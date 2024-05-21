@@ -1,5 +1,6 @@
 use std::ops;
 
+/// Represents a position on the board.
 pub struct Position {
     pub col: u8,
     pub row: u8,
