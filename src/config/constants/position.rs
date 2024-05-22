@@ -8,6 +8,7 @@ pub struct Position {
 
 impl Position {
     pub fn new(col: u8, row: u8) -> Position {
+        assert!(col < 8 && row < 8);
         Position { col, row }
     }
 
@@ -18,10 +19,10 @@ impl Position {
     }
 }
 
-impl ops::Add<Position> for Position {
+impl ops::Add<&Position> for &Position {
     type Output = (i8, i8);
 
-    fn add(self, other: Position) -> (i8, i8) {
+    fn add(self, other: &Position) -> (i8, i8) {
         (
             self.col as i8 + other.col as i8,
             self.row as i8 + other.row as i8,
@@ -29,7 +30,7 @@ impl ops::Add<Position> for Position {
     }
 }
 
-impl ops::Add<(i8, i8)> for Position {
+impl ops::Add<(i8, i8)> for &Position {
     type Output = Position;
 
     fn add(self, other: (i8, i8)) -> Position {
@@ -40,10 +41,10 @@ impl ops::Add<(i8, i8)> for Position {
     }
 }
 
-impl ops::Sub<Position> for Position {
+impl ops::Sub<&Position> for &Position {
     type Output = (i8, i8);
 
-    fn sub(self, other: Position) -> (i8, i8) {
+    fn sub(self, other: &Position) -> (i8, i8) {
         (
             self.col as i8 - other.col as i8,
             self.row as i8 - other.row as i8,
@@ -51,7 +52,7 @@ impl ops::Sub<Position> for Position {
     }
 }
 
-impl ops::Sub<(i8, i8)> for Position {
+impl ops::Sub<(i8, i8)> for &Position {
     type Output = Position;
 
     fn sub(self, other: (i8, i8)) -> Position {
