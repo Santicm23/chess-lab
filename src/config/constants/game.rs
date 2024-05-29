@@ -13,7 +13,6 @@ impl Color {
     }
 }
 
-/// implement clone
 impl Clone for Color {
     fn clone(&self) -> Color {
         match self {
