@@ -3,6 +3,7 @@ use crate::config::constants::{
     Color, PieceType, Position,
 };
 
+/// Returns true if the movement is valid for a pawn
 pub fn pawn_movement(color: Color, start_pos: &Position, end_pos: &Position) -> bool {
     let direction;
     let starting_row;
@@ -29,26 +30,32 @@ pub fn pawn_movement(color: Color, start_pos: &Position, end_pos: &Position) -> 
     }
 }
 
+/// Returns true if the movement is valid for a knight
 pub fn knight_movement(_: Color, start_pos: &Position, end_pos: &Position) -> bool {
     l_movement(start_pos, end_pos)
 }
 
+/// Returns true if the movement is valid for a bishop
 pub fn bishop_movement(_: Color, start_pos: &Position, end_pos: &Position) -> bool {
     diagonal_movement(start_pos, end_pos)
 }
 
+/// Returns true if the movement is valid for a rook
 pub fn rook_movement(_: Color, start_pos: &Position, end_pos: &Position) -> bool {
     linear_movement(start_pos, end_pos)
 }
 
+/// Returns true if the movement is valid for a queen
 pub fn queen_movement(_: Color, start_pos: &Position, end_pos: &Position) -> bool {
     linear_movement(start_pos, end_pos) || diagonal_movement(start_pos, end_pos)
 }
 
+/// Returns true if the movement is valid for a king
 pub fn king_movement(_: Color, start_pos: &Position, end_pos: &Position) -> bool {
     max_movement(start_pos, end_pos, 1)
 }
 
+/// Returns the movement function for a given piece type
 pub fn get_piece_movement(piece_type: PieceType) -> fn(Color, &Position, &Position) -> bool {
     match piece_type {
         PieceType::PAWN => pawn_movement,

@@ -12,6 +12,7 @@ pub fn linear_movement(start_pos: &Position, end_pos: &Position) -> bool {
     (diff.0 == 0 || diff.1 == 0) && diff != (0, 0)
 }
 
+/// Check if the movement is an L
 pub fn l_movement(start_pos: &Position, end_pos: &Position) -> bool {
     let diff = end_pos - start_pos;
     (diff.0.abs() == 2 && diff.1.abs() == 1) || (diff.0.abs() == 1 && diff.1.abs() == 2)
