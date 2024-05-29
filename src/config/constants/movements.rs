@@ -26,7 +26,13 @@ pub fn max_movement(start_pos: &Position, end_pos: &Position, max: i8) -> bool {
 /// Check if the movement is in a certain direction
 pub fn movement_direction(start_pos: &Position, end_pos: &Position, direction: (i8, i8)) -> bool {
     let diff = end_pos - start_pos;
-    diff.0 % direction.0 == 0 && diff.1 % direction.1 == 0 && diff != (0, 0)
+    if direction.0 == 0 {
+        diff.1 * direction.1 > 0 && diff.0 == 0
+    } else if direction.1 == 0 {
+        diff.0 * direction.0 > 0 && diff.1 == 0
+    } else {
+        diff.0 * direction.0 == diff.1 * direction.1
+    }
 }
 
 #[cfg(test)]
@@ -65,8 +71,8 @@ mod tests {
 
     #[test]
     fn test_movement_direction() {
-        let start_pos = Position::new(0, 0);
-        let end_pos = Position::new(1, 1);
-        assert!(movement_direction(&start_pos, &end_pos, (1, 1)));
+        let start_pos = Position::new(0, 2);
+        let end_pos = Position::new(2, 0);
+        assert!(movement_direction(&start_pos, &end_pos, (1, -1)));
     }
 }

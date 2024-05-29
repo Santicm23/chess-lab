@@ -59,3 +59,96 @@ pub fn get_piece_movement(piece_type: PieceType) -> fn(Color, &Position, &Positi
         PieceType::KING => king_movement,
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        bishop_movement, king_movement, knight_movement, pawn_movement, queen_movement,
+        rook_movement, PieceType,
+    };
+    use crate::config::constants::{Color, Position};
+
+    #[test]
+    fn test_pawn_movement() {
+        assert!(pawn_movement(
+            Color::WHITE,
+            &Position::from_string("e2"),
+            &Position::from_string("e3")
+        ));
+        assert!(pawn_movement(
+            Color::WHITE,
+            &Position::from_string("e2"),
+            &Position::from_string("e4")
+        ));
+        assert!(pawn_movement(
+            Color::WHITE,
+            &Position::from_string("e2"),
+            &Position::from_string("d3")
+        ));
+        assert!(pawn_movement(
+            Color::WHITE,
+            &Position::from_string("e2"),
+            &Position::from_string("f3")
+        ));
+        assert!(pawn_movement(
+            Color::BLACK,
+            &Position::from_string("e7"),
+            &Position::from_string("e6")
+        ));
+        assert!(pawn_movement(
+            Color::BLACK,
+            &Position::from_string("e7"),
+            &Position::from_string("e5")
+        ));
+        assert!(pawn_movement(
+            Color::BLACK,
+            &Position::from_string("e7"),
+            &Position::from_string("d6")
+        ));
+        assert!(pawn_movement(
+            Color::BLACK,
+            &Position::from_string("e7"),
+            &Position::from_string("f6")
+        ));
+        assert!(!pawn_movement(
+            Color::WHITE,
+            &Position::from_string("e4"),
+            &Position::from_string("e4")
+        ));
+        assert!(!pawn_movement(
+            Color::WHITE,
+            &Position::from_string("e2"),
+            &Position::from_string("e5")
+        ));
+        assert!(!pawn_movement(
+            Color::WHITE,
+            &Position::from_string("e2"),
+            &Position::from_string("d4")
+        ));
+        assert!(!pawn_movement(
+            Color::WHITE,
+            &Position::from_string("e2"),
+            &Position::from_string("f4")
+        ));
+        assert!(!pawn_movement(
+            Color::BLACK,
+            &Position::from_string("e4"),
+            &Position::from_string("e4")
+        ));
+        assert!(!pawn_movement(
+            Color::BLACK,
+            &Position::from_string("e7"),
+            &Position::from_string("e4")
+        ));
+        assert!(!pawn_movement(
+            Color::BLACK,
+            &Position::from_string("e7"),
+            &Position::from_string("d5")
+        ));
+        assert!(!pawn_movement(
+            Color::BLACK,
+            &Position::from_string("e7"),
+            &Position::from_string("f5")
+        ));
+    }
+}
