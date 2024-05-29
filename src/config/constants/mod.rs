@@ -1,3 +1,6 @@
-pub mod game;
-pub mod movements;
-pub mod position;
+mod game;
+pub(crate) mod movements;
+mod position;
+
+pub use game::*;
+pub use position::*;

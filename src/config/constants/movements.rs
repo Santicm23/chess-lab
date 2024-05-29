@@ -28,3 +28,45 @@ pub fn movement_direction(start_pos: &Position, end_pos: &Position, direction: (
     let diff = end_pos - start_pos;
     diff.0 % direction.0 == 0 && diff.1 % direction.1 == 0 && diff != (0, 0)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        diagonal_movement, l_movement, linear_movement, max_movement, movement_direction, Position,
+    };
+
+    #[test]
+    fn test_diagonal_movement() {
+        let start_pos = Position::new(0, 0);
+        let end_pos = Position::new(3, 3);
+        assert!(diagonal_movement(&start_pos, &end_pos));
+    }
+
+    #[test]
+    fn test_linear_movement() {
+        let start_pos = Position::new(0, 0);
+        let end_pos = Position::new(0, 3);
+        assert!(linear_movement(&start_pos, &end_pos));
+    }
+
+    #[test]
+    fn test_l_movement() {
+        let start_pos = Position::new(0, 0);
+        let end_pos = Position::new(1, 2);
+        assert!(l_movement(&start_pos, &end_pos));
+    }
+
+    #[test]
+    fn test_max_movement() {
+        let start_pos = Position::new(0, 0);
+        let end_pos = Position::new(1, 1);
+        assert!(max_movement(&start_pos, &end_pos, 1));
+    }
+
+    #[test]
+    fn test_movement_direction() {
+        let start_pos = Position::new(0, 0);
+        let end_pos = Position::new(1, 1);
+        assert!(movement_direction(&start_pos, &end_pos, (1, 1)));
+    }
+}

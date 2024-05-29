@@ -72,3 +72,56 @@ impl ToString for Position {
         )
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Position;
+
+    #[test]
+    fn test_position() {
+        let pos = Position::new(0, 0);
+        assert_eq!(pos.to_string(), "a1");
+        let pos = Position::new(7, 7);
+        assert_eq!(pos.to_string(), "h8");
+        let pos = Position::from_string("a1");
+        assert_eq!(pos.col, 0);
+        assert_eq!(pos.row, 0);
+        let pos = Position::from_string("h8");
+        assert_eq!(pos.col, 7);
+        assert_eq!(pos.row, 7);
+    }
+
+    #[test]
+    fn test_position_add() {
+        let pos1 = Position::new(0, 0);
+        let pos2 = Position::new(1, 1);
+        let pos3 = &pos1 + &pos2;
+        assert_eq!(pos3.0, 1);
+        assert_eq!(pos3.1, 1);
+    }
+
+    #[test]
+    fn test_position_sub() {
+        let pos1 = Position::new(1, 1);
+        let pos2 = Position::new(0, 0);
+        let pos3 = &pos1 - &pos2;
+        assert_eq!(pos3.0, 1);
+        assert_eq!(pos3.1, 1);
+    }
+
+    #[test]
+    fn test_position_add_tuple() {
+        let pos1 = Position::new(0, 0);
+        let pos2 = (1, 1);
+        let pos3 = &pos1 + pos2;
+        assert_eq!(pos3.to_string(), "b2");
+    }
+
+    #[test]
+    fn test_position_sub_tuple() {
+        let pos1 = Position::new(1, 1);
+        let pos2 = (1, 1);
+        let pos3 = &pos1 - pos2;
+        assert_eq!(pos3.to_string(), "a1");
+    }
+}

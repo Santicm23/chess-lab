@@ -1,7 +1,6 @@
 use crate::config::constants::{
-    game::{Color, PieceType},
     movements::{diagonal_movement, l_movement, linear_movement, max_movement, movement_direction},
-    position::Position,
+    Color, PieceType, Position,
 };
 
 pub fn pawn_movement(color: Color, start_pos: &Position, end_pos: &Position) -> bool {
