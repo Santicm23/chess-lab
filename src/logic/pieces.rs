@@ -13,7 +13,7 @@ impl Piece {
         Piece { color, piece_type }
     }
 
-    pub fn from_fen(char: &char) -> Piece {
+    pub fn from_fen(char: char) -> Piece {
         let color = match char.is_uppercase() {
             true => Color::WHITE,
             false => Color::BLACK,
@@ -120,9 +120,9 @@ pub fn piece_movement(piece: Piece, start_pos: &Position, end_pos: &Position) ->
 mod tests {
     use super::{
         bishop_movement, king_movement, knight_movement, pawn_movement, queen_movement,
-        rook_movement,
+        rook_movement, Piece,
     };
-    use crate::config::constants::{Color, Position};
+    use crate::config::constants::{Color, PieceType, Position};
 
     #[test]
     fn test_pawn_movement() {
@@ -770,5 +770,56 @@ mod tests {
 
         asserts(Color::WHITE);
         asserts(Color::BLACK);
+    }
+
+    #[test]
+    fn test_from_fen() {
+        let wpawn = Piece::from_fen('P');
+        assert_eq!(wpawn.color, Color::WHITE);
+        assert_eq!(wpawn.piece_type, PieceType::PAWN);
+
+        let bpawn = Piece::from_fen('p');
+        assert_eq!(bpawn.color, Color::BLACK);
+        assert_eq!(bpawn.piece_type, PieceType::PAWN);
+
+        let wrook = Piece::from_fen('R');
+        assert_eq!(wrook.color, Color::WHITE);
+        assert_eq!(wrook.piece_type, PieceType::ROOK);
+
+        let brook = Piece::from_fen('r');
+        assert_eq!(brook.color, Color::BLACK);
+        assert_eq!(brook.piece_type, PieceType::ROOK);
+
+        let wknight = Piece::from_fen('N');
+        assert_eq!(wknight.color, Color::WHITE);
+        assert_eq!(wknight.piece_type, PieceType::KNIGHT);
+
+        let bknight = Piece::from_fen('n');
+        assert_eq!(bknight.color, Color::BLACK);
+        assert_eq!(bknight.piece_type, PieceType::KNIGHT);
+
+        let wbishop = Piece::from_fen('B');
+        assert_eq!(wbishop.color, Color::WHITE);
+        assert_eq!(wbishop.piece_type, PieceType::BISHOP);
+
+        let bbishop = Piece::from_fen('b');
+        assert_eq!(bbishop.color, Color::BLACK);
+        assert_eq!(bbishop.piece_type, PieceType::BISHOP);
+
+        let wqueen = Piece::from_fen('Q');
+        assert_eq!(wqueen.color, Color::WHITE);
+        assert_eq!(wqueen.piece_type, PieceType::QUEEN);
+
+        let bqueen = Piece::from_fen('q');
+        assert_eq!(bqueen.color, Color::BLACK);
+        assert_eq!(bqueen.piece_type, PieceType::QUEEN);
+
+        let wking = Piece::from_fen('K');
+        assert_eq!(wking.color, Color::WHITE);
+        assert_eq!(wking.piece_type, PieceType::KING);
+
+        let bking = Piece::from_fen('k');
+        assert_eq!(bking.color, Color::BLACK);
+        assert_eq!(bking.piece_type, PieceType::KING);
     }
 }

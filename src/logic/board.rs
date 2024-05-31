@@ -54,7 +54,7 @@ impl Board {
                     continue;
                 }
 
-                let piece = Piece::from_fen(&c);
+                let piece = Piece::from_fen(c);
 
                 board.set_piece(piece, &Position::new(col, row))?;
 

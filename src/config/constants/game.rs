@@ -1,4 +1,5 @@
 /// Represents the color of a chess piece.
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Color {
     WHITE,
     BLACK,
@@ -13,18 +14,8 @@ impl Color {
     }
 }
 
-impl Clone for Color {
-    fn clone(&self) -> Color {
-        match self {
-            Color::WHITE => Color::WHITE,
-            Color::BLACK => Color::BLACK,
-        }
-    }
-}
-
-impl Copy for Color {}
-
 /// Represents the type of a chess piece.
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum PieceType {
     PAWN,
     KNIGHT,
