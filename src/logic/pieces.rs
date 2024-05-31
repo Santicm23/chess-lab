@@ -12,6 +12,25 @@ impl Piece {
     pub fn new(color: Color, piece_type: PieceType) -> Piece {
         Piece { color, piece_type }
     }
+
+    pub fn from_fen(char: &char) -> Piece {
+        let color = match char.is_uppercase() {
+            true => Color::WHITE,
+            false => Color::BLACK,
+        };
+
+        let piece_type = match char.to_lowercase().to_string().as_str() {
+            "p" => PieceType::PAWN,
+            "n" => PieceType::KNIGHT,
+            "b" => PieceType::BISHOP,
+            "r" => PieceType::ROOK,
+            "q" => PieceType::QUEEN,
+            "k" => PieceType::KING,
+            _ => panic!("Invalid piece type"),
+        };
+
+        Piece::new(color, piece_type)
+    }
 }
 
 impl ToString for Piece {
@@ -34,7 +53,7 @@ impl ToString for Piece {
 }
 
 /// Returns true if the movement is valid for a pawn
-pub fn pawn_movement(color: Color, start_pos: &Position, end_pos: &Position) -> bool {
+fn pawn_movement(color: Color, start_pos: &Position, end_pos: &Position) -> bool {
     let direction;
     let starting_row;
 
@@ -61,39 +80,39 @@ pub fn pawn_movement(color: Color, start_pos: &Position, end_pos: &Position) -> 
 }
 
 /// Returns true if the movement is valid for a knight
-pub fn knight_movement(_: Color, start_pos: &Position, end_pos: &Position) -> bool {
+fn knight_movement(_: Color, start_pos: &Position, end_pos: &Position) -> bool {
     l_movement(start_pos, end_pos)
 }
 
 /// Returns true if the movement is valid for a bishop
-pub fn bishop_movement(_: Color, start_pos: &Position, end_pos: &Position) -> bool {
+fn bishop_movement(_: Color, start_pos: &Position, end_pos: &Position) -> bool {
     diagonal_movement(start_pos, end_pos)
 }
 
 /// Returns true if the movement is valid for a rook
-pub fn rook_movement(_: Color, start_pos: &Position, end_pos: &Position) -> bool {
+fn rook_movement(_: Color, start_pos: &Position, end_pos: &Position) -> bool {
     linear_movement(start_pos, end_pos)
 }
 
 /// Returns true if the movement is valid for a queen
-pub fn queen_movement(_: Color, start_pos: &Position, end_pos: &Position) -> bool {
+fn queen_movement(_: Color, start_pos: &Position, end_pos: &Position) -> bool {
     linear_movement(start_pos, end_pos) || diagonal_movement(start_pos, end_pos)
 }
 
 /// Returns true if the movement is valid for a king
-pub fn king_movement(_: Color, start_pos: &Position, end_pos: &Position) -> bool {
+fn king_movement(_: Color, start_pos: &Position, end_pos: &Position) -> bool {
     max_movement(start_pos, end_pos, 1)
 }
 
 /// Returns the movement function for a given piece type
-pub fn get_piece_movement(piece_type: PieceType) -> fn(Color, &Position, &Position) -> bool {
-    match piece_type {
-        PieceType::PAWN => pawn_movement,
-        PieceType::KNIGHT => knight_movement,
-        PieceType::BISHOP => bishop_movement,
-        PieceType::ROOK => rook_movement,
-        PieceType::QUEEN => queen_movement,
-        PieceType::KING => king_movement,
+pub fn piece_movement(piece: Piece, start_pos: &Position, end_pos: &Position) -> bool {
+    match piece.piece_type {
+        PieceType::PAWN => pawn_movement(piece.color, start_pos, end_pos),
+        PieceType::KNIGHT => knight_movement(piece.color, start_pos, end_pos),
+        PieceType::BISHOP => bishop_movement(piece.color, start_pos, end_pos),
+        PieceType::ROOK => rook_movement(piece.color, start_pos, end_pos),
+        PieceType::QUEEN => queen_movement(piece.color, start_pos, end_pos),
+        PieceType::KING => king_movement(piece.color, start_pos, end_pos),
     }
 }
 

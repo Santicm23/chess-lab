@@ -19,12 +19,6 @@ pub struct Board {
 
 impl Default for Board {
     fn default() -> Self {
-        Board::new()
-    }
-}
-
-impl Board {
-    pub fn new() -> Board {
         Board {
             wpawns: 0x000000000000FF00,
             bpawns: 0x00FF000000000000,
@@ -39,6 +33,37 @@ impl Board {
             wkings: 0x0000000000000008,
             bkings: 0x0800000000000000,
         }
+    }
+}
+
+impl Board {
+    pub fn new(fen: &str) -> Result<Board, &'static str> {
+        Result::Ok(Board::from_fen(fen)?)
+    }
+
+    pub fn from_fen(fen: &str) -> Result<Board, &'static str> {
+        let mut board = Board::default();
+        let ranks = fen.split('/').collect::<Vec<&str>>();
+
+        let mut row = 7;
+        for rank in ranks {
+            let mut col = 0;
+            for c in rank.chars() {
+                if c.is_digit(10) {
+                    col += c.to_digit(10).unwrap() as u8;
+                    continue;
+                }
+
+                let piece = Piece::from_fen(&c);
+
+                board.set_piece(piece, &Position::new(col, row))?;
+
+                col += 1;
+            }
+
+            row -= 1;
+        }
+        Result::Ok(board)
     }
 
     pub fn is_ocupied(&self, pos: &Position) -> bool {
@@ -168,5 +193,35 @@ impl Board {
             },
         }
         Result::Ok(())
+    }
+}
+
+impl ToString for Board {
+    fn to_string(&self) -> String {
+        let mut board = String::new();
+        for row in (0..8).rev() {
+            let mut empty = 0;
+            for col in 0..8 {
+                let pos = Position::new(col, row);
+                let piece = self.get_piece(&pos);
+                if piece.is_none() {
+                    empty += 1;
+                    continue;
+                }
+                if empty > 0 {
+                    board.push_str(&empty.to_string());
+                    empty = 0;
+                }
+                let piece = piece.unwrap();
+                board.push_str(&piece.to_string());
+            }
+            if empty > 0 {
+                board.push_str(&empty.to_string());
+            }
+            if row > 0 {
+                board.push('/');
+            }
+        }
+        board
     }
 }

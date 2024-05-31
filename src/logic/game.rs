@@ -15,24 +15,48 @@ pub struct Game {
 
 impl Default for Game {
     fn default() -> Self {
-        Game::new()
-    }
-}
-
-impl Game {
-    pub fn new() -> Game {
         Game {
-            board: Board::new(),
+            board: Board::default(),
             is_white_turn: true,
+            castling_rights: 0b1111,
+            en_passant: None,
             halfmove_clock: 0,
             fullmove_number: 1,
-            en_passant: None,
-            castling_rights: 0b1111,
             start_position: String::from(
                 "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
             ),
             history: Vec::new(),
         }
+    }
+}
+
+impl Game {
+    pub fn new(fen: &str) -> Game {
+        Game::from_fen(fen)
+    }
+
+    pub fn from_fen(fen: &str) -> Game {
+        let mut game = Game::default();
+        game.start_position = String::from(fen);
+
+        let parts = fen.split(' ').collect::<Vec<&str>>();
+        game.board = Board::from_fen(parts[0]).unwrap();
+        game.is_white_turn = parts[1] == "w";
+        game.castling_rights = parts[2].chars().fold(0, |acc, c| match c {
+            'K' => acc | 0b1000,
+            'Q' => acc | 0b0100,
+            'k' => acc | 0b0010,
+            'q' => acc | 0b0001,
+            _ => acc,
+        });
+        game.en_passant = if parts[3] == "-" {
+            None
+        } else {
+            Some(Position::from_string(parts[3]))
+        };
+        game.halfmove_clock = parts[4].parse::<u8>().unwrap();
+        game.fullmove_number = parts[5].parse::<u8>().unwrap();
+        game
     }
 
     pub fn move_piece(&mut self, move_str: &'static str) {}
