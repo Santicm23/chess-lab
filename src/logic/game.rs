@@ -63,30 +63,57 @@ impl Game {
 
     pub fn fen(&self) -> String {
         let mut fen = String::new();
-        let mut empty_count = 0;
-
-        for rank in (0..8).rev() {
-            for file in 0..8 {
-                let piece = self.board.get_piece(&Position::new(file, rank));
-                if piece.is_some() {
-                    if empty_count > 0 {
-                        fen.push_str(&empty_count.to_string());
-                        empty_count = 0;
-                    }
-                    fen.push_str(&piece.unwrap().to_string());
-                } else {
-                    empty_count += 1;
-                }
+        fen.push_str(&self.board.to_string());
+        fen.push(' ');
+        fen.push(if self.is_white_turn { 'w' } else { 'b' });
+        fen.push(' ');
+        if self.castling_rights == 0 {
+            fen.push('-');
+        } else {
+            if self.castling_rights & 0b1000 != 0 {
+                fen.push('K');
             }
-            if empty_count > 0 {
-                fen.push_str(&empty_count.to_string());
-                empty_count = 0;
+            if self.castling_rights & 0b0100 != 0 {
+                fen.push('Q');
             }
-            if rank > 0 {
-                fen.push('/');
+            if self.castling_rights & 0b0010 != 0 {
+                fen.push('k');
+            }
+            if self.castling_rights & 0b0001 != 0 {
+                fen.push('q');
             }
         }
+        fen.push(' ');
+        fen.push_str(
+            &self
+                .en_passant
+                .as_ref()
+                .map_or(String::from("-"), |pos| pos.to_string()),
+        );
+        fen.push(' ');
+        fen.push_str(&self.halfmove_clock.to_string());
+        fen.push(' ');
+        fen.push_str(&self.fullmove_number.to_string());
 
         fen
+    }
+}
+
+impl ToString for Game {
+    fn to_string(&self) -> String {
+        self.fen()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    #[test]
+    fn test_fen() {
+        let game = super::Game::default();
+        assert_eq!(
+            game.fen(),
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+        );
     }
 }
