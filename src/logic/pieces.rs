@@ -822,4 +822,79 @@ mod tests {
         assert_eq!(bking.color, Color::BLACK);
         assert_eq!(bking.piece_type, PieceType::KING);
     }
+
+    #[test]
+    fn test_to_fen() {
+        let wpawn = Piece {
+            color: Color::WHITE,
+            piece_type: PieceType::PAWN,
+        };
+        assert_eq!(wpawn.to_string(), String::from("P"));
+
+        let bpawn = Piece {
+            color: Color::BLACK,
+            piece_type: PieceType::PAWN,
+        };
+        assert_eq!(bpawn.to_string(), String::from("p"));
+
+        let wrook = Piece {
+            color: Color::WHITE,
+            piece_type: PieceType::ROOK,
+        };
+        assert_eq!(wrook.to_string(), String::from("R"));
+
+        let brook = Piece {
+            color: Color::BLACK,
+            piece_type: PieceType::ROOK,
+        };
+        assert_eq!(brook.to_string(), String::from("r"));
+
+        let wknight = Piece {
+            color: Color::WHITE,
+            piece_type: PieceType::KNIGHT,
+        };
+        assert_eq!(wknight.to_string(), String::from("N"));
+
+        let bknight = Piece {
+            color: Color::BLACK,
+            piece_type: PieceType::KNIGHT,
+        };
+        assert_eq!(bknight.to_string(), String::from("n"));
+
+        let wbishop = Piece {
+            color: Color::WHITE,
+            piece_type: PieceType::BISHOP,
+        };
+        assert_eq!(wbishop.to_string(), String::from("B"));
+
+        let bbishop = Piece {
+            color: Color::BLACK,
+            piece_type: PieceType::BISHOP,
+        };
+        assert_eq!(bbishop.to_string(), String::from("b"));
+
+        let wqueen = Piece {
+            color: Color::WHITE,
+            piece_type: PieceType::QUEEN,
+        };
+        assert_eq!(wqueen.to_string(), String::from("Q"));
+
+        let bqueen = Piece {
+            color: Color::BLACK,
+            piece_type: PieceType::QUEEN,
+        };
+        assert_eq!(bqueen.to_string(), String::from("q"));
+
+        let wking = Piece {
+            color: Color::WHITE,
+            piece_type: PieceType::KING,
+        };
+        assert_eq!(wking.to_string(), String::from("K"));
+
+        let bking = Piece {
+            color: Color::BLACK,
+            piece_type: PieceType::KING,
+        };
+        assert_eq!(bking.to_string(), String::from("k"));
+    }
 }

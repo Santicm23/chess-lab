@@ -28,10 +28,10 @@ impl Default for Board {
             bbishops: 0x2400000000000000,
             wrooks: 0x0000000000000081,
             brooks: 0x8100000000000000,
-            wqueens: 0x0000000000000010,
-            bqueens: 0x1000000000000000,
-            wkings: 0x0000000000000008,
-            bkings: 0x0800000000000000,
+            wqueens: 0x0000000000000008,
+            bqueens: 0x0800000000000000,
+            wkings: 0x0000000000000010,
+            bkings: 0x1000000000000000,
         }
     }
 }
@@ -68,18 +68,18 @@ impl Board {
 
     pub fn is_ocupied(&self, pos: &Position) -> bool {
         let bit = pos.to_bitboard();
-        self.wpawns
-            & self.bpawns
-            & self.wknights
-            & self.bknights
-            & self.wbishops
-            & self.bbishops
-            & self.wrooks
-            & self.brooks
-            & self.wqueens
-            & self.bqueens
-            & self.wkings
-            & self.bkings
+        (self.wpawns
+            | self.bpawns
+            | self.wknights
+            | self.bknights
+            | self.wbishops
+            | self.bbishops
+            | self.wrooks
+            | self.brooks
+            | self.wqueens
+            | self.bqueens
+            | self.wkings
+            | self.bkings)
             & bit
             != 0
     }
@@ -223,5 +223,63 @@ impl ToString for Board {
             }
         }
         board
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::Board;
+    use crate::constants::{Color, PieceType, Position};
+    use crate::logic::pieces::Piece;
+
+    #[test]
+    fn test_to_fen() {
+        let board = Board::default();
+        assert_eq!(
+            board.to_string(),
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+        );
+    }
+
+    #[test]
+    fn test_set_piece() {
+        let mut board = Board::default();
+        let pos = Position::new(4, 2);
+        let piece = Piece::new(Color::WHITE, PieceType::PAWN);
+        board.set_piece(piece, &pos).unwrap();
+        assert_eq!(
+            board.to_string(),
+            "rnbqkbnr/pppppppp/8/8/8/4P3/PPPPPPPP/RNBQKBNR"
+        );
+    }
+
+    #[test]
+    fn test_delete_piece() {
+        let mut board = Board::default();
+        let pos = Position::new(0, 0);
+        board.delete_piece(&pos).unwrap();
+        assert_eq!(
+            board.to_string(),
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/1NBQKBNR"
+        );
+    }
+
+    #[test]
+    fn test_get_piece() {
+        let board = Board::default();
+        let pos = Position::new(0, 0);
+        let piece = board.get_piece(&pos).unwrap();
+        assert_eq!(piece.to_string(), "R");
+    }
+
+    #[test]
+    fn test_is_ocupied() {
+        let board = Board::default();
+        let pos = Position::new(0, 0);
+        assert!(board.is_ocupied(&pos));
+
+        let pos = Position::new(0, 2);
+        assert!(!board.is_ocupied(&pos));
     }
 }
