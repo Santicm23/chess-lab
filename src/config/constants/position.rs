@@ -17,6 +17,10 @@ impl Position {
         let row = s.chars().nth(1).unwrap() as u8 - '1' as u8;
         Position { col, row }
     }
+
+    pub fn to_bitboard(&self) -> u64 {
+        1 << (self.row * 8 + self.col)
+    }
 }
 
 impl ops::Add<&Position> for &Position {
@@ -89,6 +93,14 @@ mod tests {
         let pos = Position::from_string("h8");
         assert_eq!(pos.col, 7);
         assert_eq!(pos.row, 7);
+    }
+
+    #[test]
+    fn test_position_to_bitboard() {
+        let pos = Position::new(0, 0);
+        assert_eq!(pos.to_bitboard(), 0x0000000000000001);
+        let pos = Position::new(7, 7);
+        assert_eq!(pos.to_bitboard(), 0x8000000000000000);
     }
 
     #[test]

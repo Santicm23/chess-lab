@@ -3,6 +3,36 @@ use crate::config::constants::{
     Color, PieceType, Position,
 };
 
+pub struct Piece {
+    pub color: Color,
+    pub piece_type: PieceType,
+}
+
+impl Piece {
+    pub fn new(color: Color, piece_type: PieceType) -> Piece {
+        Piece { color, piece_type }
+    }
+}
+
+impl ToString for Piece {
+    fn to_string(&self) -> String {
+        let char = match self.piece_type {
+            PieceType::PAWN => "p",
+            PieceType::KNIGHT => "n",
+            PieceType::BISHOP => "b",
+            PieceType::ROOK => "r",
+            PieceType::QUEEN => "q",
+            PieceType::KING => "k",
+        }
+        .to_string();
+
+        match self.color {
+            Color::WHITE => char.to_uppercase(),
+            Color::BLACK => char,
+        }
+    }
+}
+
 /// Returns true if the movement is valid for a pawn
 pub fn pawn_movement(color: Color, start_pos: &Position, end_pos: &Position) -> bool {
     let direction;
