@@ -1,4 +1,4 @@
-use crate::config::constants::{
+use crate::constants::{
     movements::{diagonal_movement, l_movement, linear_movement, max_movement, movement_direction},
     Color, PieceType, Position,
 };

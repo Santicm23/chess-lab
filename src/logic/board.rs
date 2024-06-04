@@ -38,7 +38,7 @@ impl Default for Board {
 
 impl Board {
     pub fn new(fen: &str) -> Result<Board, &'static str> {
-        Result::Ok(Board::from_fen(fen)?)
+        Ok(Board::from_fen(fen)?)
     }
 
     pub fn from_fen(fen: &str) -> Result<Board, &'static str> {
@@ -63,7 +63,7 @@ impl Board {
 
             row -= 1;
         }
-        Result::Ok(board)
+        Ok(board)
     }
 
     pub fn is_ocupied(&self, pos: &Position) -> bool {
@@ -87,47 +87,47 @@ impl Board {
     pub fn get_piece(&self, pos: &Position) -> Option<Piece> {
         let bit = pos.to_bitboard();
         if self.wpawns & bit != 0 {
-            return Option::Some(Piece::new(Color::WHITE, PieceType::PAWN));
+            return Some(Piece::new(Color::WHITE, PieceType::PAWN));
         }
         if self.bpawns & bit != 0 {
-            return Option::Some(Piece::new(Color::BLACK, PieceType::PAWN));
+            return Some(Piece::new(Color::BLACK, PieceType::PAWN));
         }
         if self.wknights & bit != 0 {
-            return Option::Some(Piece::new(Color::WHITE, PieceType::KNIGHT));
+            return Some(Piece::new(Color::WHITE, PieceType::KNIGHT));
         }
         if self.bknights & bit != 0 {
-            return Option::Some(Piece::new(Color::BLACK, PieceType::KNIGHT));
+            return Some(Piece::new(Color::BLACK, PieceType::KNIGHT));
         }
         if self.wbishops & bit != 0 {
-            return Option::Some(Piece::new(Color::WHITE, PieceType::BISHOP));
+            return Some(Piece::new(Color::WHITE, PieceType::BISHOP));
         }
         if self.bbishops & bit != 0 {
-            return Option::Some(Piece::new(Color::BLACK, PieceType::BISHOP));
+            return Some(Piece::new(Color::BLACK, PieceType::BISHOP));
         }
         if self.wrooks & bit != 0 {
-            return Option::Some(Piece::new(Color::WHITE, PieceType::ROOK));
+            return Some(Piece::new(Color::WHITE, PieceType::ROOK));
         }
         if self.brooks & bit != 0 {
-            return Option::Some(Piece::new(Color::BLACK, PieceType::ROOK));
+            return Some(Piece::new(Color::BLACK, PieceType::ROOK));
         }
         if self.wqueens & bit != 0 {
-            return Option::Some(Piece::new(Color::WHITE, PieceType::QUEEN));
+            return Some(Piece::new(Color::WHITE, PieceType::QUEEN));
         }
         if self.bqueens & bit != 0 {
-            return Option::Some(Piece::new(Color::BLACK, PieceType::QUEEN));
+            return Some(Piece::new(Color::BLACK, PieceType::QUEEN));
         }
         if self.wkings & bit != 0 {
-            return Option::Some(Piece::new(Color::WHITE, PieceType::KING));
+            return Some(Piece::new(Color::WHITE, PieceType::KING));
         }
         if self.bkings & bit != 0 {
-            return Option::Some(Piece::new(Color::BLACK, PieceType::KING));
+            return Some(Piece::new(Color::BLACK, PieceType::KING));
         }
-        Option::None
+        None
     }
 
     pub fn set_piece(&mut self, piece: Piece, pos: &Position) -> Result<(), &'static str> {
         if self.is_ocupied(pos) {
-            return Result::Err("Position already occupied");
+            return Err("Position already occupied");
         }
         let bit = pos.to_bitboard();
         match piece.piece_type {
@@ -156,13 +156,13 @@ impl Board {
                 Color::BLACK => self.bkings |= bit,
             },
         }
-        Result::Ok(())
+        Ok(())
     }
 
     pub fn delete_piece(&mut self, pos: &Position) -> Result<(), &'static str> {
         let piece = self.get_piece(&pos);
         if piece.is_none() {
-            return Result::Err("No piece at position");
+            return Err("No piece at position");
         }
         let piece = piece.unwrap();
         let bit = pos.to_bitboard();
@@ -192,7 +192,7 @@ impl Board {
                 Color::BLACK => self.bkings &= !bit,
             },
         }
-        Result::Ok(())
+        Ok(())
     }
 }
 

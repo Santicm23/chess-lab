@@ -1,4 +1,4 @@
-mod config;
+mod common;
 pub mod logic;
 
-pub use config::constants;
+pub use common::constants;

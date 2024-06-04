@@ -1,3 +1,5 @@
+use regex::Regex;
+
 use crate::constants::Position;
 
 use super::board::Board;
@@ -31,23 +33,28 @@ impl Default for Game {
 }
 
 impl Game {
-    pub fn new(fen: &str) -> Game {
-        Game::from_fen(fen)
+    pub fn new(fen: &str) -> Result<Game, &'static str> {
+        Ok(Game::from_fen(fen)?)
     }
 
-    pub fn from_fen(fen: &str) -> Game {
+    pub fn from_fen(fen: &str) -> Result<Game, &'static str> {
+        let re = Regex::new(r"^([1-8PpNnBbRrQqKk]{1,8}/){7}[1-8PpNnBbRrQqKk]{1,8} [wb] (-|[KQkq]{1,4}) (-|[a-h][1-8]) \d+ ([1-9]\d*)$").unwrap();
+        if !re.is_match(fen) {
+            return Err("Invalid FEN");
+        }
+
         let mut game = Game::default();
         game.start_position = String::from(fen);
 
         let parts = fen.split(' ').collect::<Vec<&str>>();
-        game.board = Board::from_fen(parts[0]).unwrap();
+        game.board = Board::from_fen(parts[0])?;
         game.is_white_turn = parts[1] == "w";
         game.castling_rights = parts[2].chars().fold(0, |acc, c| match c {
             'K' => acc | 0b1000,
             'Q' => acc | 0b0100,
             'k' => acc | 0b0010,
             'q' => acc | 0b0001,
-            _ => acc,
+            _ => 0,
         });
         game.en_passant = if parts[3] == "-" {
             None
@@ -56,10 +63,17 @@ impl Game {
         };
         game.halfmove_clock = parts[4].parse::<u8>().unwrap();
         game.fullmove_number = parts[5].parse::<u8>().unwrap();
-        game
+        Ok(game)
     }
 
-    pub fn move_piece(&mut self, move_str: &'static str) {}
+    pub fn move_piece(&mut self, move_str: &'static str) -> Result<(), &'static str> {
+        let re =
+            Regex::new(r"^([NBRQK]?[a-h]?[1-8]?x?[a-h][1-8](=[NBRQ])?|O(-O){1,2})[+#]?").unwrap();
+        if !re.is_match(move_str) || move_str.starts_with('x') {
+            return Err("Invalid move");
+        }
+        todo!()
+    }
 
     pub fn fen(&self) -> String {
         let mut fen = String::new();
@@ -97,6 +111,14 @@ impl Game {
 
         fen
     }
+
+    pub fn undo(&mut self) {
+        todo!()
+    }
+
+    pub fn redo(&mut self) {
+        todo!()
+    }
 }
 
 impl ToString for Game {
@@ -114,6 +136,16 @@ mod tests {
         assert_eq!(
             game.fen(),
             "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+        );
+    }
+
+    #[test]
+    fn test_move_piece() {
+        let mut game = super::Game::default();
+        game.move_piece("e4").unwrap();
+        assert_eq!(
+            game.fen(),
+            "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1"
         );
     }
 }
