@@ -1,4 +1,9 @@
-use crate::constants::{Color, PieceType, Position};
+use regex::Regex;
+
+use crate::{
+    common::errors::{fen::FenError, position::PositionError},
+    constants::{Color, PieceType, Position},
+};
 
 use super::pieces::Piece;
 
@@ -37,11 +42,16 @@ impl Default for Board {
 }
 
 impl Board {
-    pub fn new(fen: &str) -> Result<Board, &'static str> {
+    pub fn new(fen: &str) -> Result<Board, FenError> {
         Ok(Board::from_fen(fen)?)
     }
 
-    pub fn from_fen(fen: &str) -> Result<Board, &'static str> {
+    pub fn from_fen(fen: &str) -> Result<Board, FenError> {
+        let re = Regex::new(r"^([1-8PpNnBbRrQqKk]{1,8}/){7}[1-8PpNnBbRrQqKk]{1,8}$").unwrap();
+        if !re.is_match(fen) {
+            return Err(FenError::InvalidFen);
+        }
+
         let mut board = Board::default();
         let ranks = fen.split('/').collect::<Vec<&str>>();
 
@@ -56,7 +66,15 @@ impl Board {
 
                 let piece = Piece::from_fen(c);
 
-                board.set_piece(piece, &Position::new(col, row))?;
+                board
+                    .set_piece(
+                        piece,
+                        match &Position::new(col, row) {
+                            Ok(pos) => pos,
+                            Err(_) => return Err(FenError::InvalidFen),
+                        },
+                    )
+                    .unwrap();
 
                 col += 1;
             }
@@ -87,112 +105,143 @@ impl Board {
     pub fn get_piece(&self, pos: &Position) -> Option<Piece> {
         let bit = pos.to_bitboard();
         if self.wpawns & bit != 0 {
-            return Some(Piece::new(Color::WHITE, PieceType::PAWN));
+            return Some(Piece::new(Color::White, PieceType::Pawn));
         }
         if self.bpawns & bit != 0 {
-            return Some(Piece::new(Color::BLACK, PieceType::PAWN));
+            return Some(Piece::new(Color::Black, PieceType::Pawn));
         }
         if self.wknights & bit != 0 {
-            return Some(Piece::new(Color::WHITE, PieceType::KNIGHT));
+            return Some(Piece::new(Color::White, PieceType::Knight));
         }
         if self.bknights & bit != 0 {
-            return Some(Piece::new(Color::BLACK, PieceType::KNIGHT));
+            return Some(Piece::new(Color::Black, PieceType::Knight));
         }
         if self.wbishops & bit != 0 {
-            return Some(Piece::new(Color::WHITE, PieceType::BISHOP));
+            return Some(Piece::new(Color::White, PieceType::Bishop));
         }
         if self.bbishops & bit != 0 {
-            return Some(Piece::new(Color::BLACK, PieceType::BISHOP));
+            return Some(Piece::new(Color::Black, PieceType::Bishop));
         }
         if self.wrooks & bit != 0 {
-            return Some(Piece::new(Color::WHITE, PieceType::ROOK));
+            return Some(Piece::new(Color::White, PieceType::Rook));
         }
         if self.brooks & bit != 0 {
-            return Some(Piece::new(Color::BLACK, PieceType::ROOK));
+            return Some(Piece::new(Color::Black, PieceType::Rook));
         }
         if self.wqueens & bit != 0 {
-            return Some(Piece::new(Color::WHITE, PieceType::QUEEN));
+            return Some(Piece::new(Color::White, PieceType::Queen));
         }
         if self.bqueens & bit != 0 {
-            return Some(Piece::new(Color::BLACK, PieceType::QUEEN));
+            return Some(Piece::new(Color::Black, PieceType::Queen));
         }
         if self.wkings & bit != 0 {
-            return Some(Piece::new(Color::WHITE, PieceType::KING));
+            return Some(Piece::new(Color::White, PieceType::King));
         }
         if self.bkings & bit != 0 {
-            return Some(Piece::new(Color::BLACK, PieceType::KING));
+            return Some(Piece::new(Color::Black, PieceType::King));
         }
         None
     }
 
-    pub fn set_piece(&mut self, piece: Piece, pos: &Position) -> Result<(), &'static str> {
+    pub fn set_piece(&mut self, piece: Piece, pos: &Position) -> Result<(), PositionError> {
         if self.is_ocupied(pos) {
-            return Err("Position already occupied");
+            return Err(PositionError::PositionOccupied);
         }
         let bit = pos.to_bitboard();
         match piece.piece_type {
-            PieceType::PAWN => match piece.color {
-                Color::WHITE => self.wpawns |= bit,
-                Color::BLACK => self.bpawns |= bit,
+            PieceType::Pawn => match piece.color {
+                Color::White => self.wpawns |= bit,
+                Color::Black => self.bpawns |= bit,
             },
-            PieceType::KNIGHT => match piece.color {
-                Color::WHITE => self.wknights |= bit,
-                Color::BLACK => self.bknights |= bit,
+            PieceType::Knight => match piece.color {
+                Color::White => self.wknights |= bit,
+                Color::Black => self.bknights |= bit,
             },
-            PieceType::BISHOP => match piece.color {
-                Color::WHITE => self.wbishops |= bit,
-                Color::BLACK => self.bbishops |= bit,
+            PieceType::Bishop => match piece.color {
+                Color::White => self.wbishops |= bit,
+                Color::Black => self.bbishops |= bit,
             },
-            PieceType::ROOK => match piece.color {
-                Color::WHITE => self.wrooks |= bit,
-                Color::BLACK => self.brooks |= bit,
+            PieceType::Rook => match piece.color {
+                Color::White => self.wrooks |= bit,
+                Color::Black => self.brooks |= bit,
             },
-            PieceType::QUEEN => match piece.color {
-                Color::WHITE => self.wqueens |= bit,
-                Color::BLACK => self.bqueens |= bit,
+            PieceType::Queen => match piece.color {
+                Color::White => self.wqueens |= bit,
+                Color::Black => self.bqueens |= bit,
             },
-            PieceType::KING => match piece.color {
-                Color::WHITE => self.wkings |= bit,
-                Color::BLACK => self.bkings |= bit,
+            PieceType::King => match piece.color {
+                Color::White => self.wkings |= bit,
+                Color::Black => self.bkings |= bit,
             },
         }
         Ok(())
     }
 
-    pub fn delete_piece(&mut self, pos: &Position) -> Result<(), &'static str> {
+    pub fn delete_piece(&mut self, pos: &Position) -> Result<Piece, PositionError> {
         let piece = self.get_piece(&pos);
         if piece.is_none() {
-            return Err("No piece at position");
+            return Err(PositionError::EmptyPosition);
         }
         let piece = piece.unwrap();
         let bit = pos.to_bitboard();
         match piece.piece_type {
-            PieceType::PAWN => match piece.color {
-                Color::WHITE => self.wpawns &= !bit,
-                Color::BLACK => self.bpawns &= !bit,
+            PieceType::Pawn => match piece.color {
+                Color::White => self.wpawns &= !bit,
+                Color::Black => self.bpawns &= !bit,
             },
-            PieceType::KNIGHT => match piece.color {
-                Color::WHITE => self.wknights &= !bit,
-                Color::BLACK => self.bknights &= !bit,
+            PieceType::Knight => match piece.color {
+                Color::White => self.wknights &= !bit,
+                Color::Black => self.bknights &= !bit,
             },
-            PieceType::BISHOP => match piece.color {
-                Color::WHITE => self.wbishops &= !bit,
-                Color::BLACK => self.bbishops &= !bit,
+            PieceType::Bishop => match piece.color {
+                Color::White => self.wbishops &= !bit,
+                Color::Black => self.bbishops &= !bit,
             },
-            PieceType::ROOK => match piece.color {
-                Color::WHITE => self.wrooks &= !bit,
-                Color::BLACK => self.brooks &= !bit,
+            PieceType::Rook => match piece.color {
+                Color::White => self.wrooks &= !bit,
+                Color::Black => self.brooks &= !bit,
             },
-            PieceType::QUEEN => match piece.color {
-                Color::WHITE => self.wqueens &= !bit,
-                Color::BLACK => self.bqueens &= !bit,
+            PieceType::Queen => match piece.color {
+                Color::White => self.wqueens &= !bit,
+                Color::Black => self.bqueens &= !bit,
             },
-            PieceType::KING => match piece.color {
-                Color::WHITE => self.wkings &= !bit,
-                Color::BLACK => self.bkings &= !bit,
+            PieceType::King => match piece.color {
+                Color::White => self.wkings &= !bit,
+                Color::Black => self.bkings &= !bit,
             },
         }
-        Ok(())
+        Ok(piece)
+    }
+
+    pub fn find(&self, piece_type: PieceType, color: Color) -> Vec<Position> {
+        let bitboard;
+        match piece_type {
+            PieceType::Pawn => match color {
+                Color::White => bitboard = self.wpawns,
+                Color::Black => bitboard = self.bpawns,
+            },
+            PieceType::Knight => match color {
+                Color::White => bitboard = self.wknights,
+                Color::Black => bitboard = self.bknights,
+            },
+            PieceType::Bishop => match color {
+                Color::White => bitboard = self.wbishops,
+                Color::Black => bitboard = self.bbishops,
+            },
+            PieceType::Rook => match color {
+                Color::White => bitboard = self.wrooks,
+                Color::Black => bitboard = self.brooks,
+            },
+            PieceType::Queen => match color {
+                Color::White => bitboard = self.wqueens,
+                Color::Black => bitboard = self.bqueens,
+            },
+            PieceType::King => match color {
+                Color::White => bitboard = self.wkings,
+                Color::Black => bitboard = self.bkings,
+            },
+        }
+        Position::from_bitboard(bitboard)
     }
 }
 
@@ -202,7 +251,7 @@ impl ToString for Board {
         for row in (0..8).rev() {
             let mut empty = 0;
             for col in 0..8 {
-                let pos = Position::new(col, row);
+                let pos = Position::new(col, row).unwrap();
                 let piece = self.get_piece(&pos);
                 if piece.is_none() {
                     empty += 1;
@@ -245,8 +294,8 @@ mod tests {
     #[test]
     fn test_set_piece() {
         let mut board = Board::default();
-        let pos = Position::new(4, 2);
-        let piece = Piece::new(Color::WHITE, PieceType::PAWN);
+        let pos = Position::new(4, 2).unwrap();
+        let piece = Piece::new(Color::White, PieceType::Pawn);
         board.set_piece(piece, &pos).unwrap();
         assert_eq!(
             board.to_string(),
@@ -257,7 +306,7 @@ mod tests {
     #[test]
     fn test_delete_piece() {
         let mut board = Board::default();
-        let pos = Position::new(0, 0);
+        let pos = Position::new(0, 0).unwrap();
         board.delete_piece(&pos).unwrap();
         assert_eq!(
             board.to_string(),
@@ -268,7 +317,7 @@ mod tests {
     #[test]
     fn test_get_piece() {
         let board = Board::default();
-        let pos = Position::new(0, 0);
+        let pos = Position::new(0, 0).unwrap();
         let piece = board.get_piece(&pos).unwrap();
         assert_eq!(piece.to_string(), "R");
     }
@@ -276,10 +325,10 @@ mod tests {
     #[test]
     fn test_is_ocupied() {
         let board = Board::default();
-        let pos = Position::new(0, 0);
+        let pos = Position::new(0, 0).unwrap();
         assert!(board.is_ocupied(&pos));
 
-        let pos = Position::new(0, 2);
+        let pos = Position::new(0, 2).unwrap();
         assert!(!board.is_ocupied(&pos));
     }
 }

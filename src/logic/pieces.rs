@@ -15,17 +15,17 @@ impl Piece {
 
     pub fn from_fen(char: char) -> Piece {
         let color = match char.is_uppercase() {
-            true => Color::WHITE,
-            false => Color::BLACK,
+            true => Color::White,
+            false => Color::Black,
         };
 
         let piece_type = match char.to_lowercase().to_string().as_str() {
-            "p" => PieceType::PAWN,
-            "n" => PieceType::KNIGHT,
-            "b" => PieceType::BISHOP,
-            "r" => PieceType::ROOK,
-            "q" => PieceType::QUEEN,
-            "k" => PieceType::KING,
+            "p" => PieceType::Pawn,
+            "n" => PieceType::Knight,
+            "b" => PieceType::Bishop,
+            "r" => PieceType::Rook,
+            "q" => PieceType::Queen,
+            "k" => PieceType::King,
             _ => panic!("Invalid piece type"),
         };
 
@@ -36,18 +36,18 @@ impl Piece {
 impl ToString for Piece {
     fn to_string(&self) -> String {
         let char = match self.piece_type {
-            PieceType::PAWN => "p",
-            PieceType::KNIGHT => "n",
-            PieceType::BISHOP => "b",
-            PieceType::ROOK => "r",
-            PieceType::QUEEN => "q",
-            PieceType::KING => "k",
+            PieceType::Pawn => "p",
+            PieceType::Knight => "n",
+            PieceType::Bishop => "b",
+            PieceType::Rook => "r",
+            PieceType::Queen => "q",
+            PieceType::King => "k",
         }
         .to_string();
 
         match self.color {
-            Color::WHITE => char.to_uppercase(),
-            Color::BLACK => char,
+            Color::White => char.to_uppercase(),
+            Color::Black => char,
         }
     }
 }
@@ -58,11 +58,11 @@ fn pawn_movement(color: Color, start_pos: &Position, end_pos: &Position) -> bool
     let starting_row;
 
     match color {
-        Color::WHITE => {
+        Color::White => {
             direction = 1;
             starting_row = 1;
         }
-        Color::BLACK => {
+        Color::Black => {
             direction = -1;
             starting_row = 6;
         }
@@ -107,12 +107,12 @@ fn king_movement(_: Color, start_pos: &Position, end_pos: &Position) -> bool {
 /// Returns the movement function for a given piece type
 pub fn piece_movement(piece: Piece, start_pos: &Position, end_pos: &Position) -> bool {
     match piece.piece_type {
-        PieceType::PAWN => pawn_movement(piece.color, start_pos, end_pos),
-        PieceType::KNIGHT => knight_movement(piece.color, start_pos, end_pos),
-        PieceType::BISHOP => bishop_movement(piece.color, start_pos, end_pos),
-        PieceType::ROOK => rook_movement(piece.color, start_pos, end_pos),
-        PieceType::QUEEN => queen_movement(piece.color, start_pos, end_pos),
-        PieceType::KING => king_movement(piece.color, start_pos, end_pos),
+        PieceType::Pawn => pawn_movement(piece.color, start_pos, end_pos),
+        PieceType::Knight => knight_movement(piece.color, start_pos, end_pos),
+        PieceType::Bishop => bishop_movement(piece.color, start_pos, end_pos),
+        PieceType::Rook => rook_movement(piece.color, start_pos, end_pos),
+        PieceType::Queen => queen_movement(piece.color, start_pos, end_pos),
+        PieceType::King => king_movement(piece.color, start_pos, end_pos),
     }
 }
 
@@ -122,89 +122,89 @@ mod tests {
         bishop_movement, king_movement, knight_movement, pawn_movement, queen_movement,
         rook_movement, Piece,
     };
-    use crate::config::constants::{Color, PieceType, Position};
+    use crate::constants::{Color, PieceType, Position};
 
     #[test]
     fn test_pawn_movement() {
         assert!(pawn_movement(
-            Color::WHITE,
-            &Position::from_string("e2"),
-            &Position::from_string("e3")
+            Color::White,
+            &Position::from_string("e2").unwrap(),
+            &Position::from_string("e3").unwrap()
         ));
         assert!(pawn_movement(
-            Color::WHITE,
-            &Position::from_string("e2"),
-            &Position::from_string("e4")
+            Color::White,
+            &Position::from_string("e2").unwrap(),
+            &Position::from_string("e4").unwrap()
         ));
         assert!(pawn_movement(
-            Color::WHITE,
-            &Position::from_string("e2"),
-            &Position::from_string("d3")
+            Color::White,
+            &Position::from_string("e2").unwrap(),
+            &Position::from_string("d3").unwrap()
         ));
         assert!(pawn_movement(
-            Color::WHITE,
-            &Position::from_string("e2"),
-            &Position::from_string("f3")
+            Color::White,
+            &Position::from_string("e2").unwrap(),
+            &Position::from_string("f3").unwrap()
         ));
         assert!(pawn_movement(
-            Color::BLACK,
-            &Position::from_string("e7"),
-            &Position::from_string("e6")
+            Color::Black,
+            &Position::from_string("e7").unwrap(),
+            &Position::from_string("e6").unwrap()
         ));
         assert!(pawn_movement(
-            Color::BLACK,
-            &Position::from_string("e7"),
-            &Position::from_string("e5")
+            Color::Black,
+            &Position::from_string("e7").unwrap(),
+            &Position::from_string("e5").unwrap()
         ));
         assert!(pawn_movement(
-            Color::BLACK,
-            &Position::from_string("e7"),
-            &Position::from_string("d6")
+            Color::Black,
+            &Position::from_string("e7").unwrap(),
+            &Position::from_string("d6").unwrap()
         ));
         assert!(pawn_movement(
-            Color::BLACK,
-            &Position::from_string("e7"),
-            &Position::from_string("f6")
+            Color::Black,
+            &Position::from_string("e7").unwrap(),
+            &Position::from_string("f6").unwrap()
         ));
         assert!(!pawn_movement(
-            Color::WHITE,
-            &Position::from_string("e4"),
-            &Position::from_string("e4")
+            Color::White,
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("e4").unwrap()
         ));
         assert!(!pawn_movement(
-            Color::WHITE,
-            &Position::from_string("e2"),
-            &Position::from_string("e5")
+            Color::White,
+            &Position::from_string("e2").unwrap(),
+            &Position::from_string("e5").unwrap()
         ));
         assert!(!pawn_movement(
-            Color::WHITE,
-            &Position::from_string("e2"),
-            &Position::from_string("d4")
+            Color::White,
+            &Position::from_string("e2").unwrap(),
+            &Position::from_string("d4").unwrap()
         ));
         assert!(!pawn_movement(
-            Color::WHITE,
-            &Position::from_string("e2"),
-            &Position::from_string("f4")
+            Color::White,
+            &Position::from_string("e2").unwrap(),
+            &Position::from_string("f4").unwrap()
         ));
         assert!(!pawn_movement(
-            Color::BLACK,
-            &Position::from_string("e4"),
-            &Position::from_string("e4")
+            Color::Black,
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("e4").unwrap()
         ));
         assert!(!pawn_movement(
-            Color::BLACK,
-            &Position::from_string("e7"),
-            &Position::from_string("e4")
+            Color::Black,
+            &Position::from_string("e7").unwrap(),
+            &Position::from_string("e4").unwrap()
         ));
         assert!(!pawn_movement(
-            Color::BLACK,
-            &Position::from_string("e7"),
-            &Position::from_string("d5")
+            Color::Black,
+            &Position::from_string("e7").unwrap(),
+            &Position::from_string("d5").unwrap()
         ));
         assert!(!pawn_movement(
-            Color::BLACK,
-            &Position::from_string("e7"),
-            &Position::from_string("f5")
+            Color::Black,
+            &Position::from_string("e7").unwrap(),
+            &Position::from_string("f5").unwrap()
         ));
     }
 
@@ -213,77 +213,77 @@ mod tests {
         fn asserts(color: Color) {
             assert!(knight_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("f6")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("f6").unwrap()
             ));
             assert!(knight_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("g5")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("g5").unwrap()
             ));
             assert!(knight_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("g3")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("g3").unwrap()
             ));
             assert!(knight_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("f2")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("f2").unwrap()
             ));
             assert!(knight_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("d2")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("d2").unwrap()
             ));
             assert!(knight_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("c3")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("c3").unwrap()
             ));
             assert!(knight_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("c5")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("c5").unwrap()
             ));
             assert!(knight_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("d6")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("d6").unwrap()
             ));
             assert!(!knight_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("e4")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("e4").unwrap()
             ));
             assert!(!knight_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("e6")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("e6").unwrap()
             ));
             assert!(!knight_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("g6")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("g6").unwrap()
             ));
             assert!(!knight_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("g4")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("g4").unwrap()
             ));
             assert!(!knight_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("f3")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("f3").unwrap()
             ));
             assert!(!knight_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("d3")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("d3").unwrap()
             ));
         }
-        asserts(Color::WHITE);
-        asserts(Color::BLACK);
+        asserts(Color::White);
+        asserts(Color::Black);
     }
 
     #[test]
@@ -291,88 +291,88 @@ mod tests {
         fn asserts(color: Color) {
             assert!(bishop_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("f5")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("f5").unwrap()
             ));
             assert!(bishop_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("g6")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("g6").unwrap()
             ));
             assert!(bishop_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("h7")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("h7").unwrap()
             ));
             assert!(bishop_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("f3")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("f3").unwrap()
             ));
             assert!(bishop_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("g2")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("g2").unwrap()
             ));
             assert!(bishop_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("h1")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("h1").unwrap()
             ));
             assert!(bishop_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("d3")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("d3").unwrap()
             ));
             assert!(bishop_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("c2")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("c2").unwrap()
             ));
             assert!(bishop_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("b1")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("b1").unwrap()
             ));
             assert!(bishop_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("d5")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("d5").unwrap()
             ));
             assert!(bishop_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("c6")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("c6").unwrap()
             ));
             assert!(bishop_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("b7")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("b7").unwrap()
             ));
             assert!(!bishop_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("e4")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("e4").unwrap()
             ));
             assert!(!bishop_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("e5")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("e5").unwrap()
             ));
             assert!(!bishop_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("f6")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("f6").unwrap()
             ));
             assert!(!bishop_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("g7")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("g7").unwrap()
             ));
         }
 
-        asserts(Color::WHITE);
-        asserts(Color::BLACK);
+        asserts(Color::White);
+        asserts(Color::Black);
     }
 
     #[test]
@@ -380,113 +380,113 @@ mod tests {
         fn asserts(color: Color) {
             assert!(rook_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("e5")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("e5").unwrap()
             ));
             assert!(rook_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("e6")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("e6").unwrap()
             ));
             assert!(rook_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("e7")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("e7").unwrap()
             ));
             assert!(rook_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("e8")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("e8").unwrap()
             ));
             assert!(rook_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("e3")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("e3").unwrap()
             ));
             assert!(rook_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("e2")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("e2").unwrap()
             ));
             assert!(rook_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("e1")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("e1").unwrap()
             ));
             assert!(rook_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("f4")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("f4").unwrap()
             ));
             assert!(rook_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("g4")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("g4").unwrap()
             ));
             assert!(rook_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("h4")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("h4").unwrap()
             ));
             assert!(rook_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("d4")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("d4").unwrap()
             ));
             assert!(rook_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("c4")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("c4").unwrap()
             ));
             assert!(rook_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("b4")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("b4").unwrap()
             ));
             assert!(rook_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("a4")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("a4").unwrap()
             ));
             assert!(!rook_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("e4")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("e4").unwrap()
             ));
             assert!(!rook_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("f5")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("f5").unwrap()
             ));
             assert!(!rook_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("g6")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("g6").unwrap()
             ));
             assert!(!rook_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("h7")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("h7").unwrap()
             ));
             assert!(!rook_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("d3")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("d3").unwrap()
             ));
             assert!(!rook_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("c2")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("c2").unwrap()
             ));
             assert!(!rook_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("b1")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("b1").unwrap()
             ));
         }
 
-        asserts(Color::WHITE);
-        asserts(Color::BLACK);
+        asserts(Color::White);
+        asserts(Color::Black);
     }
 
     #[test]
@@ -494,178 +494,178 @@ mod tests {
         fn asserts(color: Color) {
             assert!(queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("f5")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("f5").unwrap()
             ));
             assert!(queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("g6")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("g6").unwrap()
             ));
             assert!(queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("h7")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("h7").unwrap()
             ));
             assert!(queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("f3")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("f3").unwrap()
             ));
             assert!(queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("g2")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("g2").unwrap()
             ));
             assert!(queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("h1")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("h1").unwrap()
             ));
             assert!(queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("d3")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("d3").unwrap()
             ));
             assert!(queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("c2")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("c2").unwrap()
             ));
             assert!(queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("b1")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("b1").unwrap()
             ));
             assert!(queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("d5")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("d5").unwrap()
             ));
             assert!(queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("c6")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("c6").unwrap()
             ));
             assert!(queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("b7")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("b7").unwrap()
             ));
             assert!(queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("e5")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("e5").unwrap()
             ));
             assert!(queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("e6")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("e6").unwrap()
             ));
             assert!(queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("e7")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("e7").unwrap()
             ));
             assert!(queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("e8")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("e8").unwrap()
             ));
             assert!(queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("e3")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("e3").unwrap()
             ));
             assert!(queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("e2")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("e2").unwrap()
             ));
             assert!(queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("e1")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("e1").unwrap()
             ));
             assert!(queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("f4")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("f4").unwrap()
             ));
             assert!(queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("g4")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("g4").unwrap()
             ));
             assert!(queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("h4")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("h4").unwrap()
             ));
             assert!(queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("d4")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("d4").unwrap()
             ));
             assert!(queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("c4")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("c4").unwrap()
             ));
             assert!(queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("b4")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("b4").unwrap()
             ));
             assert!(queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("a4")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("a4").unwrap()
             ));
             assert!(!queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("e4")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("e4").unwrap()
             ));
             assert!(!queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("d7")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("d7").unwrap()
             ));
             assert!(!queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("d1")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("d1").unwrap()
             ));
             assert!(!queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("f7")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("f7").unwrap()
             ));
             assert!(!queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("f1")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("f1").unwrap()
             ));
             assert!(!queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("g7")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("g7").unwrap()
             ));
             assert!(!queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("g1")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("g1").unwrap()
             ));
             assert!(!queen_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("h8")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("h8").unwrap()
             ));
         }
 
-        asserts(Color::WHITE);
-        asserts(Color::BLACK);
+        asserts(Color::White);
+        asserts(Color::Black);
     }
 
     #[test]
@@ -673,227 +673,227 @@ mod tests {
         fn asserts(color: Color) {
             assert!(king_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("f5")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("f5").unwrap()
             ));
             assert!(king_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("e5")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("e5").unwrap()
             ));
             assert!(king_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("d5")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("d5").unwrap()
             ));
             assert!(king_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("d4")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("d4").unwrap()
             ));
             assert!(king_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("d3")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("d3").unwrap()
             ));
             assert!(king_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("e3")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("e3").unwrap()
             ));
             assert!(king_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("f3")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("f3").unwrap()
             ));
             assert!(king_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("f4")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("f4").unwrap()
             ));
             assert!(!king_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("e4")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("e4").unwrap()
             ));
             assert!(!king_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("e6")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("e6").unwrap()
             ));
             assert!(!king_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("f6")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("f6").unwrap()
             ));
             assert!(!king_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("g6")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("g6").unwrap()
             ));
             assert!(!king_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("g5")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("g5").unwrap()
             ));
             assert!(!king_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("g4")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("g4").unwrap()
             ));
             assert!(!king_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("g3")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("g3").unwrap()
             ));
             assert!(!king_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("f2")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("f2").unwrap()
             ));
             assert!(!king_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("e2")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("e2").unwrap()
             ));
             assert!(!king_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("d2")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("d2").unwrap()
             ));
             assert!(!king_movement(
                 color,
-                &Position::from_string("e4"),
-                &Position::from_string("d6")
+                &Position::from_string("e4").unwrap(),
+                &Position::from_string("d6").unwrap()
             ));
         }
 
-        asserts(Color::WHITE);
-        asserts(Color::BLACK);
+        asserts(Color::White);
+        asserts(Color::Black);
     }
 
     #[test]
     fn test_from_fen() {
         let wpawn = Piece::from_fen('P');
-        assert_eq!(wpawn.color, Color::WHITE);
-        assert_eq!(wpawn.piece_type, PieceType::PAWN);
+        assert_eq!(wpawn.color, Color::White);
+        assert_eq!(wpawn.piece_type, PieceType::Pawn);
 
         let bpawn = Piece::from_fen('p');
-        assert_eq!(bpawn.color, Color::BLACK);
-        assert_eq!(bpawn.piece_type, PieceType::PAWN);
+        assert_eq!(bpawn.color, Color::Black);
+        assert_eq!(bpawn.piece_type, PieceType::Pawn);
 
         let wrook = Piece::from_fen('R');
-        assert_eq!(wrook.color, Color::WHITE);
-        assert_eq!(wrook.piece_type, PieceType::ROOK);
+        assert_eq!(wrook.color, Color::White);
+        assert_eq!(wrook.piece_type, PieceType::Rook);
 
         let brook = Piece::from_fen('r');
-        assert_eq!(brook.color, Color::BLACK);
-        assert_eq!(brook.piece_type, PieceType::ROOK);
+        assert_eq!(brook.color, Color::Black);
+        assert_eq!(brook.piece_type, PieceType::Rook);
 
         let wknight = Piece::from_fen('N');
-        assert_eq!(wknight.color, Color::WHITE);
-        assert_eq!(wknight.piece_type, PieceType::KNIGHT);
+        assert_eq!(wknight.color, Color::White);
+        assert_eq!(wknight.piece_type, PieceType::Knight);
 
         let bknight = Piece::from_fen('n');
-        assert_eq!(bknight.color, Color::BLACK);
-        assert_eq!(bknight.piece_type, PieceType::KNIGHT);
+        assert_eq!(bknight.color, Color::Black);
+        assert_eq!(bknight.piece_type, PieceType::Knight);
 
         let wbishop = Piece::from_fen('B');
-        assert_eq!(wbishop.color, Color::WHITE);
-        assert_eq!(wbishop.piece_type, PieceType::BISHOP);
+        assert_eq!(wbishop.color, Color::White);
+        assert_eq!(wbishop.piece_type, PieceType::Bishop);
 
         let bbishop = Piece::from_fen('b');
-        assert_eq!(bbishop.color, Color::BLACK);
-        assert_eq!(bbishop.piece_type, PieceType::BISHOP);
+        assert_eq!(bbishop.color, Color::Black);
+        assert_eq!(bbishop.piece_type, PieceType::Bishop);
 
         let wqueen = Piece::from_fen('Q');
-        assert_eq!(wqueen.color, Color::WHITE);
-        assert_eq!(wqueen.piece_type, PieceType::QUEEN);
+        assert_eq!(wqueen.color, Color::White);
+        assert_eq!(wqueen.piece_type, PieceType::Queen);
 
         let bqueen = Piece::from_fen('q');
-        assert_eq!(bqueen.color, Color::BLACK);
-        assert_eq!(bqueen.piece_type, PieceType::QUEEN);
+        assert_eq!(bqueen.color, Color::Black);
+        assert_eq!(bqueen.piece_type, PieceType::Queen);
 
         let wking = Piece::from_fen('K');
-        assert_eq!(wking.color, Color::WHITE);
-        assert_eq!(wking.piece_type, PieceType::KING);
+        assert_eq!(wking.color, Color::White);
+        assert_eq!(wking.piece_type, PieceType::King);
 
         let bking = Piece::from_fen('k');
-        assert_eq!(bking.color, Color::BLACK);
-        assert_eq!(bking.piece_type, PieceType::KING);
+        assert_eq!(bking.color, Color::Black);
+        assert_eq!(bking.piece_type, PieceType::King);
     }
 
     #[test]
     fn test_to_fen() {
         let wpawn = Piece {
-            color: Color::WHITE,
-            piece_type: PieceType::PAWN,
+            color: Color::White,
+            piece_type: PieceType::Pawn,
         };
         assert_eq!(wpawn.to_string(), String::from("P"));
 
         let bpawn = Piece {
-            color: Color::BLACK,
-            piece_type: PieceType::PAWN,
+            color: Color::Black,
+            piece_type: PieceType::Pawn,
         };
         assert_eq!(bpawn.to_string(), String::from("p"));
 
         let wrook = Piece {
-            color: Color::WHITE,
-            piece_type: PieceType::ROOK,
+            color: Color::White,
+            piece_type: PieceType::Rook,
         };
         assert_eq!(wrook.to_string(), String::from("R"));
 
         let brook = Piece {
-            color: Color::BLACK,
-            piece_type: PieceType::ROOK,
+            color: Color::Black,
+            piece_type: PieceType::Rook,
         };
         assert_eq!(brook.to_string(), String::from("r"));
 
         let wknight = Piece {
-            color: Color::WHITE,
-            piece_type: PieceType::KNIGHT,
+            color: Color::White,
+            piece_type: PieceType::Knight,
         };
         assert_eq!(wknight.to_string(), String::from("N"));
 
         let bknight = Piece {
-            color: Color::BLACK,
-            piece_type: PieceType::KNIGHT,
+            color: Color::Black,
+            piece_type: PieceType::Knight,
         };
         assert_eq!(bknight.to_string(), String::from("n"));
 
         let wbishop = Piece {
-            color: Color::WHITE,
-            piece_type: PieceType::BISHOP,
+            color: Color::White,
+            piece_type: PieceType::Bishop,
         };
         assert_eq!(wbishop.to_string(), String::from("B"));
 
         let bbishop = Piece {
-            color: Color::BLACK,
-            piece_type: PieceType::BISHOP,
+            color: Color::Black,
+            piece_type: PieceType::Bishop,
         };
         assert_eq!(bbishop.to_string(), String::from("b"));
 
         let wqueen = Piece {
-            color: Color::WHITE,
-            piece_type: PieceType::QUEEN,
+            color: Color::White,
+            piece_type: PieceType::Queen,
         };
         assert_eq!(wqueen.to_string(), String::from("Q"));
 
         let bqueen = Piece {
-            color: Color::BLACK,
-            piece_type: PieceType::QUEEN,
+            color: Color::Black,
+            piece_type: PieceType::Queen,
         };
         assert_eq!(bqueen.to_string(), String::from("q"));
 
         let wking = Piece {
-            color: Color::WHITE,
-            piece_type: PieceType::KING,
+            color: Color::White,
+            piece_type: PieceType::King,
         };
         assert_eq!(wking.to_string(), String::from("K"));
 
         let bking = Piece {
-            color: Color::BLACK,
-            piece_type: PieceType::KING,
+            color: Color::Black,
+            piece_type: PieceType::King,
         };
         assert_eq!(bking.to_string(), String::from("k"));
     }

@@ -1,6 +1,9 @@
 use regex::Regex;
 
-use crate::constants::Position;
+use crate::{
+    common::errors::{fen::FenError, movements::MoveError},
+    constants::{CastleType, Color, MoveType, PieceType, Position},
+};
 
 use super::board::Board;
 
@@ -33,14 +36,14 @@ impl Default for Game {
 }
 
 impl Game {
-    pub fn new(fen: &str) -> Result<Game, &'static str> {
+    pub fn new(fen: &str) -> Result<Game, FenError> {
         Ok(Game::from_fen(fen)?)
     }
 
-    pub fn from_fen(fen: &str) -> Result<Game, &'static str> {
+    pub fn from_fen(fen: &str) -> Result<Game, FenError> {
         let re = Regex::new(r"^([1-8PpNnBbRrQqKk]{1,8}/){7}[1-8PpNnBbRrQqKk]{1,8} [wb] (-|[KQkq]{1,4}) (-|[a-h][1-8]) \d+ ([1-9]\d*)$").unwrap();
         if !re.is_match(fen) {
-            return Err("Invalid FEN");
+            return Err(FenError::InvalidFen);
         }
 
         let mut game = Game::default();
@@ -56,10 +59,11 @@ impl Game {
             'q' => acc | 0b0001,
             _ => 0,
         });
+
         game.en_passant = if parts[3] == "-" {
             None
         } else {
-            Some(Position::from_string(parts[3]))
+            Some(Position::from_string(parts[3]).unwrap())
         };
         game.halfmove_clock = parts[4].parse::<u8>().unwrap();
         game.fullmove_number = parts[5].parse::<u8>().unwrap();
@@ -67,11 +71,6 @@ impl Game {
     }
 
     pub fn move_piece(&mut self, move_str: &'static str) -> Result<(), &'static str> {
-        let re =
-            Regex::new(r"^([NBRQK]?[a-h]?[1-8]?x?[a-h][1-8](=[NBRQ])?|O(-O){1,2})[+#]?").unwrap();
-        if !re.is_match(move_str) || move_str.starts_with('x') {
-            return Err("Invalid move");
-        }
         todo!()
     }
 
@@ -117,6 +116,62 @@ impl Game {
     }
 
     pub fn redo(&mut self) {
+        todo!()
+    }
+
+    /// Parse a move string and return the start and end positions
+    ///
+    /// # Arguments
+    ///
+    /// * `move_str` - A string slice that holds the move to be parsed
+    ///
+    /// # Returns
+    ///
+    /// A tuple containing the start and end positions of the move
+    /// as well as the piece type, promotion piece type, and whether
+    /// the move
+    fn parse_move(
+        &self,
+        move_str: &'static str,
+    ) -> Result<(Position, Position, MoveType), MoveError> {
+        let re =
+            Regex::new(r"^([NBRQK]?[a-h]?[1-8]?x?[a-h][1-8](=[NBRQ])?|O(-O){1,2})[+#]?").unwrap();
+        if !re.is_match(move_str) || move_str.starts_with('x') {
+            return Err(MoveError::InvalidMove);
+        }
+
+        if move_str.starts_with('O') {
+            if move_str == "O-O" {
+                if self.castling_rights & 0b1000 != 0 && self.is_white_turn {
+                    let kings = self.board.find(PieceType::King, Color::White);
+                    let start = kings.first().unwrap();
+                    let end = Position::from_string("g1").unwrap();
+
+                    return Ok((start.clone(), end, MoveType::Castle(CastleType::KingSide)));
+                } else if self.castling_rights & 0b0010 != 0 && !self.is_white_turn {
+                    let kings = self.board.find(PieceType::King, Color::Black);
+                    let start = kings.first().unwrap();
+                    let end = Position::from_string("g8").unwrap();
+
+                    return Ok((start.clone(), end, MoveType::Castle(CastleType::KingSide)));
+                }
+            } else if move_str == "O-O-O" {
+                if self.castling_rights & 0b0100 != 0 && self.is_white_turn {
+                    let kings = self.board.find(PieceType::King, Color::White);
+                    let start = kings.first().unwrap();
+                    let end = Position::from_string("c1").unwrap();
+
+                    return Ok((start.clone(), end, MoveType::Castle(CastleType::QueenSide)));
+                } else if self.castling_rights & 0b0001 != 0 && !self.is_white_turn {
+                    let kings = self.board.find(PieceType::King, Color::Black);
+                    let start = kings.first().unwrap();
+                    let end = Position::from_string("c8").unwrap();
+
+                    return Ok((start.clone(), end, MoveType::Castle(CastleType::QueenSide)));
+                }
+            }
+            return Err(MoveError::InvalidMove);
+        }
         todo!()
     }
 }
