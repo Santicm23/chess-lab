@@ -1,7 +1,7 @@
 use regex::Regex;
 
 use crate::{
-    common::errors::{fen::FenError, position::PositionError},
+    common::errors::{board::BoardError, fen::FenError},
     constants::{Color, PieceType, Position},
 };
 
@@ -49,7 +49,7 @@ impl Board {
     pub fn from_fen(fen: &str) -> Result<Board, FenError> {
         let re = Regex::new(r"^([1-8PpNnBbRrQqKk]{1,8}/){7}[1-8PpNnBbRrQqKk]{1,8}$").unwrap();
         if !re.is_match(fen) {
-            return Err(FenError::InvalidFen);
+            return Err(FenError::Invalid);
         }
 
         let mut board = Board::default();
@@ -71,7 +71,7 @@ impl Board {
                         piece,
                         match &Position::new(col, row) {
                             Ok(pos) => pos,
-                            Err(_) => return Err(FenError::InvalidFen),
+                            Err(_) => return Err(FenError::Invalid),
                         },
                     )
                     .unwrap();
@@ -143,9 +143,9 @@ impl Board {
         None
     }
 
-    pub fn set_piece(&mut self, piece: Piece, pos: &Position) -> Result<(), PositionError> {
+    pub fn set_piece(&mut self, piece: Piece, pos: &Position) -> Result<(), BoardError> {
         if self.is_ocupied(pos) {
-            return Err(PositionError::PositionOccupied);
+            return Err(BoardError::Occupied);
         }
         let bit = pos.to_bitboard();
         match piece.piece_type {
@@ -177,10 +177,10 @@ impl Board {
         Ok(())
     }
 
-    pub fn delete_piece(&mut self, pos: &Position) -> Result<Piece, PositionError> {
+    pub fn delete_piece(&mut self, pos: &Position) -> Result<Piece, BoardError> {
         let piece = self.get_piece(&pos);
         if piece.is_none() {
-            return Err(PositionError::EmptyPosition);
+            return Err(BoardError::Empty);
         }
         let piece = piece.unwrap();
         let bit = pos.to_bitboard();

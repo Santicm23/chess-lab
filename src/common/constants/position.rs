@@ -31,13 +31,13 @@ impl Position {
         if col < 8 && row < 8 {
             Ok(Position { col, row })
         } else {
-            Err(PositionError::PositionOutOfBounds)
+            Err(PositionError::OutOfBounds)
         }
     }
 
     pub fn from_string(s: &str) -> Result<Position, PositionError> {
         if s.len() != 2 {
-            return Err(PositionError::InvalidPosition);
+            return Err(PositionError::Invalid);
         }
         let col = s.chars().nth(0).unwrap() as u8 - 'a' as u8;
         let row = s.chars().nth(1).unwrap() as u8 - '1' as u8;
