@@ -5,8 +5,9 @@ use crate::{
     constants::{Color, PieceType, Position},
 };
 
-use super::pieces::Piece;
+use super::pieces::{piece_movement, Piece};
 
+#[derive(Debug, Clone)]
 pub struct Board {
     wpawns: u64,
     bpawns: u64,
@@ -242,6 +243,51 @@ impl Board {
             },
         }
         Position::from_bitboard(bitboard)
+    }
+
+    pub fn find_all(&self, color: Color) -> Vec<Position> {
+        let mut pieces = Vec::new();
+        pieces.append(&mut self.find(PieceType::Pawn, color));
+        pieces.append(&mut self.find(PieceType::Knight, color));
+        pieces.append(&mut self.find(PieceType::Bishop, color));
+        pieces.append(&mut self.find(PieceType::Rook, color));
+        pieces.append(&mut self.find(PieceType::Queen, color));
+        pieces.append(&mut self.find(PieceType::King, color));
+        pieces
+    }
+
+    pub fn move_piece(&mut self, from: &Position, to: &Position) -> Result<(), BoardError> {
+        let piece = self.delete_piece(from)?;
+
+        if self.is_ocupied(to) {
+            self.delete_piece(to)?;
+        }
+
+        self.set_piece(piece, to)?;
+        Ok(())
+    }
+
+    pub fn is_attacked(&self, pos: Position, color: Color) -> bool {
+        let enemy_color = color.opposite();
+
+        let enemy_pieces = self.find_all(enemy_color);
+        for enemy_piece in enemy_pieces {
+            let piece_type = self.get_piece(&enemy_piece).unwrap().piece_type;
+            if piece_movement(
+                &Piece {
+                    piece_type,
+                    color: enemy_color,
+                },
+                &enemy_piece,
+                &pos,
+            ) {
+                if piece_type == PieceType::Pawn && enemy_piece.col == pos.col {
+                    return false;
+                }
+                return true;
+            }
+        }
+        false
     }
 }
 

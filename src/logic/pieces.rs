@@ -105,7 +105,7 @@ fn king_movement(_: Color, start_pos: &Position, end_pos: &Position) -> bool {
 }
 
 /// Returns the movement function for a given piece type
-pub fn piece_movement(piece: Piece, start_pos: &Position, end_pos: &Position) -> bool {
+pub fn piece_movement(piece: &Piece, start_pos: &Position, end_pos: &Position) -> bool {
     match piece.piece_type {
         PieceType::Pawn => pawn_movement(piece.color, start_pos, end_pos),
         PieceType::Knight => knight_movement(piece.color, start_pos, end_pos),

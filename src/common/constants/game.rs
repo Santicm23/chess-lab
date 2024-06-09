@@ -1,5 +1,3 @@
-use super::Position;
-
 /// Represents the color of a chess piece.
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Color {
@@ -53,26 +51,20 @@ impl PieceType {
 }
 
 /// Represents the type of a move.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum MoveType {
     Normal {
-        piece: PieceType,
-        start: (Option<u8>, Option<u8>),
-        end: Position,
         capture: bool,
         promotion: Option<PieceType>,
     },
     Castle {
         side: CastleType,
     },
-    EnPassant {
-        start: (Option<u8>, Option<u8>),
-        end: Position,
-    },
+    EnPassant,
 }
 
 /// Represents the side of the board to castle on.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum CastleType {
     KingSide,
     QueenSide,

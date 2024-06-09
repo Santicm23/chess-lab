@@ -2,4 +2,5 @@
 pub enum MoveError {
     Invalid,
     Illegal,
+    Ambiguous,
 }
