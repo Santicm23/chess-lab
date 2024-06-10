@@ -89,6 +89,47 @@ impl Game {
 
         match self.board.move_piece(&start_pos, &end_pos) {
             Ok(_) => {
+                match &move_type {
+                    MoveType::Castle { side } => {
+                        let rook_end = match side {
+                            CastleType::KingSide => Position {
+                                col: 5,
+                                row: start_pos.row,
+                            },
+                            CastleType::QueenSide => Position {
+                                col: 3,
+                                row: start_pos.row,
+                            },
+                        };
+
+                        let rooks = self.board.find(PieceType::Rook, color);
+
+                        for rook in rooks {
+                            match side {
+                                CastleType::KingSide => {
+                                    if rook.col > start_pos.col && rook.row == start_pos.row {
+                                        self.board.move_piece(&rook, &rook_end).unwrap();
+                                        break;
+                                    }
+                                }
+                                CastleType::QueenSide => {
+                                    if rook.col < start_pos.col && rook.row == start_pos.row {
+                                        self.board.move_piece(&rook, &rook_end).unwrap();
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    MoveType::EnPassant => {
+                        let captured_pos = Position {
+                            col: end_pos.col,
+                            row: start_pos.row,
+                        };
+                        self.board.delete_piece(&captured_pos).unwrap();
+                    }
+                    _ => {}
+                }
                 self.is_white_turn = !self.is_white_turn;
                 self.halfmove_clock += 1;
                 if self.is_white_turn {

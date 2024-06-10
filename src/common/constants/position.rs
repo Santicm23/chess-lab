@@ -10,11 +10,11 @@ use crate::common::errors::position::PositionError;
 /// ```
 /// use chess_lib::constants::Position;
 ///
-/// let pos = Position::new(0, 0);
+/// let pos = Position::new(0, 0).unwrap();
 ///
 /// assert_eq!(pos.to_string(), "a1");
 ///
-/// let pos = Position::from_string("a1");
+/// let pos = Position::from_string("a1").unwrap();
 ///
 /// assert_eq!(pos.col, 0);
 ///

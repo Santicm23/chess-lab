@@ -260,10 +260,10 @@ impl Board {
         let piece = self.delete_piece(from)?;
 
         if self.is_ocupied(to) {
-            self.delete_piece(to)?;
+            self.delete_piece(to).unwrap();
         }
 
-        self.set_piece(piece, to)?;
+        self.set_piece(piece, to).unwrap();
         Ok(())
     }
 
