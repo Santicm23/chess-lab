@@ -11,6 +11,19 @@ pub enum Color {
 }
 
 impl Color {
+    /// Gets the opposite color
+    ///
+    /// # Returns
+    /// The color opposite to the current one
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lib::constants::Color;
+    ///
+    /// assert_eq!(Color::White.opposite(), Color::Black);
+    /// assert_eq!(Color::Black.opposite(), Color::White);
+    /// ```
+    ///
     pub fn opposite(&self) -> Color {
         match self {
             Color::White => Color::Black,
@@ -40,7 +53,7 @@ pub enum PieceType {
 }
 
 impl PieceType {
-    /// Returns the piece type from a character
+    /// Gets the piece type from a character
     ///
     /// # Arguments
     /// * `c`: The character to convert (only valid uppercase characters)
@@ -76,7 +89,7 @@ impl PieceType {
         }
     }
 
-    /// Returns the character representation of the piece type
+    /// Gets the character representation of the piece type
     ///
     /// # Returns
     /// The character representation of the piece type
