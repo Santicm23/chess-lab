@@ -54,7 +54,7 @@ impl Board {
     /// Creates a new board from a FEN string
     ///
     /// # Arguments
-    /// * `fen` - A FEN string representing the board
+    /// * `fen`: A FEN string representing the board
     ///
     /// # Returns
     /// A new board with the position represented by the FEN string
@@ -66,7 +66,7 @@ impl Board {
     /// Creates a new board from a FEN string
     ///
     /// # Arguments
-    /// * `fen` - A FEN string representing the board
+    /// * `fen`: A FEN string representing the board
     ///
     /// # Returns
     /// A new board with the position represented by the FEN string
@@ -102,7 +102,7 @@ impl Board {
     /// Checks if a position is occupied by a piece
     ///
     /// # Arguments
-    /// * `pos` - The position to check
+    /// * `pos`: The position to check
     ///
     /// # Returns
     /// Whether the position is occupied by a piece
@@ -128,7 +128,7 @@ impl Board {
     /// Gets the piece at a position
     ///
     /// # Arguments
-    /// * `pos` - The position to get the piece
+    /// * `pos`: The position to get the piece
     ///
     /// # Returns
     /// The piece at the position or None if the position is empty
@@ -177,8 +177,8 @@ impl Board {
     /// Sets a piece at a position
     ///
     /// # Arguments
-    /// * `piece` - The piece to set
-    /// * `pos` - The position to set the piece
+    /// * `piece`: The piece to set
+    /// * `pos`: The position to set the piece
     ///
     /// # Returns
     /// Ok if the piece was set successfully, Err if the position is already occupied
@@ -220,7 +220,7 @@ impl Board {
     /// Deletes a piece at a position
     ///
     /// # Arguments
-    /// * `pos` - The position to delete the piece
+    /// * `pos`: The position to delete the piece
     ///
     /// # Returns
     /// The piece that was deleted or Err if the position is empty
@@ -264,8 +264,8 @@ impl Board {
     /// Finds all pieces of a certain type and color
     ///
     /// # Arguments
-    /// * `piece_type` - The type of the piece
-    /// * `color` - The color of the piece
+    /// * `piece_type`: The type of the piece
+    /// * `color`: The color of the piece
     ///
     /// # Returns
     /// A vector of positions of the pieces
@@ -304,7 +304,7 @@ impl Board {
     /// Finds all pieces of a certain color
     ///
     /// # Arguments
-    /// * `color` - The color of the pieces
+    /// * `color`: The color of the pieces
     ///
     /// # Returns
     /// A vector of positions of the pieces
@@ -323,8 +323,8 @@ impl Board {
     /// Moves a piece from one position to another
     ///
     /// # Arguments
-    /// * `from` - The position to move the piece from
-    /// * `to` - The position to move the piece to
+    /// * `from`: The position to move the piece from
+    /// * `to`: The position to move the piece to
     ///
     /// # Returns
     /// Ok if the move was successful, Err if the from position is empty
@@ -343,8 +343,8 @@ impl Board {
     /// Checks if a position is attacked by a certain color
     ///
     /// # Arguments
-    /// * `pos` - The position to check
-    /// * `color` - The color of the attacking pieces
+    /// * `pos`: The position to check
+    /// * `color`: The color of the attacking pieces
     ///
     /// # Returns
     /// Whether the position is attacked or not

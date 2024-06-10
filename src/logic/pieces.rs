@@ -27,8 +27,8 @@ impl Piece {
     /// Creates a new piece with a given color and piece type
     ///
     /// # Arguments
-    /// * `color` - The color of the piece
-    /// * `piece_type` - The type of the piece
+    /// * `color`: The color of the piece
+    /// * `piece_type`: The type of the piece
     ///
     /// # Returns
     /// A new piece with the given color and piece type
@@ -50,7 +50,7 @@ impl Piece {
     /// Creates a new piece from a FEN character
     ///
     /// # Arguments
-    /// * `char` - The FEN character representing the piece
+    /// * `char`: The FEN character representing the piece
     ///
     /// # Returns
     /// A new piece with the color and piece type represented by the FEN character
@@ -123,9 +123,9 @@ impl ToString for Piece {
 /// Returns true if the movement is valid for a pawn
 ///
 /// # Arguments
-/// * `color` - The color of the pawn
-/// * `start_pos` - The starting position of the pawn
-/// * `end_pos` - The ending position of the pawn
+/// * `color`: The color of the pawn
+/// * `start_pos`: The starting position of the pawn
+/// * `end_pos`: The ending position of the pawn
 ///
 /// # Returns
 /// Whether the movement is valid for a pawn
@@ -159,8 +159,8 @@ fn pawn_movement(color: Color, start_pos: &Position, end_pos: &Position) -> bool
 /// Returns true if the movement is valid for a knight
 ///
 /// # Arguments
-/// * `start_pos` - The starting position of the knight
-/// * `end_pos` - The ending position of the knight
+/// * `start_pos`: The starting position of the knight
+/// * `end_pos`: The ending position of the knight
 ///
 /// # Returns
 /// Whether the movement is valid for a knight
@@ -172,8 +172,8 @@ fn knight_movement(start_pos: &Position, end_pos: &Position) -> bool {
 /// Returns true if the movement is valid for a bishop
 ///
 /// # Arguments
-/// * `start_pos` - The starting position of the bishop
-/// * `end_pos` - The ending position of the bishop
+/// * `start_pos`: The starting position of the bishop
+/// * `end_pos`: The ending position of the bishop
 ///
 /// # Returns
 /// Whether the movement is valid for a bishop
@@ -185,8 +185,8 @@ fn bishop_movement(start_pos: &Position, end_pos: &Position) -> bool {
 /// Returns true if the movement is valid for a rook
 ///
 /// # Arguments
-/// * `start_pos` - The starting position of the rook
-/// * `end_pos` - The ending position of the rook
+/// * `start_pos`: The starting position of the rook
+/// * `end_pos`: The ending position of the rook
 ///
 /// # Returns
 /// Whether the movement is valid for a rook
@@ -198,8 +198,8 @@ fn rook_movement(start_pos: &Position, end_pos: &Position) -> bool {
 /// Returns true if the movement is valid for a queen
 ///
 /// # Arguments
-/// * `start_pos` - The starting position of the queen
-/// * `end_pos` - The ending position of the queen
+/// * `start_pos`: The starting position of the queen
+/// * `end_pos`: The ending position of the queen
 ///
 /// # Returns
 /// Whether the movement is valid for a queen
@@ -211,8 +211,8 @@ fn queen_movement(start_pos: &Position, end_pos: &Position) -> bool {
 /// Returns true if the movement is valid for a king
 ///
 /// # Arguments
-/// * `start_pos` - The starting position of the king
-/// * `end_pos` - The ending position of the king
+/// * `start_pos`: The starting position of the king
+/// * `end_pos`: The ending position of the king
 ///
 /// # Returns
 /// Whether the movement is valid for a king
@@ -224,9 +224,9 @@ fn king_movement(start_pos: &Position, end_pos: &Position) -> bool {
 /// Returns the movement function for a given piece type
 ///
 /// # Arguments
-/// * `piece` - The piece to get the movement function for
-/// * `start_pos` - The starting position of the piece
-/// * `end_pos` - The ending position of the piece
+/// * `piece`: The piece to get the movement function for
+/// * `start_pos`: The starting position of the piece
+/// * `end_pos`: The ending position of the piece
 ///
 /// # Returns
 /// Whether the movement is valid for the piece

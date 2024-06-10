@@ -207,11 +207,11 @@ impl Game {
     /// Parse a move string and return the start and end positions
     ///
     /// # Arguments
-    /// * `move_str` - A string slice that holds the move to be parsed
+    /// * `move_str`: A string slice that holds the move to be parsed
     ///
     /// # Returns
-    /// * `MoveType` - The parsed move with all the necessary information
-    /// * `MoveError` - If the move is invalid
+    /// * `MoveType`: The parsed move with all the necessary information
+    /// * `MoveError`: If the move is invalid
     ///
     fn parse_move(
         &self,

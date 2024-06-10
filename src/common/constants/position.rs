@@ -27,8 +27,8 @@ impl Position {
     /// Creates a new position
     ///
     /// # Arguments
-    /// * `col` - The column of the position (between 0 and 7)
-    /// * `row` - The row of the position (between 0 and 7)
+    /// * `col`: The column of the position (between 0 and 7)
+    /// * `row`: The row of the position (between 0 and 7)
     ///
     /// # Returns
     /// A new position
@@ -54,7 +54,7 @@ impl Position {
     /// Creates a new position from a string
     ///
     /// # Arguments
-    /// * `s` - The string representation of the position
+    /// * `s`: The string representation of the position
     ///
     /// # Returns
     /// A new position
@@ -103,7 +103,7 @@ impl Position {
     /// Converts a bitboard to a list of positions
     ///
     /// # Arguments
-    /// * `bitboard` - The bitboard to convert
+    /// * `bitboard`: The bitboard to convert
     ///
     /// # Returns
     /// A list of positions
@@ -136,7 +136,7 @@ impl ops::Add<(i8, i8)> for &Position {
     /// Adds a certain offset to the position
     ///
     /// # Arguments
-    /// * `other` - The offset to add
+    /// * `other`: The offset to add
     ///
     /// # Returns
     /// The new position
@@ -166,7 +166,7 @@ impl ops::Sub<&Position> for &Position {
     /// Gets the offset between two positions
     ///
     /// # Arguments
-    /// * `other` - The other position
+    /// * `other`: The other position
     ///
     /// # Returns
     /// The offset between the two positions
@@ -197,7 +197,7 @@ impl ops::Sub<(i8, i8)> for &Position {
     /// Subtracts a certain offset from the position
     ///
     /// # Arguments
-    /// * `other` - The offset to subtract
+    /// * `other`: The offset to subtract
     ///
     /// # Returns
     /// The new position
