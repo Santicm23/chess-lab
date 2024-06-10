@@ -7,7 +7,7 @@ use crate::constants::{
 ///
 /// # Examples
 /// ```
-/// use chess_lib::logic::pieces::Piece;
+/// use chess_lib::logic::Piece;
 /// use chess_lib::constants::{Color, PieceType};
 ///
 /// let piece = Piece::new(Color::White, PieceType::Pawn);

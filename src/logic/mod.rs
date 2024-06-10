@@ -1,3 +1,6 @@
 pub(crate) mod board;
-pub mod game;
-pub mod pieces;
+mod game;
+mod pieces;
+
+pub use game::*;
+pub use pieces::*;

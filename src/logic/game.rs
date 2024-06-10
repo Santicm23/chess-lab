@@ -425,9 +425,10 @@ impl Game {
 
                     for col in start_pos.col + 0..end_pos.col + 1 {
                         if self.board.is_ocupied(&Position::new(col, start_pos.row))
-                            || self
-                                .board
-                                .is_attacked(Position::new(col, start_pos.row), piece.color)
+                            || self.board.is_attacked(
+                                Position::new(col, start_pos.row),
+                                piece.color.opposite(),
+                            )
                         {
                             return false;
                         }
@@ -443,9 +444,10 @@ impl Game {
 
                     for col in start_pos.col - 0..end_pos.col + 1 {
                         if self.board.is_ocupied(&Position::new(col, start_pos.row))
-                            || self
-                                .board
-                                .is_attacked(Position::new(col, start_pos.row), piece.color)
+                            || self.board.is_attacked(
+                                Position::new(col, start_pos.row),
+                                piece.color.opposite(),
+                            )
                         {
                             return false;
                         }
@@ -462,7 +464,7 @@ impl Game {
         board.move_piece(&start_pos, &end_pos).unwrap();
 
         let king = self.board.find(PieceType::King, piece.color)[0];
-        return !board.is_attacked(king, piece.color);
+        return !board.is_attacked(king, piece.color.opposite());
     }
 }
 
