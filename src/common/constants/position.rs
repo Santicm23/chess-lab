@@ -17,7 +17,6 @@ use crate::common::errors::position::PositionError;
 /// let pos = Position::from_string("a1").unwrap();
 ///
 /// assert_eq!(pos.col, 0);
-///
 /// assert_eq!(pos.row, 0);
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq)]
