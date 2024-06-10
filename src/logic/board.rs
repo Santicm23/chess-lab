@@ -1,8 +1,8 @@
 use regex::Regex;
 
 use crate::{
-    common::errors::{board::BoardError, fen::FenError},
     constants::{Color, PieceType, Position},
+    errors::BoardError,
 };
 
 use super::pieces::{piece_movement, Piece};
@@ -43,15 +43,13 @@ impl Default for Board {
 }
 
 impl Board {
-    pub fn new(fen: &str) -> Result<Board, FenError> {
-        Ok(Board::from_fen(fen)?)
+    pub fn new(fen: &str) -> Board {
+        Board::from_fen(fen)
     }
 
-    pub fn from_fen(fen: &str) -> Result<Board, FenError> {
+    pub fn from_fen(fen: &str) -> Board {
         let re = Regex::new(r"^([1-8PpNnBbRrQqKk]{1,8}/){7}[1-8PpNnBbRrQqKk]{1,8}$").unwrap();
-        if !re.is_match(fen) {
-            return Err(FenError::Invalid);
-        }
+        assert!(re.is_match(fen), "Invalid FEN");
 
         let mut board = Board::default();
         let ranks = fen.split('/').collect::<Vec<&str>>();
@@ -67,22 +65,14 @@ impl Board {
 
                 let piece = Piece::from_fen(c);
 
-                board
-                    .set_piece(
-                        piece,
-                        match &Position::new(col, row) {
-                            Ok(pos) => pos,
-                            Err(_) => return Err(FenError::Invalid),
-                        },
-                    )
-                    .unwrap();
+                board.set_piece(piece, &Position::new(col, row)).unwrap();
 
                 col += 1;
             }
 
             row -= 1;
         }
-        Ok(board)
+        board
     }
 
     pub fn is_ocupied(&self, pos: &Position) -> bool {
@@ -297,7 +287,7 @@ impl ToString for Board {
         for row in (0..8).rev() {
             let mut empty = 0;
             for col in 0..8 {
-                let pos = Position::new(col, row).unwrap();
+                let pos = Position::new(col, row);
                 let piece = self.get_piece(&pos);
                 if piece.is_none() {
                     empty += 1;
@@ -340,7 +330,7 @@ mod tests {
     #[test]
     fn test_set_piece() {
         let mut board = Board::default();
-        let pos = Position::new(4, 2).unwrap();
+        let pos = Position::new(4, 2);
         let piece = Piece::new(Color::White, PieceType::Pawn);
         board.set_piece(piece, &pos).unwrap();
         assert_eq!(
@@ -352,7 +342,7 @@ mod tests {
     #[test]
     fn test_delete_piece() {
         let mut board = Board::default();
-        let pos = Position::new(0, 0).unwrap();
+        let pos = Position::new(0, 0);
         board.delete_piece(&pos).unwrap();
         assert_eq!(
             board.to_string(),
@@ -363,7 +353,7 @@ mod tests {
     #[test]
     fn test_get_piece() {
         let board = Board::default();
-        let pos = Position::new(0, 0).unwrap();
+        let pos = Position::new(0, 0);
         let piece = board.get_piece(&pos).unwrap();
         assert_eq!(piece.to_string(), "R");
     }
@@ -371,10 +361,10 @@ mod tests {
     #[test]
     fn test_is_ocupied() {
         let board = Board::default();
-        let pos = Position::new(0, 0).unwrap();
+        let pos = Position::new(0, 0);
         assert!(board.is_ocupied(&pos));
 
-        let pos = Position::new(0, 2).unwrap();
+        let pos = Position::new(0, 2);
         assert!(!board.is_ocupied(&pos));
     }
 }

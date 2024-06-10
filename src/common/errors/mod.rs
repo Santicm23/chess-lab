@@ -1,4 +1,5 @@
-pub mod board;
-pub mod fen;
-pub mod movements;
-pub mod position;
+mod board;
+mod movements;
+
+pub use board::*;
+pub use movements::*;

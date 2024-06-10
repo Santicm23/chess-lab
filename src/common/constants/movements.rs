@@ -84,36 +84,36 @@ mod tests {
 
     #[test]
     fn test_diagonal_movement() {
-        let start_pos = Position::new(0, 0).unwrap();
-        let end_pos = Position::new(3, 3).unwrap();
+        let start_pos = Position::new(0, 0);
+        let end_pos = Position::new(3, 3);
         assert!(diagonal_movement(&start_pos, &end_pos));
     }
 
     #[test]
     fn test_linear_movement() {
-        let start_pos = Position::new(0, 0).unwrap();
-        let end_pos = Position::new(0, 3).unwrap();
+        let start_pos = Position::new(0, 0);
+        let end_pos = Position::new(0, 3);
         assert!(linear_movement(&start_pos, &end_pos));
     }
 
     #[test]
     fn test_l_movement() {
-        let start_pos = Position::new(0, 0).unwrap();
-        let end_pos = Position::new(1, 2).unwrap();
+        let start_pos = Position::new(0, 0);
+        let end_pos = Position::new(1, 2);
         assert!(l_movement(&start_pos, &end_pos));
     }
 
     #[test]
     fn test_max_movement() {
-        let start_pos = Position::new(0, 0).unwrap();
-        let end_pos = Position::new(1, 1).unwrap();
+        let start_pos = Position::new(0, 0);
+        let end_pos = Position::new(1, 1);
         assert!(max_movement(&start_pos, &end_pos, 1));
     }
 
     #[test]
     fn test_movement_direction() {
-        let start_pos = Position::new(0, 2).unwrap();
-        let end_pos = Position::new(2, 0).unwrap();
+        let start_pos = Position::new(0, 2);
+        let end_pos = Position::new(2, 0);
         assert!(movement_direction(&start_pos, &end_pos, (1, -1)));
     }
 }

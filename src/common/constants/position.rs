@@ -1,7 +1,5 @@
 use std::ops;
 
-use crate::common::errors::position::PositionError;
-
 /// Represents a position on the board.
 /// The position is represented by a column and a row.
 ///
@@ -10,11 +8,11 @@ use crate::common::errors::position::PositionError;
 /// ```
 /// use chess_lib::constants::Position;
 ///
-/// let pos = Position::new(0, 0).unwrap();
+/// let pos = Position::new(0, 0);
 ///
 /// assert_eq!(pos.to_string(), "a1");
 ///
-/// let pos = Position::from_string("a1").unwrap();
+/// let pos = Position::from_string("a1");
 ///
 /// assert_eq!(pos.col, 0);
 /// assert_eq!(pos.row, 0);
@@ -26,17 +24,15 @@ pub struct Position {
 }
 
 impl Position {
-    pub fn new(col: u8, row: u8) -> Result<Position, PositionError> {
-        if col < 8 && row < 8 {
-            Ok(Position { col, row })
-        } else {
-            Err(PositionError::OutOfBounds)
-        }
+    pub fn new(col: u8, row: u8) -> Position {
+        assert!(col < 8 && row < 8, "Position out of bounds");
+        Position { col, row }
     }
 
-    pub fn from_string(s: &str) -> Result<Position, PositionError> {
+    pub fn from_string(s: &str) -> Position {
+        assert!(s.len() == 2, "Invalid position string");
         if s.len() != 2 {
-            return Err(PositionError::Invalid);
+            assert!(false, "Invalid position string");
         }
         let col = s.chars().nth(0).unwrap() as u8 - 'a' as u8;
         let row = s.chars().nth(1).unwrap() as u8 - '1' as u8;
@@ -52,7 +48,7 @@ impl Position {
         let mut bitboard = bitboard;
         while bitboard != 0 {
             let pos = bitboard.trailing_zeros() as u8;
-            positions.push(Position::new(pos % 8, pos / 8).unwrap());
+            positions.push(Position::new(pos % 8, pos / 8));
             bitboard &= bitboard - 1;
         }
         positions
@@ -119,23 +115,23 @@ mod tests {
 
     #[test]
     fn test_position() {
-        let pos = Position::new(0, 0).unwrap();
+        let pos = Position::new(0, 0);
         assert_eq!(pos.to_string(), "a1");
-        let pos = Position::new(7, 7).unwrap();
+        let pos = Position::new(7, 7);
         assert_eq!(pos.to_string(), "h8");
-        let pos = Position::from_string("a1").unwrap();
+        let pos = Position::from_string("a1");
         assert_eq!(pos.col, 0);
         assert_eq!(pos.row, 0);
-        let pos = Position::from_string("h8").unwrap();
+        let pos = Position::from_string("h8");
         assert_eq!(pos.col, 7);
         assert_eq!(pos.row, 7);
     }
 
     #[test]
     fn test_position_to_bitboard() {
-        let pos = Position::new(0, 0).unwrap();
+        let pos = Position::new(0, 0);
         assert_eq!(pos.to_bitboard(), 0x0000000000000001);
-        let pos = Position::new(7, 7).unwrap();
+        let pos = Position::new(7, 7);
         assert_eq!(pos.to_bitboard(), 0x8000000000000000);
     }
 
@@ -153,8 +149,8 @@ mod tests {
 
     #[test]
     fn test_position_add() {
-        let pos1 = Position::new(0, 0).unwrap();
-        let pos2 = Position::new(1, 1).unwrap();
+        let pos1 = Position::new(0, 0);
+        let pos2 = Position::new(1, 1);
         let pos3 = &pos1 + &pos2;
         assert_eq!(pos3.0, 1);
         assert_eq!(pos3.1, 1);
@@ -162,8 +158,8 @@ mod tests {
 
     #[test]
     fn test_position_sub() {
-        let pos1 = Position::new(1, 1).unwrap();
-        let pos2 = Position::new(0, 0).unwrap();
+        let pos1 = Position::new(1, 1);
+        let pos2 = Position::new(0, 0);
         let pos3 = &pos1 - &pos2;
         assert_eq!(pos3.0, 1);
         assert_eq!(pos3.1, 1);
@@ -171,7 +167,7 @@ mod tests {
 
     #[test]
     fn test_position_add_tuple() {
-        let pos1 = Position::new(0, 0).unwrap();
+        let pos1 = Position::new(0, 0);
         let pos2 = (1, 1);
         let pos3 = &pos1 + pos2;
         assert_eq!(pos3.to_string(), "b2");
@@ -179,7 +175,7 @@ mod tests {
 
     #[test]
     fn test_position_sub_tuple() {
-        let pos1 = Position::new(1, 1).unwrap();
+        let pos1 = Position::new(1, 1);
         let pos2 = (1, 1);
         let pos3 = &pos1 - pos2;
         assert_eq!(pos3.to_string(), "a1");

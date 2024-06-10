@@ -1,8 +1,8 @@
 use regex::Regex;
 
 use crate::{
-    common::errors::{fen::FenError, movements::MoveError},
     constants::{CastleType, Color, MoveType, PieceType, Position},
+    errors::MoveError,
     logic::pieces::{piece_movement, Piece},
 };
 
@@ -39,25 +39,23 @@ impl Default for Game {
 }
 
 impl Game {
-    pub fn new(fen: &str, capture_king: bool) -> Result<Game, FenError> {
-        let mut game = Game::from_fen(fen)?;
+    pub fn new(fen: &str, capture_king: bool) -> Game {
+        let mut game = Game::from_fen(fen);
 
         game.capture_king = capture_king;
 
-        Ok(game)
+        game
     }
 
-    pub fn from_fen(fen: &str) -> Result<Game, FenError> {
+    pub fn from_fen(fen: &str) -> Game {
         let re = Regex::new(r"^([1-8PpNnBbRrQqKk]{1,8}/){7}[1-8PpNnBbRrQqKk]{1,8} [wb] (-|[KQkq]{1,4}) (-|[a-h][1-8]) \d+ ([1-9]\d*)$").unwrap();
-        if !re.is_match(fen) {
-            return Err(FenError::Invalid);
-        }
+        assert!(re.is_match(fen), "Invalid FEN");
 
         let mut game = Game::default();
         game.start_position = String::from(fen);
 
         let parts = fen.split(' ').collect::<Vec<&str>>();
-        game.board = Board::from_fen(parts[0])?;
+        game.board = Board::from_fen(parts[0]);
         game.is_white_turn = parts[1] == "w";
         game.castling_rights = parts[2].chars().fold(0, |acc, c| match c {
             'K' => acc | 0b1000,
@@ -70,11 +68,11 @@ impl Game {
         game.en_passant = if parts[3] == "-" {
             None
         } else {
-            Some(Position::from_string(parts[3]).unwrap())
+            Some(Position::from_string(parts[3]))
         };
         game.halfmove_clock = parts[4].parse::<u8>().unwrap();
         game.fullmove_number = parts[5].parse::<u8>().unwrap();
-        Ok(game)
+        game
     }
 
     pub fn move_piece(&mut self, move_str: String) -> Result<(), MoveError> {
@@ -209,13 +207,12 @@ impl Game {
     /// Parse a move string and return the start and end positions
     ///
     /// # Arguments
-    ///
     /// * `move_str` - A string slice that holds the move to be parsed
     ///
     /// # Returns
-    ///
     /// * `MoveType` - The parsed move with all the necessary information
     /// * `MoveError` - If the move is invalid
+    ///
     fn parse_move(
         &self,
         mut move_str: String,
@@ -241,9 +238,9 @@ impl Game {
                 }
                 castle_side = CastleType::KingSide;
                 end_pos = if self.is_white_turn {
-                    Position::from_string("g1").unwrap()
+                    Position::from_string("g1")
                 } else {
-                    Position::from_string("g8").unwrap()
+                    Position::from_string("g8")
                 };
             } else if move_str == "O-O-O" {
                 if (self.castling_rights & 0b0100 == 0 || !self.is_white_turn)
@@ -254,9 +251,9 @@ impl Game {
                 castle_side = CastleType::QueenSide;
 
                 end_pos = if self.is_white_turn {
-                    Position::from_string("c1").unwrap()
+                    Position::from_string("c1")
                 } else {
-                    Position::from_string("c8").unwrap()
+                    Position::from_string("c8")
                 };
             } else {
                 return Err(MoveError::Invalid);
@@ -292,15 +289,14 @@ impl Game {
                 }
 
                 promotion = Some(PieceType::from_char(move_str.chars().last().unwrap()).unwrap());
-                end_pos = Position::from_string(&move_str[move_str.len() - 4..move_str.len() - 2])
-                    .unwrap();
+                end_pos = Position::from_string(&move_str[move_str.len() - 4..move_str.len() - 2]);
                 end_pos_index = move_str.len() - 4;
 
                 if end_pos.row != 0 && end_pos.row != 7 {
                     return Err(MoveError::Invalid);
                 }
             } else {
-                end_pos = Position::from_string(&move_str[move_str.len() - 2..]).unwrap();
+                end_pos = Position::from_string(&move_str[move_str.len() - 2..]);
                 end_pos_index = move_str.len() - 2;
                 promotion = None;
             }
@@ -428,13 +424,10 @@ impl Game {
                     }
 
                     for col in start_pos.col + 0..end_pos.col + 1 {
-                        if self
-                            .board
-                            .is_ocupied(&Position::new(col, start_pos.row).unwrap())
-                            || self.board.is_attacked(
-                                Position::new(col, start_pos.row).unwrap(),
-                                piece.color,
-                            )
+                        if self.board.is_ocupied(&Position::new(col, start_pos.row))
+                            || self
+                                .board
+                                .is_attacked(Position::new(col, start_pos.row), piece.color)
                         {
                             return false;
                         }
@@ -449,13 +442,10 @@ impl Game {
                     }
 
                     for col in start_pos.col - 0..end_pos.col + 1 {
-                        if self
-                            .board
-                            .is_ocupied(&Position::new(col, start_pos.row).unwrap())
-                            || self.board.is_attacked(
-                                Position::new(col, start_pos.row).unwrap(),
-                                piece.color,
-                            )
+                        if self.board.is_ocupied(&Position::new(col, start_pos.row))
+                            || self
+                                .board
+                                .is_attacked(Position::new(col, start_pos.row), piece.color)
                         {
                             return false;
                         }
