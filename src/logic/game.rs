@@ -8,6 +8,20 @@ use crate::{
 
 use super::board::Board;
 
+/// Represents a game of chess
+/// It contains the board, the turn, the halfmove clock, the fullmove number,
+/// the en passant square, the castling rights, the start position, the history
+/// and a flag to indicate if the king needs to be captured
+///
+/// # Example
+/// ```
+/// use chess_lib::logic::Game;
+///
+/// let game = Game::default();
+/// assert_eq!(game.to_string(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+/// ```
+///
+#[derive(Debug, Clone)]
 pub struct Game {
     pub board: Board,
     pub is_white_turn: bool,
@@ -21,7 +35,17 @@ pub struct Game {
 }
 
 impl Default for Game {
-    fn default() -> Self {
+    /// Creates a new game with the default values
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lib::logic::Game;
+    ///
+    /// let game = Game::default();
+    /// assert_eq!(game.to_string(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    /// ```
+    ///
+    fn default() -> Game {
         Game {
             board: Board::default(),
             is_white_turn: true,
@@ -39,6 +63,27 @@ impl Default for Game {
 }
 
 impl Game {
+    /// Creates a new game
+    ///
+    /// # Arguments
+    /// * `fen`: A string slice that holds the FEN representation of the game
+    /// * `capture_king`: A boolean that indicates if the king needs to be captured
+    ///
+    /// # Returns
+    /// A new game
+    ///
+    /// # Panics
+    /// Panics if the FEN is invalid
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lib::logic::Game;
+    ///
+    /// let game = Game::new("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", true);
+    /// assert_eq!(game.to_string(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    /// assert_eq!(game.capture_king, true);
+    /// ```
+    ///
     pub fn new(fen: &str, capture_king: bool) -> Game {
         let mut game = Game::from_fen(fen);
 
@@ -47,6 +92,25 @@ impl Game {
         game
     }
 
+    /// Creates a new game from a FEN string
+    ///
+    /// # Arguments
+    /// * `fen`: A string slice that holds the FEN representation of the game
+    ///
+    /// # Returns
+    /// A new game
+    ///
+    /// # Panics
+    /// Panics if the FEN is invalid
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lib::logic::Game;
+    ///
+    /// let game = Game::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    /// assert_eq!(game.to_string(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    /// ```
+    ///
     pub fn from_fen(fen: &str) -> Game {
         let re = Regex::new(r"^([1-8PpNnBbRrQqKk]{1,8}/){7}[1-8PpNnBbRrQqKk]{1,8} [wb] (-|[KQkq]{1,4}) (-|[a-h][1-8]) \d+ ([1-9]\d*)$").unwrap();
         assert!(re.is_match(fen), "Invalid FEN");
@@ -75,6 +139,23 @@ impl Game {
         game
     }
 
+    /// Moves a piece on the board
+    ///
+    /// # Arguments
+    /// * `move_str`: A string slice that holds the move
+    ///
+    /// # Returns
+    /// Nothing if the move was successful, otherwise an error
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lib::logic::Game;
+    ///
+    /// let mut game = Game::default();
+    /// game.move_piece("e4".to_string()).unwrap();
+    /// assert_eq!(game.to_string(), "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1");
+    /// ```
+    ///
     pub fn move_piece(&mut self, move_str: String) -> Result<(), MoveError> {
         let (piece_type, start_pos, end_pos, move_type) = self.parse_move(move_str)?;
         let color = if self.is_white_turn {
@@ -128,6 +209,27 @@ impl Game {
                     }
                     _ => {}
                 }
+                if piece_type == PieceType::Pawn && (&start_pos - &end_pos).1.abs() == 2 {
+                    let positions = self.board.find(PieceType::Pawn, color.opposite());
+                    let en_passant_pos = Position {
+                        col: start_pos.col,
+                        row: (start_pos.row + end_pos.row) / 2,
+                    };
+
+                    let can_en_passant = positions.iter().any(|pos| {
+                        let piece = self.board.get_piece(&pos).unwrap();
+                        piece_movement(&piece, &pos, &en_passant_pos)
+                    });
+
+                    if can_en_passant {
+                        self.en_passant = Some(en_passant_pos);
+                    } else {
+                        self.en_passant = None;
+                    }
+                } else {
+                    self.en_passant = None;
+                }
+
                 self.is_white_turn = !self.is_white_turn;
                 self.halfmove_clock += 1;
                 if self.is_white_turn {
@@ -144,21 +246,25 @@ impl Game {
                 {
                     self.halfmove_clock = 0;
                 }
-
-                if piece_type == PieceType::Pawn && (&start_pos - &end_pos).1.abs() == 2 {
-                    self.en_passant = Some(Position {
-                        col: start_pos.col,
-                        row: (start_pos.row + end_pos.row) / 2,
-                    });
-                } else {
-                    self.en_passant = None;
-                }
                 Ok(())
             }
             Err(_) => Err(MoveError::Illegal),
         }
     }
 
+    /// Returns the FEN representation of the game
+    ///
+    /// # Returns
+    /// A string that holds the FEN representation of the game
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lib::logic::Game;
+    ///
+    /// let game = Game::default();
+    /// assert_eq!(game.fen(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    /// ```
+    ///
     pub fn fen(&self) -> String {
         let mut fen = String::new();
         fen.push_str(&self.board.to_string());
@@ -210,8 +316,8 @@ impl Game {
     /// * `move_str`: A string slice that holds the move to be parsed
     ///
     /// # Returns
-    /// * `MoveType`: The parsed move with all the necessary information
-    /// * `MoveError`: If the move is invalid
+    /// A tuple containing the piece type, start position, end position and the move type
+    /// If the move is invalid, a MoveError is returned
     ///
     fn parse_move(
         &self,
@@ -398,6 +504,17 @@ impl Game {
         }
     }
 
+    /// Check if a move is legal
+    ///
+    /// # Arguments
+    /// * `piece`: The piece being moved
+    /// * `start_pos`: The starting position of the piece
+    /// * `end_pos`: The ending position of the piece
+    /// * `move_type`: The type of move being made
+    ///
+    /// # Returns
+    /// Whether the move is legal
+    ///
     fn is_legal(
         &self,
         piece: Piece,
@@ -469,6 +586,19 @@ impl Game {
 }
 
 impl ToString for Game {
+    /// Convert the game to a FEN string
+    ///
+    /// # Returns
+    /// The FEN string
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lib::logic::Game;
+    ///
+    /// let game = Game::default();
+    /// assert_eq!(game.fen(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    /// ```
+    ///
     fn to_string(&self) -> String {
         self.fen()
     }
@@ -492,7 +622,41 @@ mod tests {
         game.move_piece(String::from("e4")).unwrap();
         assert_eq!(
             game.fen(),
-            "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1"
+            "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1"
+        );
+    }
+
+    #[test]
+    fn test_castle() {
+        let mut game = super::Game::default();
+        game.move_piece(String::from("e4")).unwrap();
+        game.move_piece(String::from("e5")).unwrap();
+        game.move_piece(String::from("Nf3")).unwrap();
+        game.move_piece(String::from("Nc6")).unwrap();
+        game.move_piece(String::from("Bb5")).unwrap();
+        game.move_piece(String::from("a6")).unwrap();
+        game.move_piece(String::from("O-O")).unwrap();
+        assert_eq!(
+            game.fen(),
+            "r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQ1RK1 b kq - 1 4"
+        );
+    }
+
+    #[test]
+    fn test_en_passant() {
+        let mut game = super::Game::default();
+        game.move_piece(String::from("e4")).unwrap();
+        game.move_piece(String::from("d5")).unwrap();
+        game.move_piece(String::from("e5")).unwrap();
+        game.move_piece(String::from("f5")).unwrap();
+        assert_eq!(
+            game.fen(),
+            "rnbqkbnr/ppp1p1pp/8/3pPp2/8/8/PPPP1PPP/RNBQKBNR w KQkq f6 0 3"
+        );
+        game.move_piece(String::from("exf6")).unwrap();
+        assert_eq!(
+            game.fen(),
+            "rnbqkbnr/ppp1p1pp/5P2/3p4/8/8/PPPP1PPP/RNBQKBNR b KQkq - 0 3"
         );
     }
 }

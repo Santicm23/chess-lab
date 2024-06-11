@@ -63,6 +63,28 @@ impl Board {
         Board::from_fen(fen)
     }
 
+    /// Creates a new empty board
+    ///
+    /// # Returns
+    /// A new empty board
+    ///
+    pub fn empty() -> Board {
+        Board {
+            wpawns: 0,
+            bpawns: 0,
+            wknights: 0,
+            bknights: 0,
+            wbishops: 0,
+            bbishops: 0,
+            wrooks: 0,
+            brooks: 0,
+            wqueens: 0,
+            bqueens: 0,
+            wkings: 0,
+            bkings: 0,
+        }
+    }
+
     /// Creates a new board from a FEN string
     ///
     /// # Arguments
@@ -75,11 +97,13 @@ impl Board {
         let re = Regex::new(r"^([1-8PpNnBbRrQqKk]{1,8}/){7}[1-8PpNnBbRrQqKk]{1,8}$").unwrap();
         assert!(re.is_match(fen), "Invalid FEN");
 
-        let mut board = Board::default();
+        let mut board = Board::empty();
         let ranks = fen.split('/').collect::<Vec<&str>>();
 
-        let mut row = 7;
+        let mut row = 8;
         for rank in ranks {
+            row -= 1;
+
             let mut col = 0;
             for c in rank.chars() {
                 if c.is_digit(10) {
@@ -93,8 +117,6 @@ impl Board {
 
                 col += 1;
             }
-
-            row -= 1;
         }
         board
     }
@@ -405,6 +427,24 @@ mod tests {
     use super::Board;
     use crate::constants::{Color, PieceType, Position};
     use crate::logic::pieces::Piece;
+
+    #[test]
+    fn test_default() {
+        let board = Board::default();
+        assert_eq!(
+            board.to_string(),
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+        );
+    }
+
+    #[test]
+    fn from_fen() {
+        let board = Board::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+        assert_eq!(
+            board.to_string(),
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+        );
+    }
 
     #[test]
     fn test_to_fen() {
