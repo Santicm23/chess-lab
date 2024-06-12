@@ -155,11 +155,11 @@ impl Game {
     /// use chess_lib::logic::Game;
     ///
     /// let mut game = Game::default();
-    /// game.move_piece("e4".to_string()).unwrap();
+    /// game.move_piece("e4").unwrap();
     /// assert_eq!(game.to_string(), "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1");
     /// ```
     ///
-    pub fn move_piece(&mut self, move_str: String) -> Result<(), MoveError> {
+    pub fn move_piece(&mut self, move_str: &str) -> Result<(), MoveError> {
         let (piece_type, start_pos, end_pos, move_type) = self.parse_move(move_str)?;
         let color = if self.is_white_turn {
             Color::White
@@ -167,7 +167,7 @@ impl Game {
             Color::Black
         };
 
-        let start_pos = self.find_piece(piece_type, color, start_pos, end_pos, &move_type)?;
+        let start_pos = self.find_piece(piece_type, color, start_pos, &end_pos, &move_type)?;
 
         match self.board.move_piece(&start_pos, &end_pos) {
             Ok(_) => {
@@ -349,8 +349,9 @@ impl Game {
     ///
     fn parse_move(
         &self,
-        mut move_str: String,
+        move_str: &str,
     ) -> Result<(PieceType, (Option<u8>, Option<u8>), Position, MoveType), MoveError> {
+        let mut move_str = move_str.to_string();
         let re =
             Regex::new(r"^([NBRQK]?[a-h]?[1-8]?x?[a-h][1-8](=[NBRQ])?|O(-O){1,2})[+#]?").unwrap();
         if !re.is_match(move_str.as_str()) || move_str.starts_with('x') {
@@ -493,7 +494,7 @@ impl Game {
         piece: PieceType,
         color: Color,
         start_pos: (Option<u8>, Option<u8>),
-        end_pos: Position,
+        end_pos: &Position,
         move_type: &MoveType,
     ) -> Result<Position, MoveError> {
         let mut positions = match move_type {
@@ -519,12 +520,12 @@ impl Game {
         let mut valid_positions = Vec::new();
         for pos in positions {
             if self.is_legal(
-                Piece {
+                &Piece {
                     color,
                     piece_type: piece,
                 },
-                pos,
-                end_pos,
+                &pos,
+                &end_pos,
                 &move_type,
             ) {
                 valid_positions.push(pos);
@@ -553,69 +554,24 @@ impl Game {
     ///
     fn is_legal(
         &self,
-        piece: Piece,
-        start_pos: Position,
-        end_pos: Position,
+        piece: &Piece,
+        start_pos: &Position,
+        end_pos: &Position,
         move_type: &MoveType,
     ) -> bool {
         if piece.piece_type != PieceType::Knight && piece.piece_type != PieceType::King {
-            if !linear_movement(&start_pos, &end_pos) && !diagonal_movement(&start_pos, &end_pos) {
+            if !linear_movement(start_pos, end_pos) && !diagonal_movement(start_pos, end_pos) {
                 return false;
             }
-            if self.board.piece_between(&start_pos, &end_pos) {
+            if self.board.piece_between(start_pos, end_pos) {
                 return false;
             }
         }
 
         if let MoveType::Castle { side } = move_type {
-            assert!(piece.piece_type == PieceType::King);
-            if start_pos.row != end_pos.row {
-                return false;
-            }
-
-            match side {
-                CastleType::KingSide => {
-                    if piece.color == Color::White && self.castling_rights & 0b1000 == 0 {
-                        return false;
-                    } else if piece.color == Color::Black && self.castling_rights & 0b0010 == 0 {
-                        return false;
-                    }
-
-                    for col in start_pos.col + 0..end_pos.col + 1 {
-                        let new_pos = Position::new(col, start_pos.row);
-                        if (new_pos != start_pos && self.board.is_ocupied(&new_pos))
-                            || self.board.is_attacked(
-                                Position::new(col, start_pos.row),
-                                piece.color.opposite(),
-                            )
-                        {
-                            return false;
-                        }
-                    }
-                    return true;
-                }
-                CastleType::QueenSide => {
-                    if piece.color == Color::White && self.castling_rights & 0b0100 == 0 {
-                        return false;
-                    } else if piece.color == Color::Black && self.castling_rights & 0b0001 == 0 {
-                        return false;
-                    }
-
-                    for col in start_pos.col - 0..end_pos.col + 1 {
-                        if self.board.is_ocupied(&Position::new(col, start_pos.row))
-                            || self.board.is_attacked(
-                                Position::new(col, start_pos.row),
-                                piece.color.opposite(),
-                            )
-                        {
-                            return false;
-                        }
-                    }
-                    return true;
-                }
-            }
+            return self.is_castle_legal(piece, start_pos, end_pos, side);
         }
-        if !piece_movement(&piece, &start_pos, &end_pos) {
+        if !piece_movement(piece, start_pos, end_pos) {
             return false;
         }
         if let MoveType::Normal {
@@ -623,10 +579,10 @@ impl Game {
             promotion: _,
         } = move_type
         {
-            if self.board.get_piece(&end_pos).unwrap().color == piece.color {
-                return false;
-            }
-            if piece.piece_type == PieceType::Pawn && start_pos.col == end_pos.col {
+            if !self.board.is_ocupied(end_pos)
+                || self.board.get_piece(end_pos).unwrap().color == piece.color
+                || (piece.piece_type == PieceType::Pawn && start_pos.col == end_pos.col)
+            {
                 return false;
             }
         }
@@ -639,7 +595,7 @@ impl Game {
                 }
             )
         {
-            if self.board.get_piece(&end_pos).is_some() || start_pos.col != end_pos.col {
+            if self.board.get_piece(end_pos).is_some() || start_pos.col != end_pos.col {
                 return false;
             }
         }
@@ -649,10 +605,63 @@ impl Game {
         }
 
         let mut board = self.board.clone();
-        board.move_piece(&start_pos, &end_pos).unwrap();
+        board.move_piece(start_pos, end_pos).unwrap();
 
         let king = self.board.find(PieceType::King, piece.color)[0];
         return !board.is_attacked(king, piece.color.opposite());
+    }
+
+    fn is_castle_legal(
+        &self,
+        piece: &Piece,
+        start_pos: &Position,
+        end_pos: &Position,
+        side: &CastleType,
+    ) -> bool {
+        assert!(piece.piece_type == PieceType::King);
+        if start_pos.row != end_pos.row {
+            return false;
+        }
+
+        match side {
+            CastleType::KingSide => {
+                if piece.color == Color::White && self.castling_rights & 0b1000 == 0 {
+                    return false;
+                } else if piece.color == Color::Black && self.castling_rights & 0b0010 == 0 {
+                    return false;
+                }
+
+                for col in start_pos.col + 0..end_pos.col + 1 {
+                    let new_pos = Position::new(col, start_pos.row);
+                    if (&new_pos != start_pos && self.board.is_ocupied(&new_pos))
+                        || self
+                            .board
+                            .is_attacked(Position::new(col, start_pos.row), piece.color.opposite())
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            CastleType::QueenSide => {
+                if piece.color == Color::White && self.castling_rights & 0b0100 == 0 {
+                    return false;
+                } else if piece.color == Color::Black && self.castling_rights & 0b0001 == 0 {
+                    return false;
+                }
+
+                for col in start_pos.col - 0..end_pos.col + 1 {
+                    if self.board.is_ocupied(&Position::new(col, start_pos.row))
+                        || self
+                            .board
+                            .is_attacked(Position::new(col, start_pos.row), piece.color.opposite())
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
     }
 }
 
@@ -677,10 +686,20 @@ impl ToString for Game {
 
 #[cfg(test)]
 mod tests {
+    use super::Game;
 
     #[test]
     fn test_fen() {
-        let game = super::Game::default();
+        let game = Game::default();
+        assert_eq!(
+            game.fen(),
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+        );
+    }
+
+    #[test]
+    fn test_from_fen() {
+        let game = Game::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
         assert_eq!(
             game.fen(),
             "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
@@ -689,8 +708,8 @@ mod tests {
 
     #[test]
     fn test_move_piece() {
-        let mut game = super::Game::default();
-        game.move_piece(String::from("e4")).unwrap();
+        let mut game = Game::default();
+        game.move_piece("e4").unwrap();
         assert_eq!(
             game.fen(),
             "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1"
@@ -699,14 +718,14 @@ mod tests {
 
     #[test]
     fn test_castle() {
-        let mut game = super::Game::default();
-        game.move_piece(String::from("e4")).unwrap();
-        game.move_piece(String::from("e5")).unwrap();
-        game.move_piece(String::from("Nf3")).unwrap();
-        game.move_piece(String::from("Nc6")).unwrap();
-        game.move_piece(String::from("Bb5")).unwrap();
-        game.move_piece(String::from("a6")).unwrap();
-        game.move_piece(String::from("O-O")).unwrap();
+        let mut game = Game::default();
+        game.move_piece("e4").unwrap();
+        game.move_piece("e5").unwrap();
+        game.move_piece("Nf3").unwrap();
+        game.move_piece("Nc6").unwrap();
+        game.move_piece("Bb5").unwrap();
+        game.move_piece("a6").unwrap();
+        game.move_piece("O-O").unwrap();
         assert_eq!(
             game.fen(),
             "r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQ1RK1 b kq - 1 4"
@@ -715,16 +734,16 @@ mod tests {
 
     #[test]
     fn test_en_passant() {
-        let mut game = super::Game::default();
-        game.move_piece(String::from("e4")).unwrap();
-        game.move_piece(String::from("d5")).unwrap();
-        game.move_piece(String::from("e5")).unwrap();
-        game.move_piece(String::from("f5")).unwrap();
+        let mut game = Game::default();
+        game.move_piece("e4").unwrap();
+        game.move_piece("d5").unwrap();
+        game.move_piece("e5").unwrap();
+        game.move_piece("f5").unwrap();
         assert_eq!(
             game.fen(),
             "rnbqkbnr/ppp1p1pp/8/3pPp2/8/8/PPPP1PPP/RNBQKBNR w KQkq f6 0 3"
         );
-        game.move_piece(String::from("exf6")).unwrap();
+        game.move_piece("exf6").unwrap();
         assert_eq!(
             game.fen(),
             "rnbqkbnr/ppp1p1pp/5P2/3p4/8/8/PPPP1PPP/RNBQKBNR b KQkq - 0 3"
@@ -733,28 +752,28 @@ mod tests {
 
     #[test]
     fn test_castle_rights() {
-        let mut game = super::Game::default();
-        game.move_piece(String::from("a3")).unwrap();
-        game.move_piece(String::from("a6")).unwrap();
-        game.move_piece(String::from("Ra2")).unwrap();
+        let mut game = Game::default();
+        game.move_piece("a3").unwrap();
+        game.move_piece("a6").unwrap();
+        game.move_piece("Ra2").unwrap();
         assert_eq!(
             game.fen(),
             "rnbqkbnr/1ppppppp/p7/8/8/P7/RPPPPPPP/1NBQKBNR b Kkq - 1 2"
         );
-        game.move_piece(String::from("Ra7")).unwrap();
+        game.move_piece("Ra7").unwrap();
         assert_eq!(
             game.fen(),
             "1nbqkbnr/rppppppp/p7/8/8/P7/RPPPPPPP/1NBQKBNR w Kk - 2 3"
         );
 
-        game.move_piece(String::from("h3")).unwrap();
-        game.move_piece(String::from("h6")).unwrap();
-        game.move_piece(String::from("Rh2")).unwrap();
+        game.move_piece("h3").unwrap();
+        game.move_piece("h6").unwrap();
+        game.move_piece("Rh2").unwrap();
         assert_eq!(
             game.fen(),
             "1nbqkbnr/rpppppp1/p6p/8/8/P6P/RPPPPPPR/1NBQKBN1 b k - 1 4"
         );
-        game.move_piece(String::from("Rh7")).unwrap();
+        game.move_piece("Rh7").unwrap();
         assert_eq!(
             game.fen(),
             "1nbqkbn1/rppppppr/p6p/8/8/P6P/RPPPPPPR/1NBQKBN1 w - - 2 5"
