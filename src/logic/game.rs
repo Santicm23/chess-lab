@@ -1,7 +1,10 @@
 use regex::Regex;
 
 use crate::{
-    constants::{CastleType, Color, MoveType, PieceType, Position},
+    constants::{
+        movements::{diagonal_movement, linear_movement},
+        CastleType, Color, MoveType, PieceType, Position,
+    },
     errors::MoveError,
     logic::pieces::{piece_movement, Piece},
 };
@@ -199,6 +202,11 @@ impl Game {
                                 }
                             }
                         }
+
+                        self.castling_rights &= match color {
+                            Color::White => 0b0011,
+                            Color::Black => 0b1100,
+                        };
                     }
                     MoveType::EnPassant => {
                         let captured_pos = Position {
@@ -228,6 +236,10 @@ impl Game {
                     }
                 } else {
                     self.en_passant = None;
+                }
+
+                if piece_type == PieceType::Rook {
+                    todo!();
                 }
 
                 self.is_white_turn = !self.is_white_turn;
@@ -475,32 +487,27 @@ impl Game {
             .cloned()
             .collect();
 
-        if positions.len() == 0 {
+        let mut valid_positions = Vec::new();
+        for pos in positions {
+            if self.is_legal(
+                Piece {
+                    color,
+                    piece_type: piece,
+                },
+                pos,
+                end_pos,
+                &move_type,
+            ) {
+                valid_positions.push(pos);
+            }
+        }
+
+        if valid_positions.len() == 0 {
             return Err(MoveError::Illegal);
-        } else if positions.len() == 1 {
-            return Ok(positions[0]);
+        } else if valid_positions.len() == 1 {
+            return Ok(valid_positions[0]);
         } else {
-            let mut valid_positions = Vec::new();
-            for pos in positions {
-                if self.is_legal(
-                    Piece {
-                        color,
-                        piece_type: piece,
-                    },
-                    pos,
-                    end_pos,
-                    &move_type,
-                ) {
-                    valid_positions.push(pos);
-                }
-            }
-            if valid_positions.len() == 0 {
-                return Err(MoveError::Illegal);
-            } else if valid_positions.len() == 1 {
-                return Ok(valid_positions[0]);
-            } else {
-                return Err(MoveError::Ambiguous);
-            }
+            return Err(MoveError::Ambiguous);
         }
     }
 
@@ -522,8 +529,13 @@ impl Game {
         end_pos: Position,
         move_type: &MoveType,
     ) -> bool {
-        if self.capture_king {
-            return true;
+        if piece.piece_type != PieceType::Knight && piece.piece_type != PieceType::King {
+            if !linear_movement(&start_pos, &end_pos) && !diagonal_movement(&start_pos, &end_pos) {
+                return false;
+            }
+            if self.board.piece_between(&start_pos, &end_pos) {
+                return false;
+            }
         }
 
         if let MoveType::Castle { side } = move_type {
@@ -541,7 +553,8 @@ impl Game {
                     }
 
                     for col in start_pos.col + 0..end_pos.col + 1 {
-                        if self.board.is_ocupied(&Position::new(col, start_pos.row))
+                        let new_pos = Position::new(col, start_pos.row);
+                        if (new_pos != start_pos && self.board.is_ocupied(&new_pos))
                             || self.board.is_attacked(
                                 Position::new(col, start_pos.row),
                                 piece.color.opposite(),
@@ -575,6 +588,35 @@ impl Game {
         }
         if !piece_movement(&piece, &start_pos, &end_pos) {
             return false;
+        }
+        if let MoveType::Normal {
+            capture: true,
+            promotion: _,
+        } = move_type
+        {
+            if self.board.get_piece(&end_pos).unwrap().color == piece.color {
+                return false;
+            }
+            if piece.piece_type == PieceType::Pawn && start_pos.col == end_pos.col {
+                return false;
+            }
+        }
+        if piece.piece_type == PieceType::Pawn
+            && matches!(
+                move_type,
+                MoveType::Normal {
+                    capture: false,
+                    promotion: _
+                }
+            )
+        {
+            if self.board.get_piece(&end_pos).is_some() || start_pos.col != end_pos.col {
+                return false;
+            }
+        }
+
+        if self.capture_king {
+            return true;
         }
 
         let mut board = self.board.clone();

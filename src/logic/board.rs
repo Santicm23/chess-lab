@@ -1,7 +1,10 @@
 use regex::Regex;
 
 use crate::{
-    constants::{Color, PieceType, Position},
+    constants::{
+        movements::{diagonal_movement, linear_movement},
+        Color, PieceType, Position,
+    },
     errors::BoardError,
 };
 
@@ -379,6 +382,51 @@ impl Board {
                 if piece_type == PieceType::Pawn && piece.col == pos.col {
                     return false;
                 }
+                return match piece_type {
+                    PieceType::Pawn => diagonal_movement(&piece, &pos),
+                    PieceType::Knight | PieceType::King => true,
+                    PieceType::Bishop | PieceType::Rook | PieceType::Queen => {
+                        !self.piece_between(&piece, &pos)
+                    }
+                };
+            }
+        }
+        false
+    }
+
+    /// Checks if there is a piece between two positions
+    ///
+    /// # Arguments
+    /// * `from`: The starting position
+    /// * `to`: The ending position
+    ///
+    /// # Returns
+    /// Whether there is a piece between the two positions
+    ///
+    /// # Panics
+    /// If the positions are not in a straight line
+    ///
+    pub fn piece_between(&self, from: &Position, to: &Position) -> bool {
+        assert!(
+            linear_movement(from, to) || diagonal_movement(from, to),
+            "The positions are not in a straight line"
+        );
+        let direction = from.direction(to);
+        let mut pos = from.to_owned();
+
+        loop {
+            if pos.col as i8 + direction.0 < 0
+                || pos.col as i8 + direction.0 > 7
+                || pos.row as i8 + direction.1 < 0
+                || pos.row as i8 + direction.1 > 7
+            {
+                panic!("Position out of bounds :(");
+            }
+            pos = &pos + direction;
+            if pos == *to {
+                break;
+            }
+            if self.is_ocupied(&pos) {
                 return true;
             }
         }
@@ -531,5 +579,13 @@ mod tests {
 
         let pos = Position::from_string("e4");
         assert!(!board.is_attacked(pos, Color::White));
+    }
+
+    #[test]
+    fn test_piece_between() {
+        let board = Board::default();
+        let from = Position::new(0, 0);
+        let to = Position::new(0, 6);
+        assert!(board.piece_between(&from, &to));
     }
 }

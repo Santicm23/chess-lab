@@ -128,6 +128,34 @@ impl Position {
         }
         positions
     }
+
+    /// Gets the direction between two positions
+    ///
+    /// # Arguments
+    /// * `other`: The other position
+    ///
+    /// # Returns
+    /// The direction between the two positions
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lib::constants::Position;
+    ///
+    /// let pos1 = Position::new(0, 0);
+    /// let pos2 = Position::new(1, 1);
+    ///
+    /// let direction = pos1.direction(&pos2);
+    ///
+    /// assert_eq!(direction, (1, 1));
+    /// ```
+    pub fn direction(&self, other: &Position) -> (i8, i8) {
+        let mut col = other.col as i8 - self.col as i8;
+        let mut row = other.row as i8 - self.row as i8;
+
+        col = if col == 0 { 0 } else { col / col.abs() };
+        row = if row == 0 { 0 } else { row / row.abs() };
+        (col, row)
+    }
 }
 
 impl ops::Add<(i8, i8)> for &Position {
@@ -153,10 +181,10 @@ impl ops::Add<(i8, i8)> for &Position {
     /// ```
     ///
     fn add(self, other: (i8, i8)) -> Position {
-        Position {
-            col: (self.col as i8 + other.0) as u8,
-            row: (self.row as i8 + other.1) as u8,
-        }
+        Position::new(
+            (self.col as i8 + other.0) as u8,
+            (self.row as i8 + other.1) as u8,
+        )
     }
 }
 
@@ -306,5 +334,13 @@ mod tests {
         let pos2 = (1, 1);
         let pos3 = &pos1 - pos2;
         assert_eq!(pos3.to_string(), "a1");
+    }
+
+    #[test]
+    fn test_direction() {
+        let pos1 = Position::new(0, 0);
+        let pos2 = Position::new(1, 1);
+        let dir = pos1.direction(&pos2);
+        assert_eq!(dir, (1, 1));
     }
 }
