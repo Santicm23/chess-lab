@@ -239,7 +239,23 @@ impl Game {
                 }
 
                 if piece_type == PieceType::Rook {
-                    todo!();
+                    let king = self.board.find(PieceType::King, color)[0];
+                    match color {
+                        Color::White => {
+                            if start_pos.col < king.col {
+                                self.castling_rights &= 0b1011;
+                            } else if start_pos.col > king.col {
+                                self.castling_rights &= 0b0111;
+                            }
+                        }
+                        Color::Black => {
+                            if start_pos.col < king.col {
+                                self.castling_rights &= 0b1110;
+                            } else if start_pos.col > king.col {
+                                self.castling_rights &= 0b1101;
+                            }
+                        }
+                    }
                 }
 
                 self.is_white_turn = !self.is_white_turn;
@@ -459,6 +475,19 @@ impl Game {
         }
     }
 
+    /// Finds the position of a piece that matches the given criteria to move
+    ///
+    /// # Arguments
+    /// * `piece`: The type of piece to find
+    /// * `color`: The color of the piece to find
+    /// * `start_pos`: The criteria for the starting position of the piece to find
+    /// * `end_pos`: The ending position of the piece to find
+    /// * `move_type`: The type of move to find
+    ///
+    /// # Returns
+    /// The position of the piece on the board
+    /// If the piece is not found or there are multiple pieces that match the criteria, an error is returned
+    ///
     fn find_piece(
         &self,
         piece: PieceType,
@@ -699,6 +728,36 @@ mod tests {
         assert_eq!(
             game.fen(),
             "rnbqkbnr/ppp1p1pp/5P2/3p4/8/8/PPPP1PPP/RNBQKBNR b KQkq - 0 3"
+        );
+    }
+
+    #[test]
+    fn test_castle_rights() {
+        let mut game = super::Game::default();
+        game.move_piece(String::from("a3")).unwrap();
+        game.move_piece(String::from("a6")).unwrap();
+        game.move_piece(String::from("Ra2")).unwrap();
+        assert_eq!(
+            game.fen(),
+            "rnbqkbnr/1ppppppp/p7/8/8/P7/RPPPPPPP/1NBQKBNR b Kkq - 1 2"
+        );
+        game.move_piece(String::from("Ra7")).unwrap();
+        assert_eq!(
+            game.fen(),
+            "1nbqkbnr/rppppppp/p7/8/8/P7/RPPPPPPP/1NBQKBNR w Kk - 2 3"
+        );
+
+        game.move_piece(String::from("h3")).unwrap();
+        game.move_piece(String::from("h6")).unwrap();
+        game.move_piece(String::from("Rh2")).unwrap();
+        assert_eq!(
+            game.fen(),
+            "1nbqkbnr/rpppppp1/p6p/8/8/P6P/RPPPPPPR/1NBQKBN1 b k - 1 4"
+        );
+        game.move_piece(String::from("Rh7")).unwrap();
+        assert_eq!(
+            game.fen(),
+            "1nbqkbn1/rppppppr/p6p/8/8/P6P/RPPPPPPR/1NBQKBN1 w - - 2 5"
         );
     }
 }
