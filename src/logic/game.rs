@@ -3,7 +3,8 @@ use regex::Regex;
 use crate::{
     constants::{
         movements::{diagonal_movement, linear_movement},
-        CastleType, Color, MoveType, PieceType, Position,
+        pgn::PgnTree,
+        CastleType, Color, Move, MoveType, PieceType, Position,
     },
     errors::MoveError,
     logic::pieces::{piece_movement, Piece},
@@ -33,8 +34,8 @@ pub struct Game {
     pub en_passant: Option<Position>,
     pub castling_rights: u8,
     pub start_position: String,
-    pub history: Vec<&'static str>,
     pub capture_king: bool,
+    pub history: PgnTree,
 }
 
 impl Default for Game {
@@ -59,7 +60,7 @@ impl Default for Game {
             start_position: String::from(
                 "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
             ),
-            history: Vec::new(),
+            history: PgnTree::default(),
             capture_king: false,
         }
     }
@@ -169,6 +170,10 @@ impl Game {
 
         let start_pos = self.find_piece(piece_type, color, start_pos, &end_pos, &move_type)?;
 
+        let mut rook_start: Option<Position> = None;
+        let mut captured_piece: Option<PieceType> =
+            self.board.get_piece(&end_pos).map(|p| p.piece_type);
+
         match self.board.move_piece(&start_pos, &end_pos) {
             Ok(_) => {
                 match &move_type {
@@ -190,93 +195,137 @@ impl Game {
                             match side {
                                 CastleType::KingSide => {
                                     if rook.col > start_pos.col && rook.row == start_pos.row {
+                                        rook_start = Some(rook);
                                         self.board.move_piece(&rook, &rook_end).unwrap();
                                         break;
                                     }
                                 }
                                 CastleType::QueenSide => {
                                     if rook.col < start_pos.col && rook.row == start_pos.row {
+                                        rook_start = Some(rook);
                                         self.board.move_piece(&rook, &rook_end).unwrap();
                                         break;
                                     }
                                 }
                             }
                         }
-
-                        self.castling_rights &= match color {
-                            Color::White => 0b0011,
-                            Color::Black => 0b1100,
-                        };
                     }
                     MoveType::EnPassant => {
                         let captured_pos = Position {
                             col: end_pos.col,
                             row: start_pos.row,
                         };
-                        self.board.delete_piece(&captured_pos).unwrap();
+                        captured_piece =
+                            Some(self.board.delete_piece(&captured_pos).unwrap().piece_type);
                     }
                     _ => {}
                 }
-                if piece_type == PieceType::Pawn && (&start_pos - &end_pos).1.abs() == 2 {
-                    let positions = self.board.find(PieceType::Pawn, color.opposite());
-                    let en_passant_pos = Position {
-                        col: start_pos.col,
-                        row: (start_pos.row + end_pos.row) / 2,
-                    };
-
-                    let can_en_passant = positions.iter().any(|pos| {
-                        let piece = self.board.get_piece(&pos).unwrap();
-                        piece_movement(&piece, &pos, &en_passant_pos)
-                    });
-
-                    if can_en_passant {
-                        self.en_passant = Some(en_passant_pos);
-                    } else {
-                        self.en_passant = None;
-                    }
-                } else {
-                    self.en_passant = None;
-                }
-
-                if piece_type == PieceType::Rook {
-                    let king = self.board.find(PieceType::King, color)[0];
-                    match color {
-                        Color::White => {
-                            if start_pos.col < king.col {
-                                self.castling_rights &= 0b1011;
-                            } else if start_pos.col > king.col {
-                                self.castling_rights &= 0b0111;
-                            }
-                        }
-                        Color::Black => {
-                            if start_pos.col < king.col {
-                                self.castling_rights &= 0b1110;
-                            } else if start_pos.col > king.col {
-                                self.castling_rights &= 0b1101;
-                            }
-                        }
-                    }
-                }
-
-                self.is_white_turn = !self.is_white_turn;
-                self.halfmove_clock += 1;
-                if self.is_white_turn {
-                    self.fullmove_number += 1;
-                }
-                if PieceType::Pawn == piece_type
-                    || matches!(
-                        move_type,
-                        MoveType::Normal {
-                            capture: true,
-                            promotion: _
-                        }
-                    )
+                if let MoveType::Normal {
+                    capture: _,
+                    promotion: Some(piece_type),
+                } = move_type
                 {
-                    self.halfmove_clock = 0;
+                    self.board.delete_piece(&end_pos).unwrap();
+                    self.board
+                        .set_piece(Piece::new(color, piece_type), &end_pos)
+                        .unwrap();
                 }
+                self.update_rules(Move::new(
+                    Piece::new(color, piece_type),
+                    start_pos,
+                    end_pos,
+                    move_type,
+                    captured_piece,
+                    rook_start,
+                ));
                 Ok(())
             }
             Err(_) => Err(MoveError::Illegal),
+        }
+    }
+
+    /// Parses a move string
+    ///
+    /// # Arguments
+    /// * `mov`: A move that holds the piece type, start and end position, the move type, the captured piece and the rook start position
+    ///
+    fn update_rules(&mut self, mov: Move) {
+        if matches!(mov.move_type, MoveType::Castle { .. })
+            || mov.piece.piece_type == PieceType::King
+        {
+            self.castling_rights &= match mov.piece.color {
+                Color::White => 0b0011,
+                Color::Black => 0b1100,
+            };
+        }
+        if mov.piece.piece_type == PieceType::Rook {
+            let king = self.board.find(PieceType::King, mov.piece.color)[0];
+            match mov.piece.color {
+                Color::White => {
+                    if mov.from.col < king.col {
+                        self.castling_rights &= 0b1011;
+                    } else if mov.from.col > king.col {
+                        self.castling_rights &= 0b0111;
+                    }
+                }
+                Color::Black => {
+                    if mov.from.col < king.col {
+                        self.castling_rights &= 0b1110;
+                    } else if mov.from.col > king.col {
+                        self.castling_rights &= 0b1101;
+                    }
+                }
+            }
+        }
+        if let Some(PieceType::Rook) = mov.captured_piece {
+            let king = self.board.find(PieceType::King, mov.piece.color)[0];
+            match mov.piece.color.opposite() {
+                Color::White => {
+                    if mov.to.col < king.col {
+                        self.castling_rights &= 0b1011;
+                    } else if mov.to.col > king.col {
+                        self.castling_rights &= 0b0111;
+                    }
+                }
+                Color::Black => {
+                    if mov.to.col < king.col {
+                        self.castling_rights &= 0b1110;
+                    } else if mov.to.col > king.col {
+                        self.castling_rights &= 0b1101;
+                    }
+                }
+            }
+        }
+        if matches!(mov.move_type, MoveType::Normal { capture: true, .. })
+            || mov.piece.piece_type == PieceType::Pawn
+        {
+            self.halfmove_clock = 0;
+        } else {
+            self.halfmove_clock += 1;
+        }
+        if mov.piece.piece_type == PieceType::Pawn && (&mov.from - &mov.to).1.abs() == 2 {
+            let positions = self.board.find(PieceType::Pawn, mov.piece.color.opposite());
+            let en_passant_pos = Position {
+                col: mov.from.col,
+                row: (mov.from.row + mov.to.row) / 2,
+            };
+
+            let can_en_passant = positions.iter().any(|pos| {
+                let piece = self.board.get_piece(&pos).unwrap();
+                piece_movement(&piece, &pos, &en_passant_pos)
+            });
+
+            if can_en_passant {
+                self.en_passant = Some(en_passant_pos);
+            } else {
+                self.en_passant = None;
+            }
+        } else {
+            self.en_passant = None;
+        }
+        self.is_white_turn = !self.is_white_turn;
+        if self.is_white_turn {
+            self.fullmove_number += 1;
         }
     }
 
@@ -335,6 +384,18 @@ impl Game {
     }
 
     pub fn redo(&mut self) {
+        todo!()
+    }
+
+    pub fn pgn(&self) -> String {
+        todo!()
+    }
+
+    pub fn save(&self, path: &str) {
+        todo!()
+    }
+
+    pub fn load(&mut self, path: &str) {
         todo!()
     }
 
@@ -777,6 +838,24 @@ mod tests {
         assert_eq!(
             game.fen(),
             "1nbqkbn1/rppppppr/p6p/8/8/P6P/RPPPPPPR/1NBQKBN1 w - - 2 5"
+        );
+    }
+
+    #[test]
+    fn test_promotion() {
+        let mut game = Game::default();
+        game.move_piece("e4").unwrap();
+        game.move_piece("d5").unwrap();
+        game.move_piece("exd5").unwrap();
+        game.move_piece("c6").unwrap();
+        game.move_piece("dxc6").unwrap();
+        game.move_piece("a6").unwrap();
+        game.move_piece("cxb7").unwrap();
+        game.move_piece("a5").unwrap();
+        game.move_piece("bxa8=Q").unwrap();
+        assert_eq!(
+            game.fen(),
+            "Qnbqkbnr/4pppp/8/p7/8/8/PPPP1PPP/RNBQKBNR b KQk - 0 5"
         );
     }
 }

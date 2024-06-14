@@ -1,3 +1,7 @@
+use crate::logic::Piece;
+
+use super::Position;
+
 /// Represents the color of a chess piece
 ///
 /// # Variants
@@ -149,4 +153,120 @@ pub enum MoveType {
 pub enum CastleType {
     KingSide,
     QueenSide,
+}
+
+/// Represents a move in a chess game
+///
+/// # Examples:
+/// ```
+/// use chess_lib::constants::{Color, PieceType, Position, Move, MoveType};
+/// use chess_lib::logic::Piece;
+///
+/// let piece = Piece {
+///     color: Color::White,
+///     piece_type: PieceType::Pawn,
+/// };
+/// let from = Position::new(4, 1);
+/// let to = Position::new(4, 3);
+/// let move_type = MoveType::Normal {
+///     capture: false,
+///     promotion: None,
+/// };
+/// let captured_piece = None;
+/// let rook_from = None;
+/// let mv = Move::new(piece, from, to, move_type, captured_piece, rook_from);
+///
+/// assert_eq!(mv.to_string(), "e2e4");
+/// ```
+///
+#[derive(Debug, Clone)]
+pub struct Move {
+    pub piece: Piece,
+    pub from: Position,
+    pub to: Position,
+    pub move_type: MoveType,
+    pub captured_piece: Option<PieceType>,
+    pub rook_from: Option<Position>,
+}
+
+impl Move {
+    pub fn new(
+        piece: Piece,
+        from: Position,
+        to: Position,
+        move_type: MoveType,
+        captured_piece: Option<PieceType>,
+        rook_from: Option<Position>,
+    ) -> Move {
+        match &move_type {
+            MoveType::Normal { capture, promotion } => {
+                if *capture {
+                    assert!(
+                        captured_piece.is_some(),
+                        "The move is a capture, but no captured piece is provided"
+                    );
+                } else {
+                    assert!(
+                        captured_piece.is_none(),
+                        "The move is not a capture, but a captured piece is provided"
+                    );
+                }
+                if promotion.is_some() {
+                    assert!(
+                        piece.piece_type == PieceType::Pawn,
+                        "The move is a promotion, but the piece is not a pawn"
+                    );
+                }
+            }
+            MoveType::Castle { side: _ } => {
+                assert!(
+                    rook_from.is_some(),
+                    "The move is a castle, but no rook position is provided"
+                );
+            }
+            _ => (),
+        }
+        Move {
+            piece,
+            from,
+            to,
+            move_type,
+            captured_piece,
+            rook_from,
+        }
+    }
+}
+
+impl ToString for Move {
+    fn to_string(&self) -> String {
+        let mut result = String::new();
+        if self.piece.piece_type != PieceType::Pawn {
+            result.push(self.piece.piece_type.to_char());
+        }
+        match &self.move_type {
+            MoveType::Castle { side } => {
+                return match side {
+                    CastleType::KingSide => "O-O".to_string(),
+                    CastleType::QueenSide => "O-O-O".to_string(),
+                };
+            }
+            MoveType::Normal { capture, promotion } => {
+                result.push_str(&self.from.to_string());
+                if *capture {
+                    result.push('x');
+                }
+                result.push_str(&self.to.to_string());
+                if let Some(promotion) = promotion {
+                    result.push('=');
+                    result.push(promotion.to_char());
+                }
+            }
+            MoveType::EnPassant => {
+                result.push_str(&self.from.to_string());
+                result.push('x');
+                result.push_str(&self.to.to_string());
+            }
+        }
+        result
+    }
 }
