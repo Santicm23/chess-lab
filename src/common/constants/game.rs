@@ -131,7 +131,7 @@ impl PieceType {
 /// * `Castle`: A castle move
 ///     - `side`: The side of the board to castle on
 /// * `EnPassant`: An en passant move
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum MoveType {
     Normal {
         capture: bool,
@@ -149,7 +149,7 @@ pub enum MoveType {
 /// * `KingSide`: The king side
 /// * `QueenSide`: The queen side
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum CastleType {
     KingSide,
     QueenSide,
@@ -179,7 +179,7 @@ pub enum CastleType {
 /// assert_eq!(mv.to_string(), "e2e4");
 /// ```
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Move {
     pub piece: Piece,
     pub from: Position,
