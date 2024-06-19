@@ -28,14 +28,14 @@ use super::board::Board;
 #[derive(Debug, Clone)]
 pub struct Game {
     board: Board,
-    is_white_turn: bool,
-    halfmove_clock: u32,
-    fullmove_number: u32,
-    en_passant: Option<Position>,
-    castling_rights: u8,
-    start_position: String,
     capture_king: bool,
-    history: PgnTree,
+    pub is_white_turn: bool,
+    pub halfmove_clock: u32,
+    pub fullmove_number: u32,
+    pub en_passant: Option<Position>,
+    pub castling_rights: u8,
+    pub start_position: String,
+    pub history: PgnTree,
 }
 
 impl Default for Game {
@@ -387,6 +387,18 @@ impl Game {
         fen
     }
 
+    /// Undoes the last move
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lib::logic::Game;
+    ///
+    /// let mut game = Game::default();
+    /// game.move_piece("e4").unwrap();
+    /// game.undo();
+    /// assert_eq!(game.fen(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    /// ```
+    ///
     pub fn undo(&mut self) {
         let mov = self.history.get_move();
         let info = self.history.get_prev_move_info();
@@ -456,6 +468,20 @@ impl Game {
         self.history.prev_move();
     }
 
+    /// Redoes the last undone move
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lib::logic::Game;
+    ///
+    /// let mut game = Game::default();
+    /// game.move_piece("e4").unwrap();
+    /// game.undo();
+    /// game.redo();
+    ///
+    /// assert_eq!(game.fen(), "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1");
+    /// ```
+    ///
     pub fn redo(&mut self) {
         let mov = self.history.next_move();
 
@@ -471,10 +497,6 @@ impl Game {
     }
 
     pub fn pgn(&self) -> String {
-        todo!()
-    }
-
-    pub fn save(&self, path: &str) {
         todo!()
     }
 
