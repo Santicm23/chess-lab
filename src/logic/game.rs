@@ -27,15 +27,15 @@ use super::board::Board;
 ///
 #[derive(Debug, Clone)]
 pub struct Game {
-    pub board: Board,
-    pub is_white_turn: bool,
-    pub halfmove_clock: u8,
-    pub fullmove_number: u8,
-    pub en_passant: Option<Position>,
-    pub castling_rights: u8,
-    pub start_position: String,
-    pub capture_king: bool,
-    pub history: PgnTree,
+    board: Board,
+    is_white_turn: bool,
+    halfmove_clock: u32,
+    fullmove_number: u32,
+    en_passant: Option<Position>,
+    castling_rights: u8,
+    start_position: String,
+    capture_king: bool,
+    history: PgnTree,
 }
 
 impl Default for Game {
@@ -85,7 +85,6 @@ impl Game {
     ///
     /// let game = Game::new("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", true);
     /// assert_eq!(game.to_string(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-    /// assert_eq!(game.capture_king, true);
     /// ```
     ///
     pub fn new(fen: &str, capture_king: bool) -> Game {
@@ -123,7 +122,7 @@ impl Game {
         game.start_position = String::from(fen);
 
         let parts = fen.split(' ').collect::<Vec<&str>>();
-        game.board = Board::from_fen(parts[0]);
+        game.board = Board::new(parts[0]);
         game.is_white_turn = parts[1] == "w";
         game.castling_rights = parts[2].chars().fold(0, |acc, c| match c {
             'K' => acc | 0b1000,
@@ -138,8 +137,8 @@ impl Game {
         } else {
             Some(Position::from_string(parts[3]))
         };
-        game.halfmove_clock = parts[4].parse::<u8>().unwrap();
-        game.fullmove_number = parts[5].parse::<u8>().unwrap();
+        game.halfmove_clock = parts[4].parse::<u32>().unwrap();
+        game.fullmove_number = parts[5].parse::<u32>().unwrap();
         game
     }
 
@@ -238,6 +237,7 @@ impl Game {
                     captured_piece,
                     rook_start,
                 ));
+
                 Ok(())
             }
             Err(_) => Err(MoveError::Illegal),
@@ -250,6 +250,14 @@ impl Game {
     /// * `mov`: A move that holds the piece type, start and end position, the move type, the captured piece and the rook start position
     ///
     fn update_rules(&mut self, mov: Move) {
+        self.history.add_move(
+            mov.clone(),
+            self.halfmove_clock,
+            self.fullmove_number,
+            self.en_passant,
+            self.castling_rights,
+        );
+
         if matches!(mov.move_type, MoveType::Castle { .. })
             || mov.piece.piece_type == PieceType::King
         {
@@ -380,11 +388,86 @@ impl Game {
     }
 
     pub fn undo(&mut self) {
-        todo!()
+        let mov = self.history.get_move();
+        let info = self.history.get_prev_move_info();
+
+        if let None = mov {
+            return;
+        }
+
+        let mov = mov.unwrap();
+
+        self.board.move_piece(&mov.to, &mov.from).unwrap();
+
+        match mov.move_type {
+            MoveType::Normal {
+                capture: true,
+                promotion,
+            } => {
+                self.board
+                    .set_piece(
+                        Piece::new(mov.piece.color.opposite(), mov.captured_piece.unwrap()),
+                        &mov.to,
+                    )
+                    .unwrap();
+                if let Some(_) = promotion {
+                    self.board.delete_piece(&mov.from).unwrap();
+                    self.board
+                        .set_piece(Piece::new(mov.piece.color, PieceType::Pawn), &mov.from)
+                        .unwrap();
+                }
+            }
+            MoveType::EnPassant => {
+                let captured_pos = Position {
+                    col: mov.to.col,
+                    row: mov.from.row,
+                };
+                self.board
+                    .set_piece(
+                        Piece::new(mov.piece.color.opposite(), mov.captured_piece.unwrap()),
+                        &captured_pos,
+                    )
+                    .unwrap();
+            }
+            MoveType::Castle { side } => {
+                let rook_from = mov.rook_from.unwrap();
+                let rook_to = match side {
+                    CastleType::KingSide => Position {
+                        col: 5,
+                        row: mov.to.row,
+                    },
+                    CastleType::QueenSide => Position {
+                        col: 3,
+                        row: mov.to.row,
+                    },
+                };
+                self.board.move_piece(&rook_to, &rook_from).unwrap();
+            }
+            _ => {}
+        }
+
+        self.is_white_turn = !self.is_white_turn;
+
+        self.halfmove_clock = info.0;
+        self.fullmove_number = info.1;
+        self.en_passant = info.2;
+        self.castling_rights = info.3;
+
+        self.history.prev_move();
     }
 
     pub fn redo(&mut self) {
-        todo!()
+        let mov = self.history.next_move();
+
+        if let None = mov {
+            return;
+        }
+
+        let mov = mov.unwrap();
+
+        self.move_piece(mov.to_string().as_str()).unwrap();
+
+        self.history.next_move();
     }
 
     pub fn pgn(&self) -> String {
@@ -392,10 +475,6 @@ impl Game {
     }
 
     pub fn save(&self, path: &str) {
-        todo!()
-    }
-
-    pub fn load(&mut self, path: &str) {
         todo!()
     }
 
@@ -856,6 +935,172 @@ mod tests {
         assert_eq!(
             game.fen(),
             "Qnbqkbnr/4pppp/8/p7/8/8/PPPP1PPP/RNBQKBNR b KQk - 0 5"
+        );
+    }
+
+    #[test]
+    fn test_undo() {
+        let mut game = Game::default();
+        game.move_piece("e4").unwrap();
+        game.undo();
+        assert_eq!(
+            game.fen(),
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+        );
+    }
+
+    #[test]
+    fn test_undo_castle() {
+        let mut game = Game::default();
+        game.move_piece("e4").unwrap();
+        game.move_piece("e5").unwrap();
+        game.move_piece("Nf3").unwrap();
+        game.move_piece("Nc6").unwrap();
+        game.move_piece("Bb5").unwrap();
+        game.move_piece("a6").unwrap();
+        game.move_piece("O-O").unwrap();
+        game.undo();
+        assert_eq!(
+            game.fen(),
+            "r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4"
+        );
+    }
+
+    #[test]
+    fn test_undo_en_passant() {
+        let mut game = Game::default();
+        game.move_piece("e4").unwrap();
+        game.move_piece("d5").unwrap();
+        game.move_piece("e5").unwrap();
+        game.move_piece("f5").unwrap();
+        game.move_piece("exf6").unwrap();
+        game.undo();
+        assert_eq!(
+            game.fen(),
+            "rnbqkbnr/ppp1p1pp/8/3pPp2/8/8/PPPP1PPP/RNBQKBNR w KQkq f6 0 3"
+        );
+    }
+
+    #[test]
+    fn test_undo_promotion() {
+        let mut game = Game::default();
+        game.move_piece("e4").unwrap();
+        game.move_piece("d5").unwrap();
+        game.move_piece("exd5").unwrap();
+        game.move_piece("c6").unwrap();
+        game.move_piece("dxc6").unwrap();
+        game.move_piece("a6").unwrap();
+        game.move_piece("cxb7").unwrap();
+        game.move_piece("a5").unwrap();
+        game.move_piece("bxa8=Q").unwrap();
+        game.undo();
+        assert_eq!(
+            game.fen(),
+            "rnbqkbnr/1P2pppp/8/p7/8/8/PPPP1PPP/RNBQKBNR w KQkq - 0 5"
+        );
+    }
+
+    #[test]
+    fn test_undo_castle_rights() {
+        let mut game = Game::default();
+        game.move_piece("a3").unwrap();
+        game.move_piece("a6").unwrap();
+        game.move_piece("Ra2").unwrap();
+        game.move_piece("Ra7").unwrap();
+        game.move_piece("h3").unwrap();
+        game.move_piece("h6").unwrap();
+        game.move_piece("Rh2").unwrap();
+        game.move_piece("Rh7").unwrap();
+        game.undo();
+        assert_eq!(
+            game.fen(),
+            "1nbqkbnr/rpppppp1/p6p/8/8/P6P/RPPPPPPR/1NBQKBN1 b k - 1 4"
+        );
+    }
+
+    #[test]
+    fn test_redo() {
+        let mut game = Game::default();
+        game.move_piece("e4").unwrap();
+        game.undo();
+        game.redo();
+        assert_eq!(
+            game.fen(),
+            "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1"
+        );
+        game.undo();
+    }
+
+    #[test]
+    fn test_redo_castle() {
+        let mut game = Game::default();
+        game.move_piece("e4").unwrap();
+        game.move_piece("e5").unwrap();
+        game.move_piece("Nf3").unwrap();
+        game.move_piece("Nc6").unwrap();
+        game.move_piece("Bb5").unwrap();
+        game.move_piece("a6").unwrap();
+        game.move_piece("O-O").unwrap();
+        game.undo();
+        game.redo();
+        assert_eq!(
+            game.fen(),
+            "r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQ1RK1 b kq - 1 4"
+        );
+    }
+
+    #[test]
+    fn test_redo_en_passant() {
+        let mut game = Game::default();
+        game.move_piece("e4").unwrap();
+        game.move_piece("d5").unwrap();
+        game.move_piece("e5").unwrap();
+        game.move_piece("f5").unwrap();
+        game.move_piece("exf6").unwrap();
+        game.undo();
+        game.redo();
+        assert_eq!(
+            game.fen(),
+            "rnbqkbnr/ppp1p1pp/5P2/3p4/8/8/PPPP1PPP/RNBQKBNR b KQkq - 0 3"
+        );
+    }
+
+    #[test]
+    fn test_redo_promotion() {
+        let mut game = Game::default();
+        game.move_piece("e4").unwrap();
+        game.move_piece("d5").unwrap();
+        game.move_piece("exd5").unwrap();
+        game.move_piece("c6").unwrap();
+        game.move_piece("dxc6").unwrap();
+        game.move_piece("a6").unwrap();
+        game.move_piece("cxb7").unwrap();
+        game.move_piece("a5").unwrap();
+        game.move_piece("bxa8=Q").unwrap();
+        game.undo();
+        game.redo();
+        assert_eq!(
+            game.fen(),
+            "Qnbqkbnr/4pppp/8/p7/8/8/PPPP1PPP/RNBQKBNR b KQk - 0 5"
+        );
+    }
+
+    #[test]
+    fn test_redo_castle_rights() {
+        let mut game = Game::default();
+        game.move_piece("a3").unwrap();
+        game.move_piece("a6").unwrap();
+        game.move_piece("Ra2").unwrap();
+        game.move_piece("Ra7").unwrap();
+        game.move_piece("h3").unwrap();
+        game.move_piece("h6").unwrap();
+        game.move_piece("Rh2").unwrap();
+        game.move_piece("Rh7").unwrap();
+        game.undo();
+        game.redo();
+        assert_eq!(
+            game.fen(),
+            "1nbqkbn1/rppppppr/p6p/8/8/P6P/RPPPPPPR/1NBQKBN1 w - - 2 5"
         );
     }
 }

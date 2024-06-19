@@ -1,16 +1,19 @@
 use std::{cell::RefCell, rc::Rc};
 
-use super::Move;
+use super::{Move, Position};
 
 /// A struct representing a PGN line or variation
 /// Its also a tree node that contains a list of child nodes, the parent node,
 /// the move number and the move itself
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct PgnLine {
     pub lines: Vec<Rc<RefCell<PgnLine>>>,
     pub parent: Option<Rc<RefCell<PgnLine>>>,
-    pub move_number: u32,
+    pub halfmove_clock: u32,
+    pub fullmove_number: u32,
+    pub en_passant: Option<Position>,
+    pub castling_rights: u8,
     pub mov: Move,
 }
 
@@ -31,8 +34,8 @@ pub struct PgnTree {
     pub white_elo: Option<u32>,
     pub black_elo: Option<u32>,
     pub time_control: Option<String>,
-    pub lines: Vec<Rc<RefCell<PgnLine>>>,
-    pub current_line: Option<Rc<RefCell<PgnLine>>>,
+    lines: Vec<Rc<RefCell<PgnLine>>>,
+    current_line: Option<Rc<RefCell<PgnLine>>>,
 }
 
 impl Default for PgnTree {
@@ -139,6 +142,10 @@ impl PgnTree {
     ///
     /// # Arguments
     /// * `mov`: The move to add
+    /// * `halfmove_clock`: The halfmove clock
+    /// * `fullmove_number`: The fullmove number
+    /// * `en_passant`: The en passant position
+    /// * `castling_rights`: The castling rights
     ///
     /// # Examples
     /// ```
@@ -157,29 +164,44 @@ impl PgnTree {
     ///     None,
     ///     None,
     /// );
-    /// pgn_tree.add_move(mov.clone());
+    /// pgn_tree.add_move(mov.clone(), 0, 0, None, 0);
     /// assert_eq!(mov, pgn_tree.get_move().unwrap());
     /// ```
     ///
-    pub fn add_move(&mut self, mov: Move) {
+    pub fn add_move(
+        &mut self,
+        mov: Move,
+        halfmove_clock: u32,
+        fullmove_number: u32,
+        en_passant: Option<Position>,
+        castling_rights: u8,
+    ) {
         if let Some(current_line) = &self.current_line {
             let new_line = Rc::new(RefCell::new(PgnLine {
                 lines: Vec::new(),
                 parent: Some(Rc::clone(&current_line)),
-                move_number: current_line.as_ref().borrow().lines.len() as u32 + 1,
+                halfmove_clock,
+                fullmove_number,
+                en_passant,
+                castling_rights,
                 mov,
             }));
-            current_line
-                .as_ref()
-                .borrow_mut()
-                .lines
-                .push(Rc::clone(&new_line));
+            if !current_line.as_ref().borrow_mut().lines.contains(&new_line) {
+                current_line
+                    .as_ref()
+                    .borrow_mut()
+                    .lines
+                    .push(Rc::clone(&new_line));
+            }
             self.current_line = Some(new_line);
         } else {
             let new_line = Rc::new(RefCell::new(PgnLine {
                 lines: Vec::new(),
                 parent: None,
-                move_number: 1,
+                halfmove_clock,
+                fullmove_number,
+                en_passant,
+                castling_rights,
                 mov,
             }));
             self.lines.push(Rc::clone(&new_line));
@@ -206,10 +228,8 @@ impl PgnTree {
     ///     },
     ///     None,
     ///     None,
-    /// ));
+    /// ), 0, 0, None, 0);
     /// tree.rm_move();
-    ///
-    /// assert!(tree.current_line.is_none());
     /// ```
     ///
     pub fn rm_move(&mut self) {
@@ -259,7 +279,7 @@ impl PgnTree {
     ///     None,
     ///     None,
     /// );
-    /// tree.add_move(mov.clone());
+    /// tree.add_move(mov.clone(), 0, 0, None, 0);
     /// assert_eq!(tree.get_move(), Some(mov));
     /// ```
     ///
@@ -267,10 +287,10 @@ impl PgnTree {
         Some(self.current_line.as_ref()?.borrow().mov.clone())
     }
 
-    /// Returns the current move number
+    /// Returns the move info
     ///
     /// # Returns
-    /// The current move number
+    /// A tuple containing the halfmove clock, the fullmove number, the en passant position and the castling rights
     ///
     /// # Examples
     /// ```
@@ -278,26 +298,29 @@ impl PgnTree {
     /// use chess_lib::logic::Piece;
     ///
     /// let mut tree = PgnTree::default();
-    /// tree.add_move(Move::new(
-    ///     Piece::new(Color::Black, PieceType::Pawn),
-    ///     Position::from_string("e2"),
-    ///     Position::from_string("e4"),
-    ///     MoveType::Normal {
-    ///         capture: false,
-    ///         promotion: None,
-    ///     },
-    ///     None,
-    ///     None,
-    /// ));
-    /// assert_eq!(tree.get_move_number(), 1);
+    /// let mov = Move::new(
+    ///    Piece::new(Color::Black, PieceType::Pawn),
+    ///    Position::from_string("e2"),
+    ///    Position::from_string("e4"),
+    ///    MoveType::Normal {
+    ///       capture: false,
+    ///       promotion: None,
+    ///    },
+    ///    None,
+    ///    None,
+    /// );
+    /// tree.add_move(mov.clone(), 0, 0, None, 0);
+    /// assert_eq!(tree.get_prev_move_info(), (0, 0, None, 0));
     /// ```
     ///
-    pub fn get_move_number(&self) -> u32 {
-        if let Some(current_line) = &self.current_line {
-            current_line.borrow().move_number
-        } else {
-            0
-        }
+    pub fn get_prev_move_info(&self) -> (u32, u32, Option<Position>, u8) {
+        let current_line = self.current_line.as_ref().unwrap().borrow();
+        (
+            current_line.halfmove_clock,
+            current_line.fullmove_number,
+            current_line.en_passant,
+            current_line.castling_rights,
+        )
     }
 
     /// Returns the next move
@@ -333,8 +356,8 @@ impl PgnTree {
     ///     None,
     ///     None,
     /// );
-    /// pgn_tree.add_move(mov1.clone());
-    /// pgn_tree.add_move(mov2.clone());
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
+    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
     ///
     /// assert_eq!(mov2, pgn_tree.get_move().unwrap());
     /// assert_eq!(mov1, pgn_tree.prev_move().unwrap());
@@ -381,9 +404,9 @@ impl PgnTree {
     ///     None,
     ///     None,
     /// );
-    /// pgn_tree.add_move(mov1.clone());
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
     /// pgn_tree.prev_move();
-    /// pgn_tree.add_move(mov2.clone());
+    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
     ///
     /// pgn_tree.prev_move();
     /// assert_eq!(mov1, pgn_tree.next_move().unwrap());
@@ -442,8 +465,8 @@ impl PgnTree {
     ///     None,
     ///     None,
     /// );
-    /// pgn_tree.add_move(mov1.clone());
-    /// pgn_tree.add_move(mov2.clone());
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
+    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
     ///
     /// assert_eq!(mov2, pgn_tree.get_move().unwrap());
     /// assert_eq!(mov1, pgn_tree.prev_move().unwrap());
@@ -558,8 +581,8 @@ impl Iterator for PgnTree {
     ///     None,
     ///     None,
     /// );
-    /// pgn_tree.add_move(mov1.clone());
-    /// pgn_tree.add_move(mov2.clone());
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
+    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
     ///
     /// assert_eq!(mov2, pgn_tree.get_move().unwrap());
     /// assert_eq!(mov1, pgn_tree.next_back().unwrap());
@@ -605,8 +628,8 @@ impl DoubleEndedIterator for PgnTree {
     ///     None,
     ///     None,
     /// );
-    /// pgn_tree.add_move(mov1.clone());
-    /// pgn_tree.add_move(mov2.clone());
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
+    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
     ///
     /// assert_eq!(mov2, pgn_tree.get_move().unwrap());
     /// assert_eq!(mov1, pgn_tree.next_back().unwrap());
@@ -637,7 +660,7 @@ mod tests {
             None,
             None,
         );
-        pgn_tree.add_move(mov.clone());
+        pgn_tree.add_move(mov.clone(), 0, 0, None, 0);
 
         assert_eq!(mov, pgn_tree.get_move().unwrap());
     }
@@ -656,7 +679,7 @@ mod tests {
             None,
             None,
         );
-        pgn_tree.add_move(mov.clone());
+        pgn_tree.add_move(mov.clone(), 0, 0, None, 0);
         pgn_tree.rm_move();
 
         assert!(pgn_tree.get_move().is_none());
@@ -687,8 +710,8 @@ mod tests {
             None,
             None,
         );
-        pgn_tree.add_move(mov1.clone());
-        pgn_tree.add_move(mov2.clone());
+        pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
+        pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
 
         assert_eq!(mov2, pgn_tree.get_move().unwrap());
         assert_eq!(mov1, pgn_tree.prev_move().unwrap());
@@ -720,8 +743,8 @@ mod tests {
             None,
             None,
         );
-        pgn_tree.add_move(mov1.clone());
-        pgn_tree.add_move(mov2.clone());
+        pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
+        pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
 
         assert_eq!(mov2, pgn_tree.get_move().unwrap());
         assert_eq!(mov1, pgn_tree.prev_move().unwrap());
@@ -771,9 +794,9 @@ mod tests {
             None,
             None,
         );
-        pgn_tree.add_move(mov1.clone());
+        pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
         pgn_tree.prev_move();
-        pgn_tree.add_move(mov2.clone());
+        pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
 
         pgn_tree.prev_move();
         assert_eq!(mov1, pgn_tree.next_move().unwrap());
