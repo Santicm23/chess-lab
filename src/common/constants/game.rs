@@ -1,3 +1,5 @@
+use std::fmt::{Display, Error, Formatter};
+
 use crate::logic::Piece;
 
 use super::Position;
@@ -131,6 +133,11 @@ impl PieceType {
 /// * `Castle`: A castle move
 ///     - `side`: The side of the board to castle on
 /// * `EnPassant`: An en passant move
+///    - The move is an en passant
+///
+/// # Examples
+/// TODO
+///
 #[derive(Debug, Clone, PartialEq)]
 pub enum MoveType {
     Normal {
@@ -174,9 +181,10 @@ pub enum CastleType {
 /// };
 /// let captured_piece = None;
 /// let rook_from = None;
-/// let mv = Move::new(piece, from, to, move_type, captured_piece, rook_from);
+/// let ambiguity = (false, false);
+/// let mv = Move::new(piece, from, to, move_type, captured_piece, rook_from, ambiguity);
 ///
-/// assert_eq!(mv.to_string(), "e2e4");
+/// assert_eq!(mv.to_string(), "e4");
 /// ```
 ///
 #[derive(Debug, Clone, PartialEq)]
@@ -187,6 +195,7 @@ pub struct Move {
     pub move_type: MoveType,
     pub captured_piece: Option<PieceType>,
     pub rook_from: Option<Position>,
+    pub ambiguity: (bool, bool),
 }
 
 impl Move {
@@ -197,6 +206,7 @@ impl Move {
         move_type: MoveType,
         captured_piece: Option<PieceType>,
         rook_from: Option<Position>,
+        ambiguity: (bool, bool),
     ) -> Move {
         match &move_type {
             MoveType::Normal { capture, promotion } => {
@@ -233,25 +243,32 @@ impl Move {
             move_type,
             captured_piece,
             rook_from,
+            ambiguity,
         }
     }
 }
 
-impl ToString for Move {
-    fn to_string(&self) -> String {
+impl Display for Move {
+    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         let mut result = String::new();
         if self.piece.piece_type != PieceType::Pawn {
             result.push(self.piece.piece_type.to_char());
         }
         match &self.move_type {
             MoveType::Castle { side } => {
-                return match side {
+                result = match side {
                     CastleType::KingSide => "O-O".to_string(),
                     CastleType::QueenSide => "O-O-O".to_string(),
                 };
             }
             MoveType::Normal { capture, promotion } => {
-                result.push_str(&self.from.to_string());
+                let from_string = self.from.to_string();
+                if self.ambiguity.0 || (PieceType::Pawn == self.piece.piece_type && *capture) {
+                    result.push(from_string.chars().nth(0).unwrap());
+                }
+                if self.ambiguity.1 {
+                    result.push(from_string.chars().nth(1).unwrap());
+                }
                 if *capture {
                     result.push('x');
                 }
@@ -267,6 +284,7 @@ impl ToString for Move {
                 result.push_str(&self.to.to_string());
             }
         }
-        result
+
+        write!(f, "{}", result)
     }
 }

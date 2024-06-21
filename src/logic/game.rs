@@ -160,14 +160,14 @@ impl Game {
     /// ```
     ///
     pub fn move_piece(&mut self, move_str: &str) -> Result<(), MoveError> {
-        let (piece_type, start_pos, end_pos, move_type) = self.parse_move(move_str)?;
+        let (piece_type, start_pos_info, end_pos, move_type) = self.parse_move(move_str)?;
         let color = if self.is_white_turn {
             Color::White
         } else {
             Color::Black
         };
 
-        let start_pos = self.find_piece(piece_type, color, start_pos, &end_pos, &move_type)?;
+        let start_pos = self.find_piece(piece_type, color, start_pos_info, &end_pos, &move_type)?;
 
         let mut rook_start: Option<Position> = None;
         let mut captured_piece: Option<PieceType> =
@@ -229,6 +229,9 @@ impl Game {
                         .set_piece(Piece::new(color, piece_type), &end_pos)
                         .unwrap();
                 }
+                let ambiguity =
+                    self.move_ambiguity(piece_type, color, start_pos_info, &end_pos, &move_type);
+
                 self.update_rules(Move::new(
                     Piece::new(color, piece_type),
                     start_pos,
@@ -236,6 +239,7 @@ impl Game {
                     move_type,
                     captured_piece,
                     rook_start,
+                    ambiguity,
                 ));
 
                 Ok(())
@@ -497,7 +501,7 @@ impl Game {
     }
 
     pub fn pgn(&self) -> String {
-        todo!()
+        self.history.pgn()
     }
 
     /// Parse a move string and return the start and end positions
@@ -700,6 +704,107 @@ impl Game {
             return Ok(valid_positions[0]);
         } else {
             return Err(MoveError::Ambiguous);
+        }
+    }
+
+    /// Checks if the move representation has to contain the column or row of the piece to move
+    /// asuming that the move is legal
+    ///
+    /// # Arguments
+    /// * `piece`: The type of piece to move
+    /// * `color`: The color of the piece to move
+    /// * `start_pos`: The starting position of the piece to move
+    /// * `end_pos`: The ending position of the piece to move
+    /// * `move_type`: The type of move to make
+    ///
+    /// # Returns
+    /// A tuple containing two booleans:
+    /// * The first boolean indicates if the column of the piece to move has to be included in the move representation
+    /// * The second boolean indicates if the row of the piece to move has to be included in the move representation
+    ///
+    fn move_ambiguity(
+        &self,
+        piece: PieceType,
+        color: Color,
+        start_pos: (Option<u8>, Option<u8>),
+        end_pos: &Position,
+        move_type: &MoveType,
+    ) -> (bool, bool) {
+        match start_pos {
+            (None, None) => (false, false),
+            (Some(_), None) => {
+                let positions = self.board.find(piece, color);
+
+                let valid_positions = positions
+                    .iter()
+                    .filter(|pos| {
+                        self.is_legal(
+                            &Piece {
+                                color,
+                                piece_type: piece,
+                            },
+                            &pos,
+                            &end_pos,
+                            &move_type,
+                        )
+                    })
+                    .count();
+                (valid_positions > 1, false)
+            }
+            (None, Some(_)) => {
+                let positions = self.board.find(piece, color);
+                let valid_positions = positions
+                    .iter()
+                    .filter(|pos| {
+                        self.is_legal(
+                            &Piece {
+                                color,
+                                piece_type: piece,
+                            },
+                            &pos,
+                            &end_pos,
+                            &move_type,
+                        )
+                    })
+                    .count();
+                (false, valid_positions > 1)
+            }
+            (Some(col), Some(row)) => {
+                let positions = self.board.find(piece, color);
+                let col_ambiguity = positions
+                    .iter()
+                    .filter(|pos| pos.row == row)
+                    .filter(|pos| {
+                        self.is_legal(
+                            &Piece {
+                                color,
+                                piece_type: piece,
+                            },
+                            &pos,
+                            &end_pos,
+                            &move_type,
+                        )
+                    })
+                    .count()
+                    > 1;
+                let row_ambiguity = positions
+                    .iter()
+                    .filter(|pos| pos.col == col)
+                    .filter(|pos| {
+                        self.is_legal(
+                            &Piece {
+                                color,
+                                piece_type: piece,
+                            },
+                            &pos,
+                            &end_pos,
+                            &move_type,
+                        )
+                    })
+                    .count()
+                    > 1;
+                (col_ambiguity, row_ambiguity)
+            }
         }
     }
 
@@ -1123,6 +1228,67 @@ mod tests {
         assert_eq!(
             game.fen(),
             "1nbqkbn1/rppppppr/p6p/8/8/P6P/RPPPPPPR/1NBQKBN1 w - - 2 5"
+        );
+    }
+
+    #[test]
+    fn play_other_move() {
+        let mut game = Game::default();
+        game.move_piece("e4").unwrap();
+        game.undo();
+        game.move_piece("d4").unwrap();
+
+        assert_eq!(
+            game.fen(),
+            "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1"
+        );
+
+        let mut game = Game::default();
+        game.move_piece("e4").unwrap();
+        game.move_piece("e5").unwrap();
+        game.move_piece("Nf3").unwrap();
+        game.undo();
+        game.move_piece("Nc3").unwrap();
+
+        assert_eq!(
+            game.fen(),
+            "rnbqkbnr/pppp1ppp/8/4p3/4P3/2N5/PPPP1PPP/R1BQKBNR b KQkq - 1 2"
+        );
+    }
+
+    #[test]
+    fn pgn() {
+        let mut game = Game::default();
+        game.move_piece("e4").unwrap();
+        game.move_piece("e5").unwrap();
+        game.move_piece("Nf3").unwrap();
+        game.move_piece("Nc6").unwrap();
+        game.move_piece("Bb5").unwrap();
+        game.move_piece("a6").unwrap();
+        game.move_piece("Ba4").unwrap();
+        game.move_piece("Nf6").unwrap();
+        game.move_piece("O-O").unwrap();
+        game.move_piece("Be7").unwrap();
+        game.move_piece("Re1").unwrap();
+        game.move_piece("b5").unwrap();
+        game.move_piece("Bb3").unwrap();
+        game.move_piece("O-O").unwrap();
+        game.move_piece("c3").unwrap();
+        game.move_piece("d5").unwrap();
+        game.undo();
+        game.undo();
+        game.undo();
+        game.undo();
+        game.undo();
+        game.move_piece("O-O").unwrap();
+        game.move_piece("c3").unwrap();
+        game.move_piece("b5").unwrap();
+        game.move_piece("Bc2").unwrap();
+
+        let pgn = game.pgn();
+        assert_eq!(
+            pgn,
+            "1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 (6... O-O 7. c3 b5 8. Bc2) 7. Bb3 O-O 8. c3 d5"
         );
     }
 }

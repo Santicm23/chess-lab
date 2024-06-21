@@ -6,7 +6,7 @@ use super::{Move, Position};
 /// Its also a tree node that contains a list of child nodes, the parent node,
 /// the move number and the move itself
 ///
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
 pub struct PgnLine {
     pub lines: Vec<Rc<RefCell<PgnLine>>>,
     pub parent: Option<Rc<RefCell<PgnLine>>>,
@@ -15,6 +15,21 @@ pub struct PgnLine {
     pub en_passant: Option<Position>,
     pub castling_rights: u8,
     pub mov: Move,
+}
+
+impl PartialEq for PgnLine {
+    /// Compares two PgnLine structs
+    /// Two PgnLine structs are equal if their moves are equal
+    ///
+    /// # Arguments
+    /// * `other`: The other PgnLine struct
+    ///
+    /// # Returns
+    /// A boolean indicating if the two PgnLine structs are equal
+    ///
+    fn eq(&self, other: &Self) -> bool {
+        self.mov == other.mov
+    }
 }
 
 /// A struct representing a PGN tree
@@ -163,6 +178,7 @@ impl PgnTree {
     ///     },
     ///     None,
     ///     None,
+    ///     (false, false),
     /// );
     /// pgn_tree.add_move(mov.clone(), 0, 0, None, 0);
     /// assert_eq!(mov, pgn_tree.get_move().unwrap());
@@ -228,6 +244,7 @@ impl PgnTree {
     ///     },
     ///     None,
     ///     None,
+    ///     (false, false),
     /// ), 0, 0, None, 0);
     /// tree.rm_move();
     /// ```
@@ -278,6 +295,7 @@ impl PgnTree {
     ///     },
     ///     None,
     ///     None,
+    ///     (false, false),
     /// );
     /// tree.add_move(mov.clone(), 0, 0, None, 0);
     /// assert_eq!(tree.get_move(), Some(mov));
@@ -308,6 +326,7 @@ impl PgnTree {
     ///    },
     ///    None,
     ///    None,
+    ///     (false, false),
     /// );
     /// tree.add_move(mov.clone(), 0, 0, None, 0);
     /// assert_eq!(tree.get_prev_move_info(), (0, 0, None, 0));
@@ -344,6 +363,7 @@ impl PgnTree {
     ///     },
     ///     None,
     ///     None,
+    ///     (false, false),
     /// );
     /// let mov2 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
@@ -355,6 +375,7 @@ impl PgnTree {
     ///     },
     ///     None,
     ///     None,
+    ///     (false, false),
     /// );
     /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
     /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
@@ -392,6 +413,7 @@ impl PgnTree {
     ///     },
     ///     None,
     ///     None,
+    ///     (false, false),
     /// );
     /// let mov2 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
@@ -403,6 +425,7 @@ impl PgnTree {
     ///     },
     ///     None,
     ///     None,
+    ///     (false, false),
     /// );
     /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
     /// pgn_tree.prev_move();
@@ -432,6 +455,26 @@ impl PgnTree {
         None
     }
 
+    /// Returns all the next moves
+    ///
+    /// # Returns
+    /// All the next moves
+    /// TODO: Add example
+    ///
+    pub fn all_next_moves(&self) -> Vec<Move> {
+        let mut moves = Vec::new();
+        if let Some(current_line) = &self.current_line {
+            for line in current_line.borrow().lines.iter() {
+                moves.push(line.borrow().mov.clone());
+            }
+        } else {
+            for line in self.lines.iter() {
+                moves.push(line.borrow().mov.clone());
+            }
+        }
+        moves
+    }
+
     /// Returns the previous move
     ///
     /// # Returns
@@ -453,6 +496,7 @@ impl PgnTree {
     ///     },
     ///     None,
     ///     None,
+    ///     (false, false),
     /// );
     /// let mov2 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
@@ -464,6 +508,7 @@ impl PgnTree {
     ///     },
     ///     None,
     ///     None,
+    ///     (false, false),
     /// );
     /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
     /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
@@ -491,22 +536,19 @@ impl PgnTree {
         Some(self.current_line.as_ref()?.borrow().mov.clone())
     }
 
+    pub fn pgn(&self) -> String {
+        let mut pgn = String::new();
+        pgn.push_str(&self.pgn_header());
+        pgn.push_str(&self.pgn_moves());
+        pgn
+    }
+
     /// Returns the PGN header
     ///
     /// # Returns
     /// The PGN header
     ///
-    /// # Examples
-    /// ```
-    /// use chess_lib::constants::pgn::PgnTree;
-    ///
-    /// let mut tree = PgnTree::default();
-    /// tree.event = Some("Event".to_string());
-    ///
-    /// assert_eq!(tree.pgn_header(), "[Event Event]\n");
-    /// ```
-    ///
-    pub fn pgn_header(&self) -> String {
+    fn pgn_header(&self) -> String {
         let mut header = String::new();
         if let Some(event) = &self.event {
             header.push_str(&format!("[Event {}]\n", event));
@@ -543,6 +585,88 @@ impl PgnTree {
         }
         header
     }
+
+    fn pgn_moves(&self) -> String {
+        let mut pgn = String::new();
+
+        if self.lines.is_empty() {
+            return pgn;
+        }
+
+        let line = self.lines[0].as_ref().borrow();
+        pgn.push_str(&format!("1. {}", line.mov));
+
+        for next in self.lines.iter().skip(1) {
+            pgn.push_str(&format!(
+                " {}",
+                self.pgn_line_moves(Rc::clone(next), 1, true)
+            ));
+        }
+
+        pgn.push_str(&format!(
+            " {}",
+            self.pgn_line_moves(Rc::clone(&self.lines[0]), 2, false)
+        ));
+
+        pgn
+    }
+
+    fn pgn_line_moves(
+        &self,
+        line: Rc<RefCell<PgnLine>>,
+        move_number: u32,
+        secondary: bool,
+    ) -> String {
+        let mut pgn = String::new();
+
+        let mut tmp_move_number = move_number;
+
+        if secondary {
+            if tmp_move_number % 2 == 0 {
+                pgn.push_str(&format!("{}... ", tmp_move_number / 2))
+            } else {
+                pgn.push_str(&format!("{}. ", tmp_move_number / 2 + 1));
+            };
+            pgn.push_str(&format!("{} ", line.as_ref().borrow().mov));
+
+            tmp_move_number += 1;
+        }
+
+        let mut stack = vec![line];
+
+        while let Some(current) = stack.pop() {
+            let line = current.as_ref().borrow();
+
+            if line.lines.is_empty() {
+                pgn.pop();
+                continue;
+            } else {
+                if tmp_move_number % 2 != 0 {
+                    pgn.push_str(&format!("{}. ", tmp_move_number / 2 + 1));
+                };
+                tmp_move_number += 1;
+
+                let next = Rc::clone(&line.lines[0]);
+                pgn.push_str(&format!("{} ", next.as_ref().borrow().mov));
+                stack.push(Rc::clone(&next));
+
+                if line.lines.len() != 1 {
+                    for next in line.lines.iter().skip(1) {
+                        pgn.push_str(&format!(
+                            "{} ",
+                            self.pgn_line_moves(Rc::clone(next), tmp_move_number - 1, true)
+                        ));
+                    }
+                }
+            }
+        }
+
+        if secondary {
+            format!("({})", pgn)
+        } else {
+            pgn
+        }
+    }
 }
 
 impl Iterator for PgnTree {
@@ -569,6 +693,7 @@ impl Iterator for PgnTree {
     ///     },
     ///     None,
     ///     None,
+    ///     (false, false),
     /// );
     /// let mov2 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
@@ -580,6 +705,7 @@ impl Iterator for PgnTree {
     ///     },
     ///     None,
     ///     None,
+    ///     (false, false),
     /// );
     /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
     /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
@@ -616,6 +742,7 @@ impl DoubleEndedIterator for PgnTree {
     ///     },
     ///     None,
     ///     None,
+    ///     (false, false),
     /// );
     /// let mov2 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
@@ -627,6 +754,7 @@ impl DoubleEndedIterator for PgnTree {
     ///     },
     ///     None,
     ///     None,
+    ///     (false, false),
     /// );
     /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
     /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
@@ -659,6 +787,7 @@ mod tests {
             },
             None,
             None,
+            (false, false),
         );
         pgn_tree.add_move(mov.clone(), 0, 0, None, 0);
 
@@ -678,6 +807,7 @@ mod tests {
             },
             None,
             None,
+            (false, false),
         );
         pgn_tree.add_move(mov.clone(), 0, 0, None, 0);
         pgn_tree.rm_move();
@@ -698,6 +828,7 @@ mod tests {
             },
             None,
             None,
+            (false, false),
         );
         let mov2 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
@@ -709,6 +840,7 @@ mod tests {
             },
             None,
             None,
+            (false, false),
         );
         pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
         pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
@@ -731,6 +863,7 @@ mod tests {
             },
             None,
             None,
+            (false, false),
         );
         let mov2 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
@@ -742,6 +875,7 @@ mod tests {
             },
             None,
             None,
+            (false, false),
         );
         pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
         pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
@@ -782,6 +916,7 @@ mod tests {
             },
             None,
             None,
+            (false, false),
         );
         let mov2 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
@@ -793,6 +928,7 @@ mod tests {
             },
             None,
             None,
+            (false, false),
         );
         pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
         pgn_tree.prev_move();
@@ -803,5 +939,38 @@ mod tests {
 
         pgn_tree.prev_move();
         assert_eq!(mov2, pgn_tree.next_move_variant(1).unwrap());
+    }
+
+    #[test]
+    fn test_pgn() {
+        let mut pgn_tree = PgnTree::default();
+        let mov1 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("e2"),
+            Position::from_string("e4"),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+        );
+        let mov2 = Move::new(
+            Piece::new(Color::Black, PieceType::Pawn),
+            Position::from_string("e7"),
+            Position::from_string("e5"),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+        );
+        pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
+        pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
+
+        assert_eq!(pgn_tree.pgn(), "1. e4 e5");
     }
 }
