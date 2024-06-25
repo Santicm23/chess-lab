@@ -49,6 +49,7 @@ pub struct PgnTree {
     pub white_elo: Option<u32>,
     pub black_elo: Option<u32>,
     pub time_control: Option<String>,
+    pub termination: Option<String>,
     lines: Vec<Rc<RefCell<PgnLine>>>,
     current_line: Option<Rc<RefCell<PgnLine>>>,
 }
@@ -79,6 +80,7 @@ impl Default for PgnTree {
             white_elo: None,
             black_elo: None,
             time_control: None,
+            termination: None,
             lines: Vec::new(),
             current_line: None,
         }
@@ -135,6 +137,7 @@ impl PgnTree {
         white_elo: Option<u32>,
         black_elo: Option<u32>,
         time_control: Option<String>,
+        termination: Option<String>,
     ) -> PgnTree {
         PgnTree {
             event,
@@ -148,6 +151,7 @@ impl PgnTree {
             white_elo,
             black_elo,
             time_control,
+            termination,
             lines: Vec::new(),
             current_line: None,
         }
@@ -551,37 +555,37 @@ impl PgnTree {
     fn pgn_header(&self) -> String {
         let mut header = String::new();
         if let Some(event) = &self.event {
-            header.push_str(&format!("[Event {}]\n", event));
+            header.push_str(&format!("[Event \"{}\"]\n", event));
         }
         if let Some(site) = &self.site {
-            header.push_str(&format!("[Site {}]\n", site));
+            header.push_str(&format!("[Site \"{}\"]\n", site));
         }
         if let Some(date) = &self.date {
-            header.push_str(&format!("[Date {}]\n", date));
+            header.push_str(&format!("[Date \"{}\"]\n", date));
         }
         if let Some(round) = &self.round {
-            header.push_str(&format!("[Round {}]\n", round));
+            header.push_str(&format!("[Round \"{}\"]\n", round));
         }
         if let Some(white) = &self.white {
-            header.push_str(&format!("[White {}]\n", white));
+            header.push_str(&format!("[White \"{}\"]\n", white));
         }
         if let Some(black) = &self.black {
-            header.push_str(&format!("[Black {}]\n", black));
+            header.push_str(&format!("[Black \"{}\"]\n", black));
         }
         if let Some(result) = &self.result {
-            header.push_str(&format!("[Result {}]\n", result));
+            header.push_str(&format!("[Result \"{}\"]\n", result));
         }
         if let Some(white_elo) = &self.white_elo {
-            header.push_str(&format!("[WhiteElo {}]\n", white_elo));
+            header.push_str(&format!("[WhiteElo \"{}\"]\n", white_elo));
         }
         if let Some(black_elo) = &self.black_elo {
-            header.push_str(&format!("[BlackElo {}]\n", black_elo));
+            header.push_str(&format!("[BlackElo \"{}\"]\n", black_elo));
         }
         if let Some(time_control) = &self.time_control {
-            header.push_str(&format!("[TimeControl {}]\n", time_control));
+            header.push_str(&format!("[TimeControl \"{}\"]\n", time_control));
         }
         if let Some(variant) = &self.variant {
-            header.push_str(&format!("[Variant {}]\n", variant));
+            header.push_str(&format!("[Variant \"{}\"]\n", variant));
         }
         header
     }
