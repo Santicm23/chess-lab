@@ -124,6 +124,27 @@ impl PieceType {
     }
 }
 
+pub enum GameStatus {
+    InProgress,
+    Draw(DrawReason),
+    WhiteWins(WinReason),
+    BlackWins(WinReason),
+}
+
+pub enum DrawReason {
+    Stalemate,
+    InsufficientMaterial,
+    ThreefoldRepetition,
+    FiftyMoveRule,
+    Agreement,
+}
+
+pub enum WinReason {
+    Checkmate,
+    Resignation,
+    Time,
+}
+
 /// Represents the type of a move
 ///
 /// # Variants

@@ -1,23 +1,23 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, fmt::Display, rc::Rc};
 
-use super::{Move, Position};
+use super::Position;
 
 /// A struct representing a PGN line or variation
 /// Its also a tree node that contains a list of child nodes, the parent node,
 /// the move number and the move itself
 ///
 #[derive(Debug, Clone)]
-pub struct PgnLine {
-    pub lines: Vec<Rc<RefCell<PgnLine>>>,
-    pub parent: Option<Rc<RefCell<PgnLine>>>,
+pub struct PgnLine<T: PartialEq + Clone + Display> {
+    pub lines: Vec<Rc<RefCell<PgnLine<T>>>>,
+    pub parent: Option<Rc<RefCell<PgnLine<T>>>>,
     pub halfmove_clock: u32,
     pub fullmove_number: u32,
     pub en_passant: Option<Position>,
     pub castling_rights: u8,
-    pub mov: Move,
+    pub mov: T,
 }
 
-impl PartialEq for PgnLine {
+impl<T: PartialEq + Clone + Display> PartialEq for PgnLine<T> {
     /// Compares two PgnLine structs
     /// Two PgnLine structs are equal if their moves are equal
     ///
@@ -37,7 +37,7 @@ impl PartialEq for PgnLine {
 /// The current line is the move node that is currently being checked
 ///
 #[derive(Debug, Clone)]
-pub struct PgnTree {
+pub struct PgnTree<T: PartialEq + Clone + Display> {
     pub event: Option<String>,
     pub site: Option<String>,
     pub date: Option<String>,
@@ -50,11 +50,11 @@ pub struct PgnTree {
     pub black_elo: Option<u32>,
     pub time_control: Option<String>,
     pub termination: Option<String>,
-    lines: Vec<Rc<RefCell<PgnLine>>>,
-    current_line: Option<Rc<RefCell<PgnLine>>>,
+    lines: Vec<Rc<RefCell<PgnLine<T>>>>,
+    current_line: Option<Rc<RefCell<PgnLine<T>>>>,
 }
 
-impl Default for PgnTree {
+impl<T: PartialEq + Clone + Display> Default for PgnTree<T> {
     /// Creates a new PgnTree with no metadata and an empty list of lines
     ///
     /// # Returns
@@ -63,11 +63,12 @@ impl Default for PgnTree {
     /// # Examples
     /// ```
     /// use chess_lib::constants::pgn::PgnTree;
+    /// use chess_lib::constants::Move;
     ///
-    /// let tree = PgnTree::default();
+    /// let tree: PgnTree<Move> = PgnTree::default();
     /// ```
     ///
-    fn default() -> PgnTree {
+    fn default() -> PgnTree<T> {
         PgnTree {
             event: None,
             site: None,
@@ -87,7 +88,7 @@ impl Default for PgnTree {
     }
 }
 
-impl PgnTree {
+impl<T: PartialEq + Clone + Display> PgnTree<T> {
     /// Creates a new PgnTree with the provided metadata and an empty list of lines
     ///
     /// # Arguments
@@ -109,8 +110,9 @@ impl PgnTree {
     /// # Examples
     /// ```
     /// use chess_lib::constants::pgn::PgnTree;
+    /// use chess_lib::constants::Move;
     ///
-    /// let tree = PgnTree::new(
+    /// let tree: PgnTree<Move> = PgnTree::new(
     ///    Some("Event".to_string()),
     ///    Some("Site".to_string()),
     ///    Some("Date".to_string()),
@@ -122,6 +124,7 @@ impl PgnTree {
     ///    Some(1000),
     ///    Some(1000),
     ///    Some("Time Control".to_string()),
+    ///    Some("Termination".to_string()),
     /// );
     /// ```
     ///
@@ -138,7 +141,7 @@ impl PgnTree {
         black_elo: Option<u32>,
         time_control: Option<String>,
         termination: Option<String>,
-    ) -> PgnTree {
+    ) -> PgnTree<T> {
         PgnTree {
             event,
             site,
@@ -171,7 +174,7 @@ impl PgnTree {
     /// use chess_lib::constants::{pgn::PgnTree, Move, MoveType, PieceType, Color, Position};
     /// use chess_lib::logic::Piece;
     ///
-    /// let mut pgn_tree = PgnTree::default();
+    /// let mut pgn_tree: PgnTree<Move> = PgnTree::default();
     /// let mov = Move::new(
     ///     Piece::new(Color::Black, PieceType::Pawn),
     ///     Position::from_string("e2"),
@@ -190,7 +193,7 @@ impl PgnTree {
     ///
     pub fn add_move(
         &mut self,
-        mov: Move,
+        mov: T,
         halfmove_clock: u32,
         fullmove_number: u32,
         en_passant: Option<Position>,
@@ -305,7 +308,7 @@ impl PgnTree {
     /// assert_eq!(tree.get_move(), Some(mov));
     /// ```
     ///
-    pub fn get_move(&self) -> Option<Move> {
+    pub fn get_move(&self) -> Option<T> {
         Some(self.current_line.as_ref()?.borrow().mov.clone())
     }
 
@@ -389,7 +392,7 @@ impl PgnTree {
     /// assert_eq!(mov2, pgn_tree.next_move().unwrap());
     /// ```
     ///
-    pub fn next_move(&mut self) -> Option<Move> {
+    pub fn next_move(&mut self) -> Option<T> {
         self.next_move_variant(0)
     }
 
@@ -442,7 +445,7 @@ impl PgnTree {
     /// assert_eq!(mov2, pgn_tree.next_move_variant(1).unwrap());
     /// ```
     ///
-    pub fn next_move_variant(&mut self, variant: u32) -> Option<Move> {
+    pub fn next_move_variant(&mut self, variant: u32) -> Option<T> {
         if let Some(current_line) = &self.current_line {
             if current_line.borrow().lines.len() > variant as usize {
                 let next_line = Rc::clone(&current_line.borrow().lines[variant as usize]);
@@ -465,7 +468,7 @@ impl PgnTree {
     /// All the next moves
     /// TODO: Add example
     ///
-    pub fn all_next_moves(&self) -> Vec<Move> {
+    pub fn all_next_moves(&self) -> Vec<T> {
         let mut moves = Vec::new();
         if let Some(current_line) = &self.current_line {
             for line in current_line.borrow().lines.iter() {
@@ -521,7 +524,7 @@ impl PgnTree {
     /// assert_eq!(mov1, pgn_tree.prev_move().unwrap());
     /// ```
     ///
-    pub fn prev_move(&mut self) -> Option<Move> {
+    pub fn prev_move(&mut self) -> Option<T> {
         if self.current_line.is_none() || self.current_line.as_ref()?.borrow().parent.is_none() {
             self.current_line = None;
             return None;
@@ -617,7 +620,7 @@ impl PgnTree {
 
     fn pgn_line_moves(
         &self,
-        line: Rc<RefCell<PgnLine>>,
+        line: Rc<RefCell<PgnLine<T>>>,
         move_number: u32,
         secondary: bool,
     ) -> String {
@@ -673,8 +676,8 @@ impl PgnTree {
     }
 }
 
-impl Iterator for PgnTree {
-    type Item = Move;
+impl<T: PartialEq + Clone + Display> Iterator for PgnTree<T> {
+    type Item = T;
 
     /// Returns the next move
     ///
@@ -724,7 +727,7 @@ impl Iterator for PgnTree {
     }
 }
 
-impl DoubleEndedIterator for PgnTree {
+impl<T: PartialEq + Clone + Display> DoubleEndedIterator for PgnTree<T> {
     /// Returns the previous move
     ///
     /// # Returns
@@ -891,7 +894,7 @@ mod tests {
 
     #[test]
     fn test_pgn_header() {
-        let mut tree = PgnTree::default();
+        let mut tree: PgnTree<Move> = PgnTree::default();
         tree.event = Some("Event".to_string());
         tree.site = Some("Site".to_string());
         tree.date = Some("Date".to_string());
@@ -904,7 +907,7 @@ mod tests {
         tree.time_control = Some("TimeControl".to_string());
         tree.variant = Some("Variant".to_string());
 
-        assert_eq!(tree.pgn_header(), "[Event Event]\n[Site Site]\n[Date Date]\n[Round Round]\n[White White]\n[Black Black]\n[Result Result]\n[WhiteElo 1000]\n[BlackElo 1000]\n[TimeControl TimeControl]\n[Variant Variant]\n");
+        assert_eq!(tree.pgn_header(), "[Event \"Event\"]\n[Site \"Site\"]\n[Date \"Date\"]\n[Round \"Round\"]\n[White \"White\"]\n[Black \"Black\"]\n[Result \"Result\"]\n[WhiteElo \"1000\"]\n[BlackElo \"1000\"]\n[TimeControl \"TimeControl\"]\n[Variant \"Variant\"]\n");
     }
 
     #[test]

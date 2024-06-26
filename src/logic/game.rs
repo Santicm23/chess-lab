@@ -1,10 +1,12 @@
+use std::collections::HashMap;
+
 use regex::Regex;
 
 use crate::{
     constants::{
         movements::{diagonal_movement, linear_movement},
         pgn::PgnTree,
-        CastleType, Color, Move, MoveType, PieceType, Position,
+        CastleType, Color, DrawReason, GameStatus, Move, MoveType, PieceType, Position,
     },
     errors::MoveError,
     logic::pieces::{piece_movement, Piece},
@@ -27,15 +29,16 @@ use super::board::Board;
 ///
 #[derive(Debug, Clone)]
 pub struct Game {
-    board: Board,
     capture_king: bool,
+    pub board: Board,
     pub is_white_turn: bool,
     pub halfmove_clock: u32,
     pub fullmove_number: u32,
     pub en_passant: Option<Position>,
     pub castling_rights: u8,
     pub start_position: String,
-    pub history: PgnTree,
+    pub history: PgnTree<Move>,
+    pub prev_positions: HashMap<String, u32>,
 }
 
 impl Default for Game {
@@ -50,6 +53,13 @@ impl Default for Game {
     /// ```
     ///
     fn default() -> Game {
+        let fen = String::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        let mut map = HashMap::new();
+        map.insert(
+            String::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -"),
+            1,
+        );
+
         Game {
             board: Board::default(),
             is_white_turn: true,
@@ -57,11 +67,10 @@ impl Default for Game {
             en_passant: None,
             halfmove_clock: 0,
             fullmove_number: 1,
-            start_position: String::from(
-                "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-            ),
+            start_position: fen,
             history: PgnTree::default(),
             capture_king: false,
+            prev_positions: map,
         }
     }
 }
@@ -119,7 +128,10 @@ impl Game {
         assert!(re.is_match(fen), "Invalid FEN");
 
         let mut game = Game::default();
-        game.start_position = String::from(fen);
+        game.start_position = fen.to_string();
+
+        game.prev_positions.clear();
+        game.prev_positions.insert(game.get_fen_reduced(), 1);
 
         let parts = fen.split(' ').collect::<Vec<&str>>();
         game.board = Board::new(parts[0]);
@@ -159,7 +171,7 @@ impl Game {
     /// assert_eq!(game.to_string(), "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1");
     /// ```
     ///
-    pub fn move_piece(&mut self, move_str: &str) -> Result<(), MoveError> {
+    pub fn move_piece(&mut self, move_str: &str) -> Result<GameStatus, MoveError> {
         let (piece_type, start_pos_info, end_pos, move_type) = self.parse_move(move_str)?;
         let color = if self.is_white_turn {
             Color::White
@@ -242,7 +254,18 @@ impl Game {
                     ambiguity,
                 ));
 
-                Ok(())
+                let current_pos = self.get_fen_reduced();
+                let posistions = *self.prev_positions.get(&current_pos).unwrap_or(&0);
+
+                self.prev_positions.insert(current_pos, posistions + 1);
+
+                return if posistions == 2 {
+                    Ok(GameStatus::Draw(DrawReason::ThreefoldRepetition))
+                } else if self.halfmove_clock >= 100 {
+                    Ok(GameStatus::Draw(DrawReason::FiftyMoveRule))
+                } else {
+                    Ok(GameStatus::InProgress)
+                };
             }
             Err(_) => Err(MoveError::Illegal),
         }
@@ -513,7 +536,7 @@ impl Game {
     /// A tuple containing the piece type, start position, end position and the move type
     /// If the move is invalid, a MoveError is returned
     ///
-    fn parse_move(
+    pub fn parse_move(
         &self,
         move_str: &str,
     ) -> Result<(PieceType, (Option<u8>, Option<u8>), Position, MoveType), MoveError> {
@@ -640,6 +663,76 @@ impl Game {
                 MoveType::Normal { capture, promotion },
             ));
         }
+    }
+
+    /// Check if a move is legal
+    ///
+    /// # Arguments
+    /// * `piece`: The piece being moved
+    /// * `start_pos`: The starting position of the piece
+    /// * `end_pos`: The ending position of the piece
+    /// * `move_type`: The type of move being made
+    ///
+    /// # Returns
+    /// Whether the move is legal
+    ///
+    pub fn is_legal(
+        &self,
+        piece: &Piece,
+        start_pos: &Position,
+        end_pos: &Position,
+        move_type: &MoveType,
+    ) -> bool {
+        if piece.piece_type != PieceType::Knight && piece.piece_type != PieceType::King {
+            if !linear_movement(start_pos, end_pos) && !diagonal_movement(start_pos, end_pos) {
+                return false;
+            }
+            if self.board.piece_between(start_pos, end_pos) {
+                return false;
+            }
+        }
+
+        if let MoveType::Castle { side } = move_type {
+            return self.is_castle_legal(piece, start_pos, end_pos, side);
+        }
+        if !piece_movement(piece, start_pos, end_pos) {
+            return false;
+        }
+        if let MoveType::Normal {
+            capture: true,
+            promotion: _,
+        } = move_type
+        {
+            if !self.board.is_ocupied(end_pos)
+                || self.board.get_piece(end_pos).unwrap().color == piece.color
+                || (piece.piece_type == PieceType::Pawn && start_pos.col == end_pos.col)
+            {
+                return false;
+            }
+        }
+        if piece.piece_type == PieceType::Pawn
+            && matches!(
+                move_type,
+                MoveType::Normal {
+                    capture: false,
+                    promotion: _
+                }
+            )
+        {
+            if self.board.get_piece(end_pos).is_some() || start_pos.col != end_pos.col {
+                return false;
+            }
+        }
+
+        if self.capture_king {
+            return true;
+        }
+
+        let mut board = self.board.clone();
+        board.move_piece(start_pos, end_pos).unwrap();
+
+        let king = self.board.find(PieceType::King, piece.color)[0];
+        return !board.is_attacked(king, piece.color.opposite());
     }
 
     /// Finds the position of a piece that matches the given criteria to move
@@ -808,76 +901,6 @@ impl Game {
         }
     }
 
-    /// Check if a move is legal
-    ///
-    /// # Arguments
-    /// * `piece`: The piece being moved
-    /// * `start_pos`: The starting position of the piece
-    /// * `end_pos`: The ending position of the piece
-    /// * `move_type`: The type of move being made
-    ///
-    /// # Returns
-    /// Whether the move is legal
-    ///
-    fn is_legal(
-        &self,
-        piece: &Piece,
-        start_pos: &Position,
-        end_pos: &Position,
-        move_type: &MoveType,
-    ) -> bool {
-        if piece.piece_type != PieceType::Knight && piece.piece_type != PieceType::King {
-            if !linear_movement(start_pos, end_pos) && !diagonal_movement(start_pos, end_pos) {
-                return false;
-            }
-            if self.board.piece_between(start_pos, end_pos) {
-                return false;
-            }
-        }
-
-        if let MoveType::Castle { side } = move_type {
-            return self.is_castle_legal(piece, start_pos, end_pos, side);
-        }
-        if !piece_movement(piece, start_pos, end_pos) {
-            return false;
-        }
-        if let MoveType::Normal {
-            capture: true,
-            promotion: _,
-        } = move_type
-        {
-            if !self.board.is_ocupied(end_pos)
-                || self.board.get_piece(end_pos).unwrap().color == piece.color
-                || (piece.piece_type == PieceType::Pawn && start_pos.col == end_pos.col)
-            {
-                return false;
-            }
-        }
-        if piece.piece_type == PieceType::Pawn
-            && matches!(
-                move_type,
-                MoveType::Normal {
-                    capture: false,
-                    promotion: _
-                }
-            )
-        {
-            if self.board.get_piece(end_pos).is_some() || start_pos.col != end_pos.col {
-                return false;
-            }
-        }
-
-        if self.capture_king {
-            return true;
-        }
-
-        let mut board = self.board.clone();
-        board.move_piece(start_pos, end_pos).unwrap();
-
-        let king = self.board.find(PieceType::King, piece.color)[0];
-        return !board.is_attacked(king, piece.color.opposite());
-    }
-
     fn is_castle_legal(
         &self,
         piece: &Piece,
@@ -929,6 +952,35 @@ impl Game {
                 return true;
             }
         }
+    }
+
+    fn check(&self) -> bool {
+        if self.capture_king {
+            return false;
+        }
+        todo!("Implement is_check")
+    }
+
+    fn checkmate(&self) -> bool {
+        if self.capture_king {
+            return false;
+        }
+        todo!("Implement is_checkmate")
+    }
+
+    fn stalemate(&self) -> bool {
+        if self.capture_king {
+            return false;
+        }
+        todo!("Implement is_stalemate")
+    }
+
+    fn get_fen_reduced(&self) -> String {
+        let fen = self.fen();
+        let mut fen_parts: Vec<&str> = fen.split_whitespace().collect();
+        fen_parts.pop();
+        fen_parts.pop();
+        fen_parts.join(" ")
     }
 }
 
