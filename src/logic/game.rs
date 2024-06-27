@@ -281,6 +281,7 @@ impl Game {
             self.fullmove_number,
             self.en_passant,
             self.castling_rights,
+            self.game_status,
         );
 
         if matches!(mov.move_type, MoveType::Castle { .. })
@@ -510,6 +511,7 @@ impl Game {
         self.fullmove_number = info.1;
         self.en_passant = info.2;
         self.castling_rights = info.3;
+        self.game_status = info.4;
 
         self.history.prev_move();
     }

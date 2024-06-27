@@ -1,6 +1,6 @@
 use std::{cell::RefCell, fmt::Display, rc::Rc};
 
-use super::Position;
+use super::{GameStatus, Position};
 
 /// A struct representing a PGN line or variation
 /// Its also a tree node that contains a list of child nodes, the parent node,
@@ -14,6 +14,7 @@ pub struct PgnLine<T: PartialEq + Clone + Display> {
     pub fullmove_number: u32,
     pub en_passant: Option<Position>,
     pub castling_rights: u8,
+    pub game_status: GameStatus,
     pub mov: T,
 }
 
@@ -171,7 +172,7 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::constants::{pgn::PgnTree, Move, MoveType, PieceType, Color, Position};
+    /// use chess_lib::constants::{pgn::PgnTree, Move, MoveType, PieceType, Color, Position, GameStatus};
     /// use chess_lib::logic::Piece;
     ///
     /// let mut pgn_tree: PgnTree<Move> = PgnTree::default();
@@ -189,7 +190,8 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///     false,
     ///     false,
     /// );
-    /// pgn_tree.add_move(mov.clone(), 0, 0, None, 0);
+    /// pgn_tree.add_move(mov.clone(), 0, 0, None, 0, GameStatus::InProgress);
+    ///
     /// assert_eq!(mov, pgn_tree.get_move().unwrap());
     /// ```
     ///
@@ -200,6 +202,7 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
         fullmove_number: u32,
         en_passant: Option<Position>,
         castling_rights: u8,
+        game_status: GameStatus,
     ) {
         if let Some(current_line) = &self.current_line {
             let new_line = Rc::new(RefCell::new(PgnLine {
@@ -209,6 +212,7 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
                 fullmove_number,
                 en_passant,
                 castling_rights,
+                game_status,
                 mov,
             }));
             if !current_line.as_ref().borrow_mut().lines.contains(&new_line) {
@@ -227,6 +231,7 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
                 fullmove_number,
                 en_passant,
                 castling_rights,
+                game_status,
                 mov,
             }));
             self.lines.push(Rc::clone(&new_line));
@@ -238,7 +243,7 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position};
+    /// use chess_lib::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use chess_lib::logic::Piece;
     ///
     /// let mut tree = PgnTree::default();
@@ -256,7 +261,7 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///     (false, false),
     ///     false,
     ///     false,
-    /// ), 0, 0, None, 0);
+    /// ), 0, 0, None, 0, GameStatus::InProgress);
     /// tree.rm_move();
     /// ```
     ///
@@ -292,7 +297,7 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position};
+    /// use chess_lib::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use chess_lib::logic::Piece;
     ///
     /// let mut tree = PgnTree::default();
@@ -310,7 +315,7 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///     false,
     ///     false,
     /// );
-    /// tree.add_move(mov.clone(), 0, 0, None, 0);
+    /// tree.add_move(mov.clone(), 0, 0, None, 0, GameStatus::InProgress);
     /// assert_eq!(tree.get_move(), Some(mov));
     /// ```
     ///
@@ -325,7 +330,7 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position};
+    /// use chess_lib::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use chess_lib::logic::Piece;
     ///
     /// let mut tree = PgnTree::default();
@@ -343,11 +348,12 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///     false,
     ///     false,
     /// );
-    /// tree.add_move(mov.clone(), 0, 0, None, 0);
-    /// assert_eq!(tree.get_prev_move_info(), (0, 0, None, 0));
+    /// tree.add_move(mov.clone(), 0, 0, None, 0, GameStatus::InProgress);
+    ///
+    /// assert_eq!(tree.get_prev_move_info(), (0, 0, None, 0, GameStatus::InProgress));
     /// ```
     ///
-    pub fn get_prev_move_info(&self) -> (u32, u32, Option<Position>, u8) {
+    pub fn get_prev_move_info(&self) -> (u32, u32, Option<Position>, u8, GameStatus) {
         let current_line = self
             .current_line
             .as_ref()
@@ -360,6 +366,7 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
             current_line.fullmove_number,
             current_line.en_passant,
             current_line.castling_rights,
+            current_line.game_status,
         )
     }
 
@@ -370,7 +377,7 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position};
+    /// use chess_lib::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use chess_lib::logic::Piece;
     ///
     /// let mut pgn_tree = PgnTree::default();
@@ -402,8 +409,8 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///     false,
     ///     false,
     /// );
-    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
-    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
+    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
     ///
     /// assert_eq!(mov2, pgn_tree.get_move().unwrap());
     /// assert_eq!(mov1, pgn_tree.prev_move().unwrap());
@@ -424,7 +431,7 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position};
+    /// use chess_lib::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use chess_lib::logic::Piece;
     ///
     /// let mut pgn_tree = PgnTree::default();
@@ -456,9 +463,9 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///     false,
     ///     false,
     /// );
-    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
     /// pgn_tree.prev_move();
-    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
+    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
     ///
     /// pgn_tree.prev_move();
     /// assert_eq!(mov1, pgn_tree.next_move().unwrap());
@@ -491,7 +498,7 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///
     /// # Example
     /// ```
-    /// use chess_lib::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position};
+    /// use chess_lib::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use chess_lib::logic::Piece;
     ///
     /// let mut pgn_tree = PgnTree::default();
@@ -525,9 +532,9 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///     false,
     /// );
     ///
-    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
     /// pgn_tree.prev_move();
-    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
+    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
     /// pgn_tree.prev_move();
     ///
     /// assert_eq!(vec![mov1.clone(), mov2.clone()], pgn_tree.all_next_moves());
@@ -554,7 +561,7 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position};
+    /// use chess_lib::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use chess_lib::logic::Piece;
     ///
     /// let mut pgn_tree = PgnTree::default();
@@ -586,8 +593,8 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///     false,
     ///     false,
     /// );
-    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
-    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
+    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
     ///
     /// assert_eq!(mov2, pgn_tree.get_move().unwrap());
     /// assert_eq!(mov1, pgn_tree.prev_move().unwrap());
@@ -755,7 +762,7 @@ impl<T: PartialEq + Clone + Display> Iterator for PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position};
+    /// use chess_lib::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use chess_lib::logic::Piece;
     ///
     /// let mut pgn_tree = PgnTree::default();
@@ -787,8 +794,8 @@ impl<T: PartialEq + Clone + Display> Iterator for PgnTree<T> {
     ///     false,
     ///     false,
     /// );
-    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
-    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
+    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
     ///
     /// assert_eq!(mov2, pgn_tree.get_move().unwrap());
     /// assert_eq!(mov1, pgn_tree.next_back().unwrap());
@@ -808,7 +815,7 @@ impl<T: PartialEq + Clone + Display> DoubleEndedIterator for PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position};
+    /// use chess_lib::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use chess_lib::logic::Piece;
     ///
     /// let mut pgn_tree = PgnTree::default();
@@ -840,8 +847,8 @@ impl<T: PartialEq + Clone + Display> DoubleEndedIterator for PgnTree<T> {
     ///     false,
     ///     false,
     /// );
-    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
-    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
+    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
     ///
     /// assert_eq!(mov2, pgn_tree.get_move().unwrap());
     /// assert_eq!(mov1, pgn_tree.next_back().unwrap());
@@ -855,7 +862,7 @@ impl<T: PartialEq + Clone + Display> DoubleEndedIterator for PgnTree<T> {
 #[cfg(test)]
 mod tests {
     use crate::constants::pgn::PgnTree;
-    use crate::constants::{Color, Move, MoveType, PieceType, Position};
+    use crate::constants::{Color, GameStatus, Move, MoveType, PieceType, Position};
     use crate::logic::Piece;
 
     #[test]
@@ -875,7 +882,7 @@ mod tests {
             false,
             false,
         );
-        pgn_tree.add_move(mov.clone(), 0, 0, None, 0);
+        pgn_tree.add_move(mov.clone(), 0, 0, None, 0, GameStatus::InProgress);
 
         assert_eq!(mov, pgn_tree.get_move().unwrap());
     }
@@ -897,7 +904,7 @@ mod tests {
             false,
             false,
         );
-        pgn_tree.add_move(mov.clone(), 0, 0, None, 0);
+        pgn_tree.add_move(mov.clone(), 0, 0, None, 0, GameStatus::InProgress);
         pgn_tree.rm_move();
 
         assert!(pgn_tree.get_move().is_none());
@@ -934,8 +941,8 @@ mod tests {
             false,
             false,
         );
-        pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
-        pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
+        pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
+        pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
 
         assert_eq!(mov2, pgn_tree.get_move().unwrap());
         assert_eq!(mov1, pgn_tree.prev_move().unwrap());
@@ -973,8 +980,8 @@ mod tests {
             false,
             false,
         );
-        pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
-        pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
+        pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
+        pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
 
         assert_eq!(mov2, pgn_tree.get_move().unwrap());
         assert_eq!(mov1, pgn_tree.prev_move().unwrap());
@@ -1014,9 +1021,9 @@ mod tests {
             false,
         );
 
-        pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
+        pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
         pgn_tree.prev_move();
-        pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
+        pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
         pgn_tree.prev_move();
 
         assert_eq!(vec![mov1.clone(), mov2.clone()], pgn_tree.all_next_moves());
@@ -1071,9 +1078,9 @@ mod tests {
             false,
             false,
         );
-        pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
+        pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
         pgn_tree.prev_move();
-        pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
+        pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
 
         pgn_tree.prev_move();
         assert_eq!(mov1, pgn_tree.next_move().unwrap());
@@ -1113,8 +1120,8 @@ mod tests {
             false,
             false,
         );
-        pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
-        pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
+        pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
+        pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
 
         assert_eq!(pgn_tree.pgn(), "1. e4 e5");
     }
