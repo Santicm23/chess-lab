@@ -186,6 +186,8 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///     None,
     ///     None,
     ///     (false, false),
+    ///     false,
+    ///     false,
     /// );
     /// pgn_tree.add_move(mov.clone(), 0, 0, None, 0);
     /// assert_eq!(mov, pgn_tree.get_move().unwrap());
@@ -252,6 +254,8 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///     None,
     ///     None,
     ///     (false, false),
+    ///     false,
+    ///     false,
     /// ), 0, 0, None, 0);
     /// tree.rm_move();
     /// ```
@@ -303,6 +307,8 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///     None,
     ///     None,
     ///     (false, false),
+    ///     false,
+    ///     false,
     /// );
     /// tree.add_move(mov.clone(), 0, 0, None, 0);
     /// assert_eq!(tree.get_move(), Some(mov));
@@ -324,23 +330,31 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///
     /// let mut tree = PgnTree::default();
     /// let mov = Move::new(
-    ///    Piece::new(Color::Black, PieceType::Pawn),
-    ///    Position::from_string("e2"),
-    ///    Position::from_string("e4"),
-    ///    MoveType::Normal {
-    ///       capture: false,
-    ///       promotion: None,
-    ///    },
-    ///    None,
-    ///    None,
+    ///     Piece::new(Color::Black, PieceType::Pawn),
+    ///     Position::from_string("e2"),
+    ///     Position::from_string("e4"),
+    ///     MoveType::Normal {
+    ///         capture: false,
+    ///         promotion: None,
+    ///     },
+    ///     None,
+    ///     None,
     ///     (false, false),
+    ///     false,
+    ///     false,
     /// );
     /// tree.add_move(mov.clone(), 0, 0, None, 0);
     /// assert_eq!(tree.get_prev_move_info(), (0, 0, None, 0));
     /// ```
     ///
     pub fn get_prev_move_info(&self) -> (u32, u32, Option<Position>, u8) {
-        let current_line = self.current_line.as_ref().unwrap().borrow();
+        let current_line = self
+            .current_line
+            .as_ref()
+            .unwrap_or_else(|| {
+                panic!("No current line found. Please add a move before calling this method")
+            })
+            .borrow();
         (
             current_line.halfmove_clock,
             current_line.fullmove_number,
@@ -371,6 +385,8 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///     None,
     ///     None,
     ///     (false, false),
+    ///     false,
+    ///     false,
     /// );
     /// let mov2 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
@@ -383,6 +399,8 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///     None,
     ///     None,
     ///     (false, false),
+    ///     false,
+    ///     false,
     /// );
     /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
     /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
@@ -421,6 +439,8 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///     None,
     ///     None,
     ///     (false, false),
+    ///     false,
+    ///     false,
     /// );
     /// let mov2 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
@@ -433,6 +453,8 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///     None,
     ///     None,
     ///     (false, false),
+    ///     false,
+    ///     false,
     /// );
     /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
     /// pgn_tree.prev_move();
@@ -466,7 +488,50 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///
     /// # Returns
     /// All the next moves
-    /// TODO: Add example
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lib::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position};
+    /// use chess_lib::logic::Piece;
+    ///
+    /// let mut pgn_tree = PgnTree::default();
+    /// let mov1 = Move::new(
+    ///     Piece::new(Color::White, PieceType::Pawn),
+    ///     Position::from_string("e4"),
+    ///     Position::from_string("e2"),
+    ///     MoveType::Normal {
+    ///         capture: false,
+    ///         promotion: None,
+    ///     },
+    ///     None,
+    ///     None,
+    ///     (false, false),
+    ///     false,
+    ///     false,
+    /// );
+    ///
+    /// let mov2 = Move::new(
+    ///     Piece::new(Color::White, PieceType::Pawn),
+    ///     Position::from_string("d2"),
+    ///     Position::from_string("d4"),
+    ///     MoveType::Normal {
+    ///         capture: false,
+    ///         promotion: None,
+    ///     },
+    ///     None,
+    ///     None,
+    ///     (false, false),
+    ///     false,
+    ///     false,
+    /// );
+    ///
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
+    /// pgn_tree.prev_move();
+    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
+    /// pgn_tree.prev_move();
+    ///
+    /// assert_eq!(vec![mov1.clone(), mov2.clone()], pgn_tree.all_next_moves());
+    /// ```
     ///
     pub fn all_next_moves(&self) -> Vec<T> {
         let mut moves = Vec::new();
@@ -504,6 +569,8 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///     None,
     ///     None,
     ///     (false, false),
+    ///     false,
+    ///     false,
     /// );
     /// let mov2 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
@@ -516,6 +583,8 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///     None,
     ///     None,
     ///     (false, false),
+    ///     false,
+    ///     false,
     /// );
     /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
     /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
@@ -701,6 +770,8 @@ impl<T: PartialEq + Clone + Display> Iterator for PgnTree<T> {
     ///     None,
     ///     None,
     ///     (false, false),
+    ///     false,
+    ///     false,
     /// );
     /// let mov2 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
@@ -713,6 +784,8 @@ impl<T: PartialEq + Clone + Display> Iterator for PgnTree<T> {
     ///     None,
     ///     None,
     ///     (false, false),
+    ///     false,
+    ///     false,
     /// );
     /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
     /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
@@ -750,6 +823,8 @@ impl<T: PartialEq + Clone + Display> DoubleEndedIterator for PgnTree<T> {
     ///     None,
     ///     None,
     ///     (false, false),
+    ///     false,
+    ///     false,
     /// );
     /// let mov2 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
@@ -762,6 +837,8 @@ impl<T: PartialEq + Clone + Display> DoubleEndedIterator for PgnTree<T> {
     ///     None,
     ///     None,
     ///     (false, false),
+    ///     false,
+    ///     false,
     /// );
     /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
     /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
@@ -795,6 +872,8 @@ mod tests {
             None,
             None,
             (false, false),
+            false,
+            false,
         );
         pgn_tree.add_move(mov.clone(), 0, 0, None, 0);
 
@@ -815,6 +894,8 @@ mod tests {
             None,
             None,
             (false, false),
+            false,
+            false,
         );
         pgn_tree.add_move(mov.clone(), 0, 0, None, 0);
         pgn_tree.rm_move();
@@ -836,6 +917,8 @@ mod tests {
             None,
             None,
             (false, false),
+            false,
+            false,
         );
         let mov2 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
@@ -848,6 +931,8 @@ mod tests {
             None,
             None,
             (false, false),
+            false,
+            false,
         );
         pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
         pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
@@ -871,6 +956,8 @@ mod tests {
             None,
             None,
             (false, false),
+            false,
+            false,
         );
         let mov2 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
@@ -883,6 +970,8 @@ mod tests {
             None,
             None,
             (false, false),
+            false,
+            false,
         );
         pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
         pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
@@ -890,6 +979,47 @@ mod tests {
         assert_eq!(mov2, pgn_tree.get_move().unwrap());
         assert_eq!(mov1, pgn_tree.prev_move().unwrap());
         assert_eq!(mov2, pgn_tree.next_move().unwrap());
+    }
+
+    #[test]
+    fn test_all_next_moves() {
+        let mut pgn_tree = PgnTree::default();
+        let mov1 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("e4"),
+            Position::from_string("e2"),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        );
+
+        let mov2 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("d2"),
+            Position::from_string("d4"),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        );
+
+        pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
+        pgn_tree.prev_move();
+        pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);
+        pgn_tree.prev_move();
+
+        assert_eq!(vec![mov1.clone(), mov2.clone()], pgn_tree.all_next_moves());
     }
 
     #[test]
@@ -924,6 +1054,8 @@ mod tests {
             None,
             None,
             (false, false),
+            false,
+            false,
         );
         let mov2 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
@@ -936,6 +1068,8 @@ mod tests {
             None,
             None,
             (false, false),
+            false,
+            false,
         );
         pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
         pgn_tree.prev_move();
@@ -962,6 +1096,8 @@ mod tests {
             None,
             None,
             (false, false),
+            false,
+            false,
         );
         let mov2 = Move::new(
             Piece::new(Color::Black, PieceType::Pawn),
@@ -974,6 +1110,8 @@ mod tests {
             None,
             None,
             (false, false),
+            false,
+            false,
         );
         pgn_tree.add_move(mov1.clone(), 0, 0, None, 0);
         pgn_tree.add_move(mov2.clone(), 0, 0, None, 0);

@@ -6,7 +6,7 @@ use crate::{
     constants::{
         movements::{diagonal_movement, linear_movement},
         pgn::PgnTree,
-        CastleType, Color, DrawReason, GameStatus, Move, MoveType, PieceType, Position,
+        CastleType, Color, DrawReason, GameStatus, Move, MoveType, PieceType, Position, WinReason,
     },
     errors::MoveError,
     logic::pieces::{piece_movement, Piece},
@@ -16,8 +16,9 @@ use super::board::Board;
 
 /// Represents a game of chess
 /// It contains the board, the turn, the halfmove clock, the fullmove number,
-/// the en passant square, the castling rights, the start position, the history
-/// and a flag to indicate if the king needs to be captured
+/// the en passant square, the castling rights, the start position, the history,
+/// a flag to indicate if the king needs to be captured, the previous positions
+/// and the game status
 ///
 /// # Example
 /// ```
@@ -39,6 +40,7 @@ pub struct Game {
     pub start_position: String,
     pub history: PgnTree<Move>,
     pub prev_positions: HashMap<String, u32>,
+    pub game_status: GameStatus,
 }
 
 impl Default for Game {
@@ -71,6 +73,7 @@ impl Default for Game {
             history: PgnTree::default(),
             capture_king: false,
             prev_positions: map,
+            game_status: GameStatus::InProgress,
         }
     }
 }
@@ -160,7 +163,7 @@ impl Game {
     /// * `move_str`: A string slice that holds the move
     ///
     /// # Returns
-    /// Nothing if the move was successful, otherwise an error
+    /// The game status if the move was successful, otherwise an error
     ///
     /// # Example
     /// ```
@@ -172,6 +175,10 @@ impl Game {
     /// ```
     ///
     pub fn move_piece(&mut self, move_str: &str) -> Result<GameStatus, MoveError> {
+        if self.game_status != GameStatus::InProgress {
+            return Ok(self.game_status);
+        }
+
         let (piece_type, start_pos_info, end_pos, move_type) = self.parse_move(move_str)?;
         let color = if self.is_white_turn {
             Color::White
@@ -252,20 +259,11 @@ impl Game {
                     captured_piece,
                     rook_start,
                     ambiguity,
+                    self.check(),
+                    self.checkmate(),
                 ));
 
-                let current_pos = self.get_fen_reduced();
-                let posistions = *self.prev_positions.get(&current_pos).unwrap_or(&0);
-
-                self.prev_positions.insert(current_pos, posistions + 1);
-
-                return if posistions == 2 {
-                    Ok(GameStatus::Draw(DrawReason::ThreefoldRepetition))
-                } else if self.halfmove_clock >= 100 {
-                    Ok(GameStatus::Draw(DrawReason::FiftyMoveRule))
-                } else {
-                    Ok(GameStatus::InProgress)
-                };
+                Ok(self.game_status)
             }
             Err(_) => Err(MoveError::Illegal),
         }
@@ -362,6 +360,27 @@ impl Game {
         if self.is_white_turn {
             self.fullmove_number += 1;
         }
+
+        let current_pos = self.get_fen_reduced();
+        let posistions = *self.prev_positions.get(&current_pos).unwrap_or(&0);
+
+        self.prev_positions.insert(current_pos, posistions + 1);
+
+        if mov.checkmate {
+            self.game_status = if self.is_white_turn {
+                GameStatus::BlackWins(WinReason::Checkmate)
+            } else {
+                GameStatus::WhiteWins(WinReason::Checkmate)
+            };
+        } else if self.stalemate() {
+            self.game_status = GameStatus::Draw(DrawReason::Stalemate);
+        } else if posistions == 2 {
+            self.game_status = GameStatus::Draw(DrawReason::ThreefoldRepetition);
+        } else if self.halfmove_clock >= 100 {
+            self.game_status = GameStatus::Draw(DrawReason::FiftyMoveRule);
+        } else {
+            self.game_status = GameStatus::InProgress;
+        };
     }
 
     /// Returns the FEN representation of the game
@@ -523,6 +542,21 @@ impl Game {
         self.history.next_move();
     }
 
+    /// Returns the PGN of the game
+    ///
+    /// # Returns
+    /// A string containing the PGN of the game
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lib::logic::Game;
+    ///
+    /// let mut game = Game::default();
+    /// game.move_piece("e4").unwrap();
+    /// game.move_piece("e5").unwrap();
+    /// assert_eq!(game.pgn(), "1. e4 e5");
+    /// ```
+    ///
     pub fn pgn(&self) -> String {
         self.history.pgn()
     }
@@ -735,6 +769,171 @@ impl Game {
         return !board.is_attacked(king, piece.color.opposite());
     }
 
+    /// Returns whether the king is in check
+    ///
+    /// # Returns
+    /// Whether the king is in check
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lib::logic::Game;
+    ///
+    /// let mut game = Game::default();
+    ///
+    /// game.move_piece("c4").unwrap();
+    /// game.move_piece("d6").unwrap();
+    /// game.move_piece("Qa4+").unwrap();
+    ///
+    /// assert!(game.check());
+    /// ```
+    ///
+    pub fn check(&self) -> bool {
+        if self.capture_king {
+            return false;
+        }
+        let color = if self.is_white_turn {
+            Color::White
+        } else {
+            Color::Black
+        };
+
+        if self
+            .board
+            .is_attacked(self.board.find(PieceType::King, color)[0], color.opposite())
+        {
+            return true;
+        }
+        false
+    }
+
+    /// Returns whether the king is in checkmate
+    ///
+    /// # Returns
+    /// Whether the king is in checkmate
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lib::logic::Game;
+    ///
+    /// let mut game = Game::default();
+    ///
+    /// game.move_piece("e4").unwrap();
+    /// game.move_piece("e5").unwrap();
+    /// game.move_piece("Qh5").unwrap();
+    /// game.move_piece("Nc6").unwrap();
+    /// game.move_piece("Bc4").unwrap();
+    /// game.move_piece("Nf6").unwrap();
+    /// game.move_piece("Qxf7#").unwrap();
+    ///
+    /// assert!(game.checkmate());
+    /// ```
+    ///
+    pub fn checkmate(&self) -> bool {
+        if self.capture_king {
+            let color = if self.is_white_turn {
+                Color::White
+            } else {
+                Color::Black
+            };
+            let kings = self.board.find(PieceType::King, color);
+            return !kings.is_empty();
+        }
+        if !self.check() {
+            return false;
+        }
+
+        !self.has_legal_moves()
+    }
+
+    /// Returns whether the game is in stalemate
+    ///
+    /// # Returns
+    /// Whether the game is in stalemate
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lib::logic::Game;
+    ///
+    /// let game = Game::from_fen("8/8/8/8/8/4KQ2/8/4k3 b - - 0 1");
+    ///
+    /// assert!(game.stalemate());
+    /// ```
+    ///
+    pub fn stalemate(&self) -> bool {
+        if self.capture_king {
+            return false;
+        }
+        if self.check() {
+            return false;
+        }
+
+        !self.has_legal_moves()
+    }
+
+    /// Ends the game and sets the winner to the opposite of the color that resigned
+    ///
+    /// # Arguments
+    /// * `color`: The color of the player that resigned
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lib::logic::{Game};
+    /// use chess_lib::constants::{Color, GameStatus, WinReason};
+    ///
+    /// let mut game = Game::default();
+    /// game.resign(Color::White);
+    ///
+    /// assert_eq!(game.game_status, GameStatus::BlackWins(WinReason::Resignation));
+    /// ```
+    ///
+    pub fn resign(&mut self, color: Color) {
+        self.game_status = if color == Color::White {
+            GameStatus::BlackWins(WinReason::Resignation)
+        } else {
+            GameStatus::WhiteWins(WinReason::Resignation)
+        };
+    }
+
+    /// Ends the game and sets the winner to the opposite of the color that lost on time
+    ///
+    /// # Arguments
+    /// * `color`: The color of the player that lost on time
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lib::constants::{Color, GameStatus, WinReason};
+    /// use chess_lib::logic::Game;
+    ///
+    /// let mut game = Game::default();
+    /// game.set_lost_in_time(Color::White);
+    ///
+    /// assert_eq!(game.game_status, GameStatus::BlackWins(WinReason::Time));
+    /// ```
+    ///
+    pub fn set_lost_in_time(&mut self, color: Color) {
+        self.game_status = if color == Color::White {
+            GameStatus::BlackWins(WinReason::Time)
+        } else {
+            GameStatus::WhiteWins(WinReason::Time)
+        };
+    }
+
+    /// Ends the game by a draw due to agreement
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lib::constants::{GameStatus, DrawReason};
+    /// use chess_lib::logic::Game;
+    ///
+    /// let mut game = Game::default();
+    /// game.set_draw_by_agreement();
+    ///
+    /// assert_eq!(game.game_status, GameStatus::Draw(DrawReason::Agreement));
+    ///
+    pub fn set_draw_by_agreement(&mut self) {
+        self.game_status = GameStatus::Draw(DrawReason::Agreement);
+    }
+
     /// Finds the position of a piece that matches the given criteria to move
     ///
     /// # Arguments
@@ -901,6 +1100,17 @@ impl Game {
         }
     }
 
+    /// Checks if castling is legal
+    ///
+    /// # Arguments
+    /// * `piece`: The king piece to castle
+    /// * `start_pos`: The starting position of the king piece
+    /// * `end_pos`: The ending position of the king piece
+    /// * `side`: The side to castle
+    ///
+    /// # Returns
+    /// A boolean indicating if the castling is legal
+    ///
     fn is_castle_legal(
         &self,
         piece: &Piece,
@@ -954,27 +1164,47 @@ impl Game {
         }
     }
 
-    fn check(&self) -> bool {
-        if self.capture_king {
-            return false;
+    /// Checks if there are legal moves for the current player
+    ///
+    /// # Returns
+    /// A boolean indicating if there are legal moves for the current player
+    ///
+    fn has_legal_moves(&self) -> bool {
+        let color = if self.is_white_turn {
+            Color::White
+        } else {
+            Color::Black
+        };
+
+        for piece_pos in self.board.find_all(color) {
+            let piece = self.board.get_piece(&piece_pos).unwrap();
+            for col in 0..8 {
+                for row in 0..8 {
+                    let end_pos = Position::new(col, row);
+
+                    let mut board = self.board.clone();
+                    if !board.can_capture(&piece_pos, &end_pos) {
+                        continue;
+                    }
+
+                    board.move_piece(&piece_pos, &end_pos).unwrap();
+
+                    let king = board.find(PieceType::King, piece.color)[0];
+                    if !board.is_attacked(king, piece.color.opposite()) {
+                        return true;
+                    }
+                }
+            }
         }
-        todo!("Implement is_check")
+        false
     }
 
-    fn checkmate(&self) -> bool {
-        if self.capture_king {
-            return false;
-        }
-        todo!("Implement is_checkmate")
-    }
-
-    fn stalemate(&self) -> bool {
-        if self.capture_king {
-            return false;
-        }
-        todo!("Implement is_stalemate")
-    }
-
+    /// Gives the FEN string of the position withouth the halfmove clock and fullmove number
+    /// to be used as position identifier
+    ///
+    /// # Returns
+    /// The FEN string of the position withouth the halfmove clock and fullmove number
+    ///
     fn get_fen_reduced(&self) -> String {
         let fen = self.fen();
         let mut fen_parts: Vec<&str> = fen.split_whitespace().collect();
@@ -1284,7 +1514,7 @@ mod tests {
     }
 
     #[test]
-    fn play_other_move() {
+    fn test_play_other_move() {
         let mut game = Game::default();
         game.move_piece("e4").unwrap();
         game.undo();
@@ -1309,7 +1539,7 @@ mod tests {
     }
 
     #[test]
-    fn pgn() {
+    fn test_pgn() {
         let mut game = Game::default();
         game.move_piece("e4").unwrap();
         game.move_piece("e5").unwrap();
@@ -1342,5 +1572,33 @@ mod tests {
             pgn,
             "1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 (6... O-O 7. c3 b5 8. Bc2) 7. Bb3 O-O 8. c3 d5"
         );
+    }
+
+    #[test]
+    fn test_check() {
+        let mut game = Game::default();
+        game.move_piece("c4").unwrap();
+        game.move_piece("d6").unwrap();
+        game.move_piece("Qa4+").unwrap();
+        assert!(game.check());
+    }
+
+    #[test]
+    fn test_checkmate() {
+        let mut game = Game::default();
+        game.move_piece("e4").unwrap();
+        game.move_piece("e5").unwrap();
+        game.move_piece("Qh5").unwrap();
+        game.move_piece("Nc6").unwrap();
+        game.move_piece("Bc4").unwrap();
+        game.move_piece("Nf6").unwrap();
+        game.move_piece("Qxf7#").unwrap();
+        assert!(game.checkmate());
+    }
+
+    #[test]
+    fn test_stalemate() {
+        let game = Game::from_fen("8/8/8/8/8/4KQ2/8/4k3 b - - 0 1");
+        assert!(game.stalemate());
     }
 }

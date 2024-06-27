@@ -22,7 +22,7 @@ impl Color {
     /// # Returns
     /// The color opposite to the current one
     ///
-    /// # Examples
+    /// # Example
     /// ```
     /// use chess_lib::constants::Color;
     ///
@@ -67,7 +67,7 @@ impl PieceType {
     /// # Returns
     /// The piece type if the character is valid, otherwise `None`
     ///
-    /// # Examples
+    /// # Example
     /// ```
     /// use chess_lib::constants::PieceType;
     ///
@@ -100,7 +100,7 @@ impl PieceType {
     /// # Returns
     /// The character representation of the piece type
     ///
-    /// # Examples
+    /// # Example
     /// ```
     /// use chess_lib::constants::PieceType;
     ///
@@ -124,6 +124,18 @@ impl PieceType {
     }
 }
 
+/// Represents the status of a chess game
+///
+/// # Variants
+/// * `InProgress`: The game is in progress
+/// * `Draw`: The game is a draw
+///     - `reason`: The reason for the draw
+/// * `WhiteWins`: White wins the game
+///     - `reason`: The reason for the win
+/// * `BlackWins`: Black wins the game
+///     - `reason`: The reason for the win
+///
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum GameStatus {
     InProgress,
     Draw(DrawReason),
@@ -131,6 +143,16 @@ pub enum GameStatus {
     BlackWins(WinReason),
 }
 
+/// Represents the reason for a draw
+///
+/// # Variants
+/// * `Stalemate`: The game is a stalemate
+/// * `InsufficientMaterial`: The game is a draw due to insufficient material
+/// * `ThreefoldRepetition`: The game is a draw due to threefold repetition
+/// * `FiftyMoveRule`: The game is a draw due to the fifty move rule
+/// * `Agreement`: The game is a draw due to agreement
+///
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum DrawReason {
     Stalemate,
     InsufficientMaterial,
@@ -139,6 +161,14 @@ pub enum DrawReason {
     Agreement,
 }
 
+/// Represents the reason for a win
+///
+/// # Variants
+/// * `Checkmate`: The game is a win due to checkmate
+/// * `Resignation`: The game is a win due to resignation
+/// * `Time`: The game is a win due to time
+///
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum WinReason {
     Checkmate,
     Resignation,
@@ -155,9 +185,6 @@ pub enum WinReason {
 ///     - `side`: The side of the board to castle on
 /// * `EnPassant`: An en passant move
 ///    - The move is an en passant
-///
-/// # Examples
-/// TODO
 ///
 #[derive(Debug, Clone, PartialEq)]
 pub enum MoveType {
@@ -185,7 +212,7 @@ pub enum CastleType {
 
 /// Represents a move in a chess game
 ///
-/// # Examples:
+/// # Example
 /// ```
 /// use chess_lib::constants::{Color, PieceType, Position, Move, MoveType};
 /// use chess_lib::logic::Piece;
@@ -203,7 +230,17 @@ pub enum CastleType {
 /// let captured_piece = None;
 /// let rook_from = None;
 /// let ambiguity = (false, false);
-/// let mv = Move::new(piece, from, to, move_type, captured_piece, rook_from, ambiguity);
+/// let mv = Move::new(
+///     piece,
+///     from,
+///     to,
+///     move_type,
+///     captured_piece,
+///     rook_from,
+///     ambiguity,
+///     false,
+///     false
+/// );
 ///
 /// assert_eq!(mv.to_string(), "e4");
 /// ```
@@ -217,9 +254,63 @@ pub struct Move {
     pub captured_piece: Option<PieceType>,
     pub rook_from: Option<Position>,
     pub ambiguity: (bool, bool),
+    pub check: bool,
+    pub checkmate: bool,
 }
 
 impl Move {
+    /// Creates a new move
+    ///
+    /// # Arguments
+    /// * `piece`: The piece that is moving
+    /// * `from`: The position the piece is moving from
+    /// * `to`: The position the piece is moving to
+    /// * `move_type`: The type of the move
+    /// * `captured_piece`: The piece that is captured, if any
+    /// * `rook_from`: The position of the rook, if the move is a castle
+    /// * `ambiguity`: A tuple of booleans representing the ambiguity of the move
+    /// * `check`: Whether the move puts the opponent in check
+    /// * `checkmate`: Whether the move puts the opponent in checkmate
+    ///
+    /// # Panics
+    /// Panics if the move is a capture, but no captured piece is provided
+    /// Panics if the move is not a capture, but a captured piece is provided
+    /// Panics if the move is a promotion, but the piece is not a pawn
+    /// Panics if the move is a castle, but the piece is not a king
+    /// Panics if the move is a castle, but the rook position is not provided
+    /// Panics if the move is an en passant, but the piece is not a pawn
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lib::constants::{Color, PieceType, Position, Move, MoveType};
+    /// use chess_lib::logic::Piece;
+    ///
+    /// let piece = Piece {
+    ///     color: Color::White,
+    ///     piece_type: PieceType::Pawn,
+    /// };
+    /// let from = Position::new(4, 1);
+    /// let to = Position::new(4, 3);
+    /// let move_type = MoveType::Normal {
+    ///     capture: false,
+    ///     promotion: None,
+    /// };
+    /// let captured_piece = None;
+    /// let rook_from = None;
+    /// let ambiguity = (false, false);
+    /// let mv = Move::new(
+    ///     piece,
+    ///     from,
+    ///     to,
+    ///     move_type,
+    ///     captured_piece,
+    ///     rook_from,
+    ///     ambiguity,
+    ///     false,
+    ///     false
+    /// );
+    /// ```
+    ///
     pub fn new(
         piece: Piece,
         from: Position,
@@ -228,6 +319,8 @@ impl Move {
         captured_piece: Option<PieceType>,
         rook_from: Option<Position>,
         ambiguity: (bool, bool),
+        check: bool,
+        checkmate: bool,
     ) -> Move {
         match &move_type {
             MoveType::Normal { capture, promotion } => {
@@ -251,11 +344,20 @@ impl Move {
             }
             MoveType::Castle { side: _ } => {
                 assert!(
+                    piece.piece_type == PieceType::King,
+                    "The move is a castle, but the piece is not a king"
+                );
+                assert!(
                     rook_from.is_some(),
                     "The move is a castle, but no rook position is provided"
                 );
             }
-            _ => (),
+            MoveType::EnPassant => {
+                assert!(
+                    piece.piece_type == PieceType::Pawn,
+                    "The move is an en passant, but the piece is not a pawn"
+                );
+            }
         }
         Move {
             piece,
@@ -265,6 +367,8 @@ impl Move {
             captured_piece,
             rook_from,
             ambiguity,
+            check,
+            checkmate,
         }
     }
 }
@@ -304,6 +408,11 @@ impl Display for Move {
                 result.push('x');
                 result.push_str(&self.to.to_string());
             }
+        }
+        if self.checkmate {
+            result.push('#');
+        } else if self.check {
+            result.push('+');
         }
 
         write!(f, "{}", result)

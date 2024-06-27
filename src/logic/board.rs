@@ -111,6 +111,7 @@ impl Board {
             for c in rank.chars() {
                 if c.is_digit(10) {
                     col += c.to_digit(10).unwrap() as u8;
+                    assert!(col <= 8, "Invalid FEN");
                     continue;
                 }
 
@@ -377,19 +378,31 @@ impl Board {
     pub fn is_attacked(&self, pos: Position, color: Color) -> bool {
         let pieces = self.find_all(color);
         for piece in pieces {
-            let piece_type = self.get_piece(&piece).unwrap().piece_type;
-            if piece_movement(&Piece { piece_type, color }, &piece, &pos) {
-                if piece_type == PieceType::Pawn && piece.col == pos.col {
-                    return false;
-                }
-                return match piece_type {
-                    PieceType::Pawn => diagonal_movement(&piece, &pos),
-                    PieceType::Knight | PieceType::King => true,
-                    PieceType::Bishop | PieceType::Rook | PieceType::Queen => {
-                        !self.piece_between(&piece, &pos)
-                    }
-                };
+            if self.can_capture(&piece, &pos) {
+                return true;
             }
+        }
+        false
+    }
+
+    pub fn can_capture(&self, start_pos: &Position, end_pos: &Position) -> bool {
+        let piece = self.get_piece(start_pos).unwrap();
+        let captured_piece = self.get_piece(end_pos);
+
+        if captured_piece.is_some() && piece.color == captured_piece.unwrap().color {
+            return false;
+        }
+        if piece_movement(&piece, start_pos, end_pos) {
+            if piece.piece_type == PieceType::Pawn && start_pos.col == end_pos.col {
+                return false;
+            }
+            return match piece.piece_type {
+                PieceType::Pawn => diagonal_movement(start_pos, end_pos),
+                PieceType::Knight | PieceType::King => true,
+                PieceType::Bishop | PieceType::Rook | PieceType::Queen => {
+                    !self.piece_between(start_pos, end_pos)
+                }
+            };
         }
         false
     }
