@@ -1,7 +1,26 @@
 [package]
-name = "chess-lib"
+name = "chess-lab"
 version = "0.1.0"
 edition = "2021"
+description = "Chess lab"
+authors = ["Santicm23 <santicastrom@outlook.com>"]
+license = "CC0-1.0"
+
+homepage = "https://github.com/Santicm23/chess-lab"
+repository = "https://github.com/Santicm23/chess-lab"
+documentation = "https://docs.rs/chess-lab/0.1.0"
+readme = "README.md"
+keywords = [
+    "chess",
+    "variants",
+    "piece",
+    "fen",
+    "pgn",
+    "tree",
+    "board",
+    "engine",
+    "ai",
+]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

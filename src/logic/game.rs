@@ -22,7 +22,7 @@ use super::board::Board;
 ///
 /// # Example
 /// ```
-/// use chess_lib::logic::Game;
+/// use chess_lab::logic::Game;
 ///
 /// let game = Game::default();
 /// assert_eq!(game.to_string(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
@@ -48,7 +48,7 @@ impl Default for Game {
     ///
     /// # Example
     /// ```
-    /// use chess_lib::logic::Game;
+    /// use chess_lab::logic::Game;
     ///
     /// let game = Game::default();
     /// assert_eq!(game.to_string(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
@@ -93,7 +93,7 @@ impl Game {
     ///
     /// # Example
     /// ```
-    /// use chess_lib::logic::Game;
+    /// use chess_lab::logic::Game;
     ///
     /// let game = Game::new("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", true);
     /// assert_eq!(game.to_string(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
@@ -120,7 +120,7 @@ impl Game {
     ///
     /// # Example
     /// ```
-    /// use chess_lib::logic::Game;
+    /// use chess_lab::logic::Game;
     ///
     /// let game = Game::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     /// assert_eq!(game.to_string(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
@@ -167,7 +167,7 @@ impl Game {
     ///
     /// # Example
     /// ```
-    /// use chess_lib::logic::Game;
+    /// use chess_lab::logic::Game;
     ///
     /// let mut game = Game::default();
     /// game.move_piece("e4").unwrap();
@@ -391,7 +391,7 @@ impl Game {
     ///
     /// # Example
     /// ```
-    /// use chess_lib::logic::Game;
+    /// use chess_lab::logic::Game;
     ///
     /// let game = Game::default();
     /// assert_eq!(game.fen(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
@@ -438,7 +438,7 @@ impl Game {
     ///
     /// # Example
     /// ```
-    /// use chess_lib::logic::Game;
+    /// use chess_lab::logic::Game;
     ///
     /// let mut game = Game::default();
     /// game.move_piece("e4").unwrap();
@@ -520,7 +520,7 @@ impl Game {
     ///
     /// # Example
     /// ```
-    /// use chess_lib::logic::Game;
+    /// use chess_lab::logic::Game;
     ///
     /// let mut game = Game::default();
     /// game.move_piece("e4").unwrap();
@@ -551,7 +551,7 @@ impl Game {
     ///
     /// # Example
     /// ```
-    /// use chess_lib::logic::Game;
+    /// use chess_lab::logic::Game;
     ///
     /// let mut game = Game::default();
     /// game.move_piece("e4").unwrap();
@@ -778,7 +778,7 @@ impl Game {
     ///
     /// # Example
     /// ```
-    /// use chess_lib::logic::Game;
+    /// use chess_lab::logic::Game;
     ///
     /// let mut game = Game::default();
     ///
@@ -815,7 +815,7 @@ impl Game {
     ///
     /// # Example
     /// ```
-    /// use chess_lib::logic::Game;
+    /// use chess_lab::logic::Game;
     ///
     /// let mut game = Game::default();
     ///
@@ -854,7 +854,7 @@ impl Game {
     ///
     /// # Example
     /// ```
-    /// use chess_lib::logic::Game;
+    /// use chess_lab::logic::Game;
     ///
     /// let game = Game::from_fen("8/8/8/8/8/4KQ2/8/4k3 b - - 0 1");
     ///
@@ -879,8 +879,8 @@ impl Game {
     ///
     /// # Example
     /// ```
-    /// use chess_lib::logic::{Game};
-    /// use chess_lib::constants::{Color, GameStatus, WinReason};
+    /// use chess_lab::logic::{Game};
+    /// use chess_lab::constants::{Color, GameStatus, WinReason};
     ///
     /// let mut game = Game::default();
     /// game.resign(Color::White);
@@ -903,8 +903,8 @@ impl Game {
     ///
     /// # Example
     /// ```
-    /// use chess_lib::constants::{Color, GameStatus, WinReason};
-    /// use chess_lib::logic::Game;
+    /// use chess_lab::constants::{Color, GameStatus, WinReason};
+    /// use chess_lab::logic::Game;
     ///
     /// let mut game = Game::default();
     /// game.set_lost_in_time(Color::White);
@@ -924,8 +924,8 @@ impl Game {
     ///
     /// # Example
     /// ```
-    /// use chess_lib::constants::{GameStatus, DrawReason};
-    /// use chess_lib::logic::Game;
+    /// use chess_lab::constants::{GameStatus, DrawReason};
+    /// use chess_lab::logic::Game;
     ///
     /// let mut game = Game::default();
     /// game.set_draw_by_agreement();
@@ -1224,7 +1224,7 @@ impl ToString for Game {
     ///
     /// # Example
     /// ```
-    /// use chess_lib::logic::Game;
+    /// use chess_lab::logic::Game;
     ///
     /// let game = Game::default();
     /// assert_eq!(game.fen(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
