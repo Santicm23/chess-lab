@@ -63,8 +63,8 @@ impl<T: PartialEq + Clone + Display> Default for PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::constants::pgn::PgnTree;
-    /// use chess_lib::constants::Move;
+    /// use chess_lab::constants::pgn::PgnTree;
+    /// use chess_lab::constants::Move;
     ///
     /// let tree: PgnTree<Move> = PgnTree::default();
     /// ```
@@ -110,8 +110,8 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::constants::pgn::PgnTree;
-    /// use chess_lib::constants::Move;
+    /// use chess_lab::constants::pgn::PgnTree;
+    /// use chess_lab::constants::Move;
     ///
     /// let tree: PgnTree<Move> = PgnTree::new(
     ///    Some("Event".to_string()),
@@ -172,8 +172,8 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::constants::{pgn::PgnTree, Move, MoveType, PieceType, Color, Position, GameStatus};
-    /// use chess_lib::logic::Piece;
+    /// use chess_lab::constants::{pgn::PgnTree, Move, MoveType, PieceType, Color, Position, GameStatus};
+    /// use chess_lab::logic::Piece;
     ///
     /// let mut pgn_tree: PgnTree<Move> = PgnTree::default();
     /// let mov = Move::new(
@@ -243,8 +243,8 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
-    /// use chess_lib::logic::Piece;
+    /// use chess_lab::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::logic::Piece;
     ///
     /// let mut tree = PgnTree::default();
     ///
@@ -297,8 +297,8 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
-    /// use chess_lib::logic::Piece;
+    /// use chess_lab::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::logic::Piece;
     ///
     /// let mut tree = PgnTree::default();
     /// let mov = Move::new(
@@ -330,8 +330,8 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
-    /// use chess_lib::logic::Piece;
+    /// use chess_lab::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::logic::Piece;
     ///
     /// let mut tree = PgnTree::default();
     /// let mov = Move::new(
@@ -377,8 +377,8 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
-    /// use chess_lib::logic::Piece;
+    /// use chess_lab::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::logic::Piece;
     ///
     /// let mut pgn_tree = PgnTree::default();
     /// let mov1 = Move::new(
@@ -431,8 +431,8 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
-    /// use chess_lib::logic::Piece;
+    /// use chess_lab::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::logic::Piece;
     ///
     /// let mut pgn_tree = PgnTree::default();
     /// let mov1 = Move::new(
@@ -498,8 +498,8 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///
     /// # Example
     /// ```
-    /// use chess_lib::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
-    /// use chess_lib::logic::Piece;
+    /// use chess_lab::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::logic::Piece;
     ///
     /// let mut pgn_tree = PgnTree::default();
     /// let mov1 = Move::new(
@@ -561,8 +561,8 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
-    /// use chess_lib::logic::Piece;
+    /// use chess_lab::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::logic::Piece;
     ///
     /// let mut pgn_tree = PgnTree::default();
     /// let mov1 = Move::new(
@@ -762,8 +762,8 @@ impl<T: PartialEq + Clone + Display> Iterator for PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
-    /// use chess_lib::logic::Piece;
+    /// use chess_lab::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::logic::Piece;
     ///
     /// let mut pgn_tree = PgnTree::default();
     /// let mov1 = Move::new(
@@ -815,8 +815,8 @@ impl<T: PartialEq + Clone + Display> DoubleEndedIterator for PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
-    /// use chess_lib::logic::Piece;
+    /// use chess_lab::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::logic::Piece;
     ///
     /// let mut pgn_tree = PgnTree::default();
     /// let mov1 = Move::new(

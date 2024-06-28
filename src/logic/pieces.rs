@@ -7,8 +7,8 @@ use crate::constants::{
 ///
 /// # Examples
 /// ```
-/// use chess_lib::logic::Piece;
-/// use chess_lib::constants::{Color, PieceType};
+/// use chess_lab::logic::Piece;
+/// use chess_lab::constants::{Color, PieceType};
 ///
 /// let piece = Piece::new(Color::White, PieceType::Pawn);
 ///
@@ -35,8 +35,8 @@ impl Piece {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::logic::Piece;
-    /// use chess_lib::constants::{Color, PieceType};
+    /// use chess_lab::logic::Piece;
+    /// use chess_lab::constants::{Color, PieceType};
     ///
     /// let piece = Piece::new(Color::White, PieceType::Pawn);
     ///
@@ -57,8 +57,8 @@ impl Piece {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::logic::Piece;
-    /// use chess_lib::constants::{Color, PieceType};
+    /// use chess_lab::logic::Piece;
+    /// use chess_lab::constants::{Color, PieceType};
     ///
     /// let piece = Piece::from_fen('P');
     ///
@@ -94,8 +94,8 @@ impl ToString for Piece {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::logic::Piece;
-    /// use chess_lib::constants::{Color, PieceType};
+    /// use chess_lab::logic::Piece;
+    /// use chess_lab::constants::{Color, PieceType};
     ///
     /// let piece = Piece::new(Color::White, PieceType::Pawn);
     ///
@@ -233,8 +233,8 @@ fn king_movement(start_pos: &Position, end_pos: &Position) -> bool {
 ///
 /// # Examples
 /// ```
-/// use chess_lib::logic::{Piece, piece_movement};
-/// use chess_lib::constants::{Color, PieceType, Position};
+/// use chess_lab::logic::{Piece, piece_movement};
+/// use chess_lab::constants::{Color, PieceType, Position};
 ///
 /// let piece = Piece::new(Color::White, PieceType::Pawn);
 /// let start_pos = Position::new(0, 1);

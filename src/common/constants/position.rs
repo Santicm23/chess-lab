@@ -5,7 +5,7 @@ use std::ops;
 ///
 /// # Examples
 /// ```
-/// use chess_lib::constants::Position;
+/// use chess_lab::constants::Position;
 ///
 /// let pos = Position::new(0, 0);
 ///
@@ -38,7 +38,7 @@ impl Position {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::constants::Position;
+    /// use chess_lab::constants::Position;
     ///
     /// let pos = Position::new(0, 0);
     ///
@@ -64,7 +64,7 @@ impl Position {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::constants::Position;
+    /// use chess_lab::constants::Position;
     ///
     /// let pos = Position::from_string("a1");
     ///
@@ -89,7 +89,7 @@ impl Position {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::constants::Position;
+    /// use chess_lab::constants::Position;
     ///
     /// let pos = Position::new(0, 0);
     ///
@@ -110,7 +110,7 @@ impl Position {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::constants::Position;
+    /// use chess_lab::constants::Position;
     ///
     /// let positions = Position::from_bitboard(0x0000000000000001);
     ///
@@ -139,7 +139,7 @@ impl Position {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::constants::Position;
+    /// use chess_lab::constants::Position;
     ///
     /// let pos1 = Position::new(0, 0);
     /// let pos2 = Position::new(1, 1);
@@ -171,7 +171,7 @@ impl ops::Add<(i8, i8)> for &Position {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::constants::Position;
+    /// use chess_lab::constants::Position;
     ///
     /// let pos = Position::new(0, 0);
     /// let new_pos = &pos + (1, 1);
@@ -201,7 +201,7 @@ impl ops::Sub<&Position> for &Position {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::constants::Position;
+    /// use chess_lab::constants::Position;
     ///
     /// let pos1 = Position::new(0, 0);
     /// let pos2 = Position::new(1, 1);
@@ -232,7 +232,7 @@ impl ops::Sub<(i8, i8)> for &Position {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::constants::Position;
+    /// use chess_lab::constants::Position;
     ///
     /// let pos = Position::new(1, 1);
     /// let new_pos = &pos - (1, 1);
@@ -257,7 +257,7 @@ impl ToString for Position {
     ///
     /// # Examples
     /// ```
-    /// use chess_lib::constants::Position;
+    /// use chess_lab::constants::Position;
     ///
     /// let pos = Position::new(0, 0);
     ///

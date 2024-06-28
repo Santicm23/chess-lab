@@ -24,7 +24,7 @@ impl Color {
     ///
     /// # Example
     /// ```
-    /// use chess_lib::constants::Color;
+    /// use chess_lab::constants::Color;
     ///
     /// assert_eq!(Color::White.opposite(), Color::Black);
     /// assert_eq!(Color::Black.opposite(), Color::White);
@@ -69,7 +69,7 @@ impl PieceType {
     ///
     /// # Example
     /// ```
-    /// use chess_lib::constants::PieceType;
+    /// use chess_lab::constants::PieceType;
     ///
     /// assert_eq!(PieceType::from_char('P'), Some(PieceType::Pawn));
     /// assert_eq!(PieceType::from_char('N'), Some(PieceType::Knight));
@@ -102,7 +102,7 @@ impl PieceType {
     ///
     /// # Example
     /// ```
-    /// use chess_lib::constants::PieceType;
+    /// use chess_lab::constants::PieceType;
     ///
     /// assert_eq!(PieceType::Pawn.to_char(), 'P');
     /// assert_eq!(PieceType::Knight.to_char(), 'N');
@@ -214,8 +214,8 @@ pub enum CastleType {
 ///
 /// # Example
 /// ```
-/// use chess_lib::constants::{Color, PieceType, Position, Move, MoveType};
-/// use chess_lib::logic::Piece;
+/// use chess_lab::constants::{Color, PieceType, Position, Move, MoveType};
+/// use chess_lab::logic::Piece;
 ///
 /// let piece = Piece {
 ///     color: Color::White,
@@ -282,8 +282,8 @@ impl Move {
     ///
     /// # Example
     /// ```
-    /// use chess_lib::constants::{Color, PieceType, Position, Move, MoveType};
-    /// use chess_lib::logic::Piece;
+    /// use chess_lab::constants::{Color, PieceType, Position, Move, MoveType};
+    /// use chess_lab::logic::Piece;
     ///
     /// let piece = Piece {
     ///     color: Color::White,
