@@ -1,14 +1,14 @@
 [package]
 name = "chess-lab"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
-description = "Chess lab"
+description = "Chess library with multiple variants and FEN/PGN support."
 authors = ["Santicm23 <santicastrom@outlook.com>"]
 license = "CC0-1.0"
 
 homepage = "https://github.com/Santicm23/chess-lab"
 repository = "https://github.com/Santicm23/chess-lab"
-documentation = "https://docs.rs/chess-lab/0.1.0"
+documentation = "https://docs.rs/chess-lab"
 readme = "README.md"
 keywords = ["chess", "variants", "fen", "pgn", "engine"]
 
