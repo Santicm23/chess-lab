@@ -1,4 +1,4 @@
-use std::fmt::{Display, Error, Formatter};
+use std::fmt::{self, Display, Error, Formatter};
 
 use crate::logic::Piece;
 
@@ -161,6 +161,18 @@ pub enum DrawReason {
     Agreement,
 }
 
+impl Display for DrawReason {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        match self {
+            DrawReason::Stalemate => write!(f, "Stalemate"),
+            DrawReason::InsufficientMaterial => write!(f, "Insufficient material"),
+            DrawReason::ThreefoldRepetition => write!(f, "Threefold repetition"),
+            DrawReason::FiftyMoveRule => write!(f, "Fifty move rule"),
+            DrawReason::Agreement => write!(f, "Agreement"),
+        }
+    }
+}
+
 /// Represents the reason for a win
 ///
 /// # Variants
@@ -173,6 +185,16 @@ pub enum WinReason {
     Checkmate,
     Resignation,
     Time,
+}
+
+impl Display for WinReason {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        match self {
+            WinReason::Checkmate => write!(f, "Checkmate"),
+            WinReason::Resignation => write!(f, "Resignation"),
+            WinReason::Time => write!(f, "Time"),
+        }
+    }
 }
 
 /// Represents the type of a move

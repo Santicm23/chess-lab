@@ -259,8 +259,8 @@ impl Game {
                     captured_piece,
                     rook_start,
                     ambiguity,
-                    self.check(),
-                    self.checkmate(),
+                    false,
+                    false,
                 ));
 
                 Ok(self.game_status)
@@ -274,7 +274,12 @@ impl Game {
     /// # Arguments
     /// * `mov`: A move that holds the piece type, start and end position, the move type, the captured piece and the rook start position
     ///
-    fn update_rules(&mut self, mov: Move) {
+    fn update_rules(&mut self, mut mov: Move) {
+        self.is_white_turn = !self.is_white_turn;
+
+        mov.check = self.check();
+        mov.checkmate = self.checkmate();
+
         self.history.add_move(
             mov.clone(),
             self.halfmove_clock,
@@ -357,7 +362,6 @@ impl Game {
         } else {
             self.en_passant = None;
         }
-        self.is_white_turn = !self.is_white_turn;
         if self.is_white_turn {
             self.fullmove_number += 1;
         }
@@ -382,6 +386,10 @@ impl Game {
         } else {
             self.game_status = GameStatus::InProgress;
         };
+
+        if self.game_status != GameStatus::InProgress {
+            self.history.game_over(self.game_status);
+        }
     }
 
     /// Returns the FEN representation of the game
@@ -1586,6 +1594,15 @@ mod tests {
     }
 
     #[test]
+    fn test_check_pgn() {
+        let mut game = Game::default();
+        game.move_piece("c4").unwrap();
+        game.move_piece("d6").unwrap();
+        game.move_piece("Qa4+").unwrap();
+        assert_eq!(game.pgn(), "1. c4 d6 2. Qa4+");
+    }
+
+    #[test]
     fn test_checkmate() {
         let mut game = Game::default();
         game.move_piece("e4").unwrap();
@@ -1596,6 +1613,22 @@ mod tests {
         game.move_piece("Nf6").unwrap();
         game.move_piece("Qxf7#").unwrap();
         assert!(game.checkmate());
+    }
+
+    #[test]
+    fn test_checkmate_pgn() {
+        let mut game = Game::default();
+        game.move_piece("e4").unwrap();
+        game.move_piece("e5").unwrap();
+        game.move_piece("Qh5").unwrap();
+        game.move_piece("Nc6").unwrap();
+        game.move_piece("Bc4").unwrap();
+        game.move_piece("Nf6").unwrap();
+        game.move_piece("Qxf7#").unwrap();
+        assert_eq!(
+            game.pgn(),
+            "[Result \"1-0\"]\n[Termination \"Checkmate\"]\n1. e4 e5 2. Qh5 Nc6 3. Bc4 Nf6 4. Qxf7# 1-0\n"
+        );
     }
 
     #[test]

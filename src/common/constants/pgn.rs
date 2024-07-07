@@ -623,7 +623,30 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
         let mut pgn = String::new();
         pgn.push_str(&self.pgn_header());
         pgn.push_str(&self.pgn_moves());
+        if let Some(result) = &self.result {
+            pgn.push_str(&format!(" {}\n", result));
+        }
         pgn
+    }
+
+    pub fn game_over(&mut self, game_status: GameStatus) {
+        if game_status != GameStatus::InProgress {
+            match game_status {
+                GameStatus::WhiteWins(reason) => {
+                    self.result = Some("1-0".to_string());
+                    self.termination = Some(reason.to_string());
+                }
+                GameStatus::BlackWins(reason) => {
+                    self.result = Some("0-1".to_string());
+                    self.termination = Some(reason.to_string());
+                }
+                GameStatus::Draw(reason) => {
+                    self.result = Some("1/2-1/2".to_string());
+                    self.termination = Some(reason.to_string());
+                }
+                _ => (),
+            }
+        }
     }
 
     /// Returns the PGN header
@@ -665,6 +688,9 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
         }
         if let Some(variant) = &self.variant {
             header.push_str(&format!("[Variant \"{}\"]\n", variant));
+        }
+        if let Some(termination) = &self.termination {
+            header.push_str(&format!("[Termination \"{}\"]\n", termination));
         }
         header
     }
