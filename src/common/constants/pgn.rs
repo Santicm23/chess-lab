@@ -39,13 +39,13 @@ impl<T: PartialEq + Clone + Display> PartialEq for PgnLine<T> {
 ///
 #[derive(Debug, Clone)]
 pub struct PgnTree<T: PartialEq + Clone + Display> {
-    pub event: Option<String>,
-    pub site: Option<String>,
-    pub date: Option<String>,
-    pub round: Option<String>,
-    pub white: Option<String>,
-    pub black: Option<String>,
-    pub result: Option<String>,
+    pub event: String,
+    pub site: String,
+    pub date: String,
+    pub round: String,
+    pub white: String,
+    pub black: String,
+    pub result: String,
     pub variant: Option<String>,
     pub white_elo: Option<u32>,
     pub black_elo: Option<u32>,
@@ -71,13 +71,13 @@ impl<T: PartialEq + Clone + Display> Default for PgnTree<T> {
     ///
     fn default() -> PgnTree<T> {
         PgnTree {
-            event: None,
-            site: None,
-            date: None,
-            round: None,
-            white: None,
-            black: None,
-            result: None,
+            event: String::from(""),
+            site: String::from(""),
+            date: String::from(""),
+            round: String::from(""),
+            white: String::from(""),
+            black: String::from(""),
+            result: String::from(""),
             variant: None,
             white_elo: None,
             black_elo: None,
@@ -114,13 +114,13 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     /// use chess_lab::constants::Move;
     ///
     /// let tree: PgnTree<Move> = PgnTree::new(
-    ///    Some("Event".to_string()),
-    ///    Some("Site".to_string()),
-    ///    Some("Date".to_string()),
-    ///    Some("Round".to_string()),
-    ///    Some("White".to_string()),
-    ///    Some("Black".to_string()),
-    ///    Some("Result".to_string()),
+    ///    "Event".to_string(),
+    ///    "Site".to_string(),
+    ///    "Date".to_string(),
+    ///    "Round".to_string(),
+    ///    "White".to_string(),
+    ///    "Black".to_string(),
+    ///    "Result".to_string(),
     ///    Some("Variant".to_string()),
     ///    Some(1000),
     ///    Some(1000),
@@ -130,13 +130,13 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     /// ```
     ///
     pub fn new(
-        event: Option<String>,
-        site: Option<String>,
-        date: Option<String>,
-        round: Option<String>,
-        white: Option<String>,
-        black: Option<String>,
-        result: Option<String>,
+        event: String,
+        site: String,
+        date: String,
+        round: String,
+        white: String,
+        black: String,
+        result: String,
         variant: Option<String>,
         white_elo: Option<u32>,
         black_elo: Option<u32>,
@@ -623,8 +623,8 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
         let mut pgn = String::new();
         pgn.push_str(&self.pgn_header());
         pgn.push_str(&self.pgn_moves());
-        if let Some(result) = &self.result {
-            pgn.push_str(&format!(" {}\n", result));
+        if !self.result.is_empty() {
+            pgn.push_str(&format!(" {}\n", self.result));
         }
         pgn
     }
@@ -633,15 +633,15 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
         if game_status != GameStatus::InProgress {
             match game_status {
                 GameStatus::WhiteWins(reason) => {
-                    self.result = Some("1-0".to_string());
+                    self.result = "1-0".to_string();
                     self.termination = Some(reason.to_string());
                 }
                 GameStatus::BlackWins(reason) => {
-                    self.result = Some("0-1".to_string());
+                    self.result = "0-1".to_string();
                     self.termination = Some(reason.to_string());
                 }
                 GameStatus::Draw(reason) => {
-                    self.result = Some("1/2-1/2".to_string());
+                    self.result = "1/2-1/2".to_string();
                     self.termination = Some(reason.to_string());
                 }
                 _ => (),
@@ -656,27 +656,14 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///
     fn pgn_header(&self) -> String {
         let mut header = String::new();
-        if let Some(event) = &self.event {
-            header.push_str(&format!("[Event \"{}\"]\n", event));
-        }
-        if let Some(site) = &self.site {
-            header.push_str(&format!("[Site \"{}\"]\n", site));
-        }
-        if let Some(date) = &self.date {
-            header.push_str(&format!("[Date \"{}\"]\n", date));
-        }
-        if let Some(round) = &self.round {
-            header.push_str(&format!("[Round \"{}\"]\n", round));
-        }
-        if let Some(white) = &self.white {
-            header.push_str(&format!("[White \"{}\"]\n", white));
-        }
-        if let Some(black) = &self.black {
-            header.push_str(&format!("[Black \"{}\"]\n", black));
-        }
-        if let Some(result) = &self.result {
-            header.push_str(&format!("[Result \"{}\"]\n", result));
-        }
+        header.push_str(&format!("[Event \"{}\"]\n", self.event));
+        header.push_str(&format!("[Site \"{}\"]\n", self.site));
+        header.push_str(&format!("[Date \"{}\"]\n", self.date));
+        header.push_str(&format!("[Round \"{}\"]\n", self.round));
+        header.push_str(&format!("[White \"{}\"]\n", self.white));
+        header.push_str(&format!("[Black \"{}\"]\n", self.black));
+        header.push_str(&format!("[Result \"{}\"]\n", self.result));
+
         if let Some(white_elo) = &self.white_elo {
             header.push_str(&format!("[WhiteElo \"{}\"]\n", white_elo));
         }
@@ -1058,13 +1045,13 @@ mod tests {
     #[test]
     fn test_pgn_header() {
         let mut tree: PgnTree<Move> = PgnTree::default();
-        tree.event = Some("Event".to_string());
-        tree.site = Some("Site".to_string());
-        tree.date = Some("Date".to_string());
-        tree.round = Some("Round".to_string());
-        tree.white = Some("White".to_string());
-        tree.black = Some("Black".to_string());
-        tree.result = Some("Result".to_string());
+        tree.event = "Event".to_string();
+        tree.site = "Site".to_string();
+        tree.date = "Date".to_string();
+        tree.round = "Round".to_string();
+        tree.white = "White".to_string();
+        tree.black = "Black".to_string();
+        tree.result = "Result".to_string();
         tree.white_elo = Some(1000);
         tree.black_elo = Some(1000);
         tree.time_control = Some("TimeControl".to_string());
@@ -1149,6 +1136,6 @@ mod tests {
         pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
         pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
 
-        assert_eq!(pgn_tree.pgn(), "1. e4 e5");
+        assert_eq!(pgn_tree.pgn(), "[Event \"\"]\n[Site \"\"]\n[Date \"\"]\n[Round \"\"]\n[White \"\"]\n[Black \"\"]\n[Result \"\"]\n1. e4 e5");
     }
 }
