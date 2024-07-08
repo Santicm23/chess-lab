@@ -6,19 +6,23 @@ use crate::{
     logic::Game,
 };
 
-pub struct ChessGame {
+pub struct StandardChess {
     game: Game,
 }
 
-impl ChessGame {
-    pub fn new() -> ChessGame {
-        ChessGame {
+impl Variant for StandardChess {
+    fn new() -> Self {
+        StandardChess {
             game: Game::default(),
         }
     }
-}
 
-impl Variant for ChessGame {
+    fn from_fen(fen: &str) -> Self {
+        StandardChess {
+            game: Game::from_fen(fen),
+        }
+    }
+
     fn move_piece(&mut self, move_str: &str) -> Result<GameStatus, MoveError> {
         self.game.move_piece(move_str)
     }
