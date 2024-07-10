@@ -1626,11 +1626,9 @@ mod tests {
         game.move_piece("Bc4").unwrap();
         game.move_piece("Nf6").unwrap();
         game.move_piece("Qxf7#").unwrap();
-        assert!(
-            game.pgn().contains(
-                "[Result \"1-0\"]\n[Termination \"Checkmate\"]\n1. e4 e5 2. Qh5 Nc6 3. Bc4 Nf6 4. Qxf7# 1-0\n"
-            )
-        );
+        assert!(game
+            .pgn()
+            .contains("[Result \"1-0\"]\n1. e4 e5 2. Qh5 Nc6 3. Bc4 Nf6 4. Qxf7# 1-0\n"));
     }
 
     #[test]

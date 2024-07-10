@@ -2,6 +2,142 @@ use std::{cell::RefCell, fmt::Display, rc::Rc};
 
 use super::{GameStatus, Position};
 
+#[derive(Debug, Clone)]
+pub enum OptionPgnMetadata {
+    // Game metadata
+    Variant(String),
+    TimeControl(String),
+    Termination(String),
+
+    // Player metadata
+    WhiteElo(u32),
+    BlackElo(u32),
+    WhiteTitle(String),
+    BlackTitle(String),
+    WhiteUSCF(String),
+    BlackUSCF(String),
+    WhiteNA(String),
+    BlackNA(String),
+    WhiteType(String),
+    BlackType(String),
+
+    // Event metadata
+    EventDate(String),
+    EventSponsor(String),
+    Section(String),
+    Stage(String),
+    Board(String),
+
+    // Opening metadata
+    Opening(String),
+    Variation(String),
+    SubVariation(String),
+    ECO(String),
+    NIC(String),
+
+    // Time and date metadata
+    Time(String),
+    UTCDate(String),
+    UTCTime(String),
+
+    // Starting position metadata
+    SetUp(String),
+    FEN(String),
+
+    // Other metadata
+    Annotator(String),
+    Mode(String),
+    PlyCount(u32),
+}
+impl OptionPgnMetadata {
+    pub fn from_string(key: &str, value: &str) -> Option<OptionPgnMetadata> {
+        match key {
+            "Variant" => Some(OptionPgnMetadata::Variant(value.to_string())),
+            "TimeControl" => Some(OptionPgnMetadata::TimeControl(value.to_string())),
+            "Termination" => Some(OptionPgnMetadata::Termination(value.to_string())),
+            "WhiteElo" => Some(OptionPgnMetadata::WhiteElo(value.parse().unwrap())),
+            "BlackElo" => Some(OptionPgnMetadata::BlackElo(value.parse().unwrap())),
+            "WhiteTitle" => Some(OptionPgnMetadata::WhiteTitle(value.to_string())),
+            "BlackTitle" => Some(OptionPgnMetadata::BlackTitle(value.to_string())),
+            "WhiteUSCF" => Some(OptionPgnMetadata::WhiteUSCF(value.to_string())),
+            "BlackUSCF" => Some(OptionPgnMetadata::BlackUSCF(value.to_string())),
+            "WhiteNA" => Some(OptionPgnMetadata::WhiteNA(value.to_string())),
+            "BlackNA" => Some(OptionPgnMetadata::BlackNA(value.to_string())),
+            "WhiteType" => Some(OptionPgnMetadata::WhiteType(value.to_string())),
+            "BlackType" => Some(OptionPgnMetadata::BlackType(value.to_string())),
+            "EventDate" => Some(OptionPgnMetadata::EventDate(value.to_string())),
+            "EventSponsor" => Some(OptionPgnMetadata::EventSponsor(value.to_string())),
+            "Section" => Some(OptionPgnMetadata::Section(value.to_string())),
+            "Stage" => Some(OptionPgnMetadata::Stage(value.to_string())),
+            "Board" => Some(OptionPgnMetadata::Board(value.to_string())),
+            "Opening" => Some(OptionPgnMetadata::Opening(value.to_string())),
+            "Variation" => Some(OptionPgnMetadata::Variation(value.to_string())),
+            "SubVariation" => Some(OptionPgnMetadata::SubVariation(value.to_string())),
+            "ECO" => Some(OptionPgnMetadata::ECO(value.to_string())),
+            "NIC" => Some(OptionPgnMetadata::NIC(value.to_string())),
+            "Time" => Some(OptionPgnMetadata::Time(value.to_string())),
+            "UTCDate" => Some(OptionPgnMetadata::UTCDate(value.to_string())),
+            "UTCTime" => Some(OptionPgnMetadata::UTCTime(value.to_string())),
+            "SetUp" => Some(OptionPgnMetadata::SetUp(value.to_string())),
+            "FEN" => Some(OptionPgnMetadata::FEN(value.to_string())),
+            "Annotator" => Some(OptionPgnMetadata::Annotator(value.to_string())),
+            "Mode" => Some(OptionPgnMetadata::Mode(value.to_string())),
+            "PlyCount" => Some(OptionPgnMetadata::PlyCount(value.parse().unwrap())),
+            _ => None,
+        }
+    }
+}
+
+impl Display for OptionPgnMetadata {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            OptionPgnMetadata::Variant(variant) => write!(f, "[Variant \"{}\"]", variant),
+            OptionPgnMetadata::TimeControl(time_control) => {
+                write!(f, "[TimeControl \"{}\"]", time_control)
+            }
+            OptionPgnMetadata::Termination(termination) => {
+                write!(f, "[Termination \"{}\"]", termination)
+            }
+            OptionPgnMetadata::WhiteElo(white_elo) => write!(f, "[WhiteElo \"{}\"]", white_elo),
+            OptionPgnMetadata::BlackElo(black_elo) => write!(f, "[BlackElo \"{}\"]", black_elo),
+            OptionPgnMetadata::WhiteTitle(white_title) => {
+                write!(f, "[WhiteTitle \"{}\"]", white_title)
+            }
+            OptionPgnMetadata::BlackTitle(black_title) => {
+                write!(f, "[BlackTitle \"{}\"]", black_title)
+            }
+            OptionPgnMetadata::WhiteUSCF(white_uscf) => write!(f, "[WhiteUSCF \"{}\"]", white_uscf),
+            OptionPgnMetadata::BlackUSCF(black_uscf) => write!(f, "[BlackUSCF \"{}\"]", black_uscf),
+            OptionPgnMetadata::WhiteNA(white_na) => write!(f, "[WhiteNA \"{}\"]", white_na),
+            OptionPgnMetadata::BlackNA(black_na) => write!(f, "[BlackNA \"{}\"]", black_na),
+            OptionPgnMetadata::WhiteType(white_type) => write!(f, "[WhiteType \"{}\"]", white_type),
+            OptionPgnMetadata::BlackType(black_type) => write!(f, "[BlackType \"{}\"]", black_type),
+            OptionPgnMetadata::EventDate(event_date) => write!(f, "[EventDate \"{}\"]", event_date),
+            OptionPgnMetadata::EventSponsor(event_sponsor) => {
+                write!(f, "[EventSponsor \"{}\"]", event_sponsor)
+            }
+            OptionPgnMetadata::Section(section) => write!(f, "[Section \"{}\"]", section),
+            OptionPgnMetadata::Stage(stage) => write!(f, "[Stage \"{}\"]", stage),
+            OptionPgnMetadata::Board(board) => write!(f, "[Board \"{}\"]", board),
+            OptionPgnMetadata::Opening(opening) => write!(f, "[Opening \"{}\"]", opening),
+            OptionPgnMetadata::Variation(variation) => write!(f, "[Variation \"{}\"]", variation),
+            OptionPgnMetadata::SubVariation(sub_variation) => {
+                write!(f, "[SubVariation \"{}\"]", sub_variation)
+            }
+            OptionPgnMetadata::ECO(eco) => write!(f, "[ECO \"{}\"]", eco),
+            OptionPgnMetadata::NIC(nic) => write!(f, "[NIC \"{}\"]", nic),
+            OptionPgnMetadata::Time(time) => write!(f, "[Time \"{}\"]", time),
+            OptionPgnMetadata::UTCDate(utc_date) => write!(f, "[UTCDate \"{}\"]", utc_date),
+            OptionPgnMetadata::UTCTime(utc_time) => write!(f, "[UTCTime \"{}\"]", utc_time),
+            OptionPgnMetadata::SetUp(set_up) => write!(f, "[SetUp \"{}\"]", set_up),
+            OptionPgnMetadata::FEN(fen) => write!(f, "[FEN \"{}\"]", fen),
+            OptionPgnMetadata::Annotator(annotator) => write!(f, "[Annotator \"{}\"]", annotator),
+            OptionPgnMetadata::Mode(mode) => write!(f, "[Mode \"{}\"]", mode),
+            OptionPgnMetadata::PlyCount(ply_count) => write!(f, "[PlyCount \"{}\"]", ply_count),
+        }
+    }
+}
+
 /// A struct representing a PGN line or variation
 /// Its also a tree node that contains a list of child nodes, the parent node,
 /// the move number and the move itself
@@ -46,11 +182,7 @@ pub struct PgnTree<T: PartialEq + Clone + Display> {
     pub white: String,
     pub black: String,
     pub result: String,
-    pub variant: Option<String>,
-    pub white_elo: Option<u32>,
-    pub black_elo: Option<u32>,
-    pub time_control: Option<String>,
-    pub termination: Option<String>,
+    pub option_metadata: Vec<OptionPgnMetadata>,
     lines: Vec<Rc<RefCell<PgnLine<T>>>>,
     current_line: Option<Rc<RefCell<PgnLine<T>>>>,
 }
@@ -71,18 +203,14 @@ impl<T: PartialEq + Clone + Display> Default for PgnTree<T> {
     ///
     fn default() -> PgnTree<T> {
         PgnTree {
-            event: String::from(""),
-            site: String::from(""),
-            date: String::from(""),
-            round: String::from(""),
-            white: String::from(""),
-            black: String::from(""),
-            result: String::from(""),
-            variant: None,
-            white_elo: None,
-            black_elo: None,
-            time_control: None,
-            termination: None,
+            event: "".to_string(),
+            site: "".to_string(),
+            date: "".to_string(),
+            round: "".to_string(),
+            white: "".to_string(),
+            black: "".to_string(),
+            result: "".to_string(),
+            option_metadata: Vec::new(),
             lines: Vec::new(),
             current_line: None,
         }
@@ -121,11 +249,7 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     ///    "White".to_string(),
     ///    "Black".to_string(),
     ///    "Result".to_string(),
-    ///    Some("Variant".to_string()),
-    ///    Some(1000),
-    ///    Some(1000),
-    ///    Some("Time Control".to_string()),
-    ///    Some("Termination".to_string()),
+    ///    Vec::new(),
     /// );
     /// ```
     ///
@@ -137,11 +261,7 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
         white: String,
         black: String,
         result: String,
-        variant: Option<String>,
-        white_elo: Option<u32>,
-        black_elo: Option<u32>,
-        time_control: Option<String>,
-        termination: Option<String>,
+        other_metadata: Vec<OptionPgnMetadata>,
     ) -> PgnTree<T> {
         PgnTree {
             event,
@@ -151,11 +271,7 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
             white,
             black,
             result,
-            variant,
-            white_elo,
-            black_elo,
-            time_control,
-            termination,
+            option_metadata: other_metadata,
             lines: Vec::new(),
             current_line: None,
         }
@@ -632,17 +748,14 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     pub fn game_over(&mut self, game_status: GameStatus) {
         if game_status != GameStatus::InProgress {
             match game_status {
-                GameStatus::WhiteWins(reason) => {
+                GameStatus::WhiteWins(_) => {
                     self.result = "1-0".to_string();
-                    self.termination = Some(reason.to_string());
                 }
-                GameStatus::BlackWins(reason) => {
+                GameStatus::BlackWins(_) => {
                     self.result = "0-1".to_string();
-                    self.termination = Some(reason.to_string());
                 }
-                GameStatus::Draw(reason) => {
+                GameStatus::Draw(_) => {
                     self.result = "1/2-1/2".to_string();
-                    self.termination = Some(reason.to_string());
                 }
                 _ => (),
             }
@@ -663,21 +776,8 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
         header.push_str(&format!("[White \"{}\"]\n", self.white));
         header.push_str(&format!("[Black \"{}\"]\n", self.black));
         header.push_str(&format!("[Result \"{}\"]\n", self.result));
-
-        if let Some(white_elo) = &self.white_elo {
-            header.push_str(&format!("[WhiteElo \"{}\"]\n", white_elo));
-        }
-        if let Some(black_elo) = &self.black_elo {
-            header.push_str(&format!("[BlackElo \"{}\"]\n", black_elo));
-        }
-        if let Some(time_control) = &self.time_control {
-            header.push_str(&format!("[TimeControl \"{}\"]\n", time_control));
-        }
-        if let Some(variant) = &self.variant {
-            header.push_str(&format!("[Variant \"{}\"]\n", variant));
-        }
-        if let Some(termination) = &self.termination {
-            header.push_str(&format!("[Termination \"{}\"]\n", termination));
+        for metadata in self.option_metadata.iter() {
+            header.push_str(&format!("{}\n", metadata));
         }
         header
     }
@@ -1052,12 +1152,8 @@ mod tests {
         tree.white = "White".to_string();
         tree.black = "Black".to_string();
         tree.result = "Result".to_string();
-        tree.white_elo = Some(1000);
-        tree.black_elo = Some(1000);
-        tree.time_control = Some("TimeControl".to_string());
-        tree.variant = Some("Variant".to_string());
 
-        assert_eq!(tree.pgn_header(), "[Event \"Event\"]\n[Site \"Site\"]\n[Date \"Date\"]\n[Round \"Round\"]\n[White \"White\"]\n[Black \"Black\"]\n[Result \"Result\"]\n[WhiteElo \"1000\"]\n[BlackElo \"1000\"]\n[TimeControl \"TimeControl\"]\n[Variant \"Variant\"]\n");
+        assert_eq!(tree.pgn_header(), "[Event \"Event\"]\n[Site \"Site\"]\n[Date \"Date\"]\n[Round \"Round\"]\n[White \"White\"]\n[Black \"Black\"]\n[Result \"Result\"]\n");
     }
 
     #[test]

@@ -1,30 +1,41 @@
 WHITESPACE = _{ " " | "\t" | "\n" | "\r" }
 COMMENT = { "{" ~ (!"}" ~ ANY)* ~ "}" }
 
+// Constants
 word = { (!("]" | "\"") ~ ANY)+ }
-metadata_block = { "[" ~ word ~ "\"" ~ word? ~ "\"]" }
 file = { 'a'..'h' }
 rank = { '1'..'8' }
 piece = { ("K" | "Q" | "R" | "B" | "N") }
 square = @{ file ~ rank }
 option_square = @{ file? ~ rank? }
-castle = { ("O-O-O" | "O-O") }
+
+// Move information
 check_state = { ("+" | "#") }
 promotion = @{ "=" ~ (!"K" ~ piece) }
+castle = { ("O-O-O" | "O-O") }
+move_number = @{ ('1'..'9') ~ ('0'..'9')* ~ "." }
+second_move_number = @{ move_number ~ ".." }
+
+// Move types
 basic_move = ${ piece? ~ ((option_square ~ square) | square) }
 capture = ${ (square | file | rank | (piece ~ option_square)) ~ "x" ~ square }
 move = ${ (((capture | basic_move) ~ promotion?) | castle) ~ check_state? }
-move_number = @{ ('1'..'9') ~ ('0'..'9')* ~ "." }
-second_move_number = @{ move_number ~ ".." }
+
+// Move sequences
 partial_move = { move_number ~ move }
 full_move = { partial_move ~ move }
 half_move = { second_move_number ~ move }
+
+// PGN
+metadata = { "[" ~ word ~ "\"" ~ word? ~ "\"]" }
 line = { (full_move)* ~ partial_move? }
+white_sequence = { (full_move* ~ partial_move) ~ ("(" ~ sequence ~ ")")+ ~ (half_move ~ sequence)? }
+black_sequence = { (full_move+ ~ ("(" ~ half_move ~ sequence ~ ")")+ ~ sequence) }
 sequence = {
-	(full_move+ ~ ("(" ~ half_move ~ sequence ~ ")")+ ~ sequence)
-	| (full_move* ~ partial_move) ~ ("(" ~ sequence ~ ")")+ ~ (half_move ~ sequence)?
+	white_sequence
+	| black_sequence
     | line
 }
 result = { "1/2-1/2" | "1-0" | "0-1" }
 
-pgn = { SOI ~ metadata_block* ~ sequence ~ result? ~ EOI}
+pgn = { SOI ~ metadata* ~ sequence ~ result? ~ EOI}
