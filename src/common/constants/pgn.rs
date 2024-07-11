@@ -777,7 +777,30 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     /// Whether there is a next move
     ///
     /// # Examples
-    /// TODO
+    /// ```
+    /// use chess_lab::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::logic::Piece;
+    ///
+    /// let mut pgn_tree = PgnTree::default();
+    /// let mov1 = Move::new(
+    ///     Piece::new(Color::White, PieceType::Pawn),
+    ///     Position::from_string("e2"),
+    ///     Position::from_string("e4"),
+    ///     MoveType::Normal {
+    ///         capture: false,
+    ///         promotion: None,
+    ///     },
+    ///     None,
+    ///     None,
+    ///     (false, false),
+    ///     false,
+    ///     false,
+    /// );
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
+    /// pgn_tree.prev_move();
+    ///
+    /// assert!(pgn_tree.has_next_move());
+    /// ```
     ///
     pub fn has_next_move(&self) -> bool {
         if self.current_line.is_none() {
@@ -792,7 +815,29 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     /// Whether there is a previous move
     ///
     /// # Examples
-    /// TODO
+    /// ```
+    /// use chess_lab::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::logic::Piece;
+    ///
+    /// let mut pgn_tree = PgnTree::default();
+    /// let mov1 = Move::new(
+    ///     Piece::new(Color::White, PieceType::Pawn),
+    ///     Position::from_string("e2"),
+    ///     Position::from_string("e4"),
+    ///     MoveType::Normal {
+    ///         capture: false,
+    ///         promotion: None,
+    ///     },
+    ///     None,
+    ///     None,
+    ///     (false, false),
+    ///     false,
+    ///     false,
+    /// );
+    ///
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
+    /// assert!(pgn_tree.has_prev_move());
+    /// ```
     ///
     pub fn has_prev_move(&self) -> bool {
         self.current_line.is_some()
@@ -804,7 +849,44 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     /// The PGN of the game
     ///
     /// # Examples
-    /// TODO
+    /// ```
+    /// use chess_lab::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::logic::Piece;
+    ///
+    /// let mut pgn_tree = PgnTree::default();
+    /// let mov1 = Move::new(
+    ///     Piece::new(Color::White, PieceType::Pawn),
+    ///     Position::from_string("e2"),
+    ///     Position::from_string("e4"),
+    ///     MoveType::Normal {
+    ///         capture: false,
+    ///         promotion: None,
+    ///     },
+    ///     None,
+    ///     None,
+    ///     (false, false),
+    ///     false,
+    ///     false,
+    /// );
+    /// let mov2 = Move::new(
+    ///     Piece::new(Color::Black, PieceType::Pawn),
+    ///     Position::from_string("e7"),
+    ///     Position::from_string("e5"),
+    ///     MoveType::Normal {
+    ///         capture: false,
+    ///         promotion: None,
+    ///     },
+    ///     None,
+    ///     None,
+    ///     (false, false),
+    ///     false,
+    ///     false,
+    /// );
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
+    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
+    ///
+    /// assert_eq!(pgn_tree.pgn(), "[Event \"\"]\n[Site \"\"]\n[Date \"\"]\n[Round \"\"]\n[White \"\"]\n[Black \"\"]\n[Result \"\"]\n1. e4 e5");
+    /// ```
     ///
     pub fn pgn(&self) -> String {
         let mut pgn = String::new();
@@ -822,7 +904,15 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     /// * `game_status` - The game status
     ///
     /// # Examples
-    /// TODO
+    /// ```
+    /// use chess_lab::constants::{pgn::PgnTree, Move, GameStatus, WinReason};
+    ///
+    /// let mut pgn_tree: PgnTree<Move> = PgnTree::default();
+    ///
+    /// pgn_tree.game_over(GameStatus::WhiteWins(WinReason::Checkmate));
+    ///
+    /// assert_eq!(pgn_tree.result, "1-0".to_string());
+    /// ```
     ///
     pub fn game_over(&mut self, game_status: GameStatus) {
         if game_status != GameStatus::InProgress {
@@ -861,6 +951,11 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
         header
     }
 
+    /// Returns the PGN moves
+    ///
+    /// # Returns
+    /// The PGN moves
+    ///
     fn pgn_moves(&self) -> String {
         let mut pgn = String::new();
 
@@ -886,6 +981,16 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
         pgn
     }
 
+    /// Returns the PGN moves of a line
+    ///
+    /// # Arguments
+    /// * `line` - The line
+    /// * `move_number` - The move number
+    /// * `secondary` - Whether the line is secondary
+    ///
+    /// # Returns
+    /// The PGN moves of a line
+    ///
     fn pgn_line_moves(
         &self,
         line: Rc<RefCell<PgnLine<T>>>,
@@ -1054,7 +1159,7 @@ impl<T: PartialEq + Clone + Display + Debug> DoubleEndedIterator for PgnTree<T> 
 #[cfg(test)]
 mod tests {
     use crate::constants::pgn::PgnTree;
-    use crate::constants::{Color, GameStatus, Move, MoveType, PieceType, Position};
+    use crate::constants::{Color, GameStatus, Move, MoveType, PieceType, Position, WinReason};
     use crate::logic::Piece;
 
     #[test]
@@ -1312,5 +1417,80 @@ mod tests {
         pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
 
         assert_eq!(pgn_tree.pgn(), "[Event \"\"]\n[Site \"\"]\n[Date \"\"]\n[Round \"\"]\n[White \"\"]\n[Black \"\"]\n[Result \"\"]\n1. e4 e5");
+    }
+
+    #[test]
+    fn test_has_prev_move() {
+        let mut pgn_tree = PgnTree::default();
+        let mov1 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("e2"),
+            Position::from_string("e4"),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        );
+
+        assert!(!pgn_tree.has_prev_move());
+        pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
+
+        assert!(pgn_tree.has_prev_move());
+    }
+
+    #[test]
+    fn test_has_next_move() {
+        let mut pgn_tree = PgnTree::default();
+        let mov1 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("e2"),
+            Position::from_string("e4"),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        );
+        let mov2 = Move::new(
+            Piece::new(Color::Black, PieceType::Pawn),
+            Position::from_string("e7"),
+            Position::from_string("e5"),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        );
+
+        pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
+        pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
+        pgn_tree.prev_move();
+
+        assert!(pgn_tree.has_next_move());
+
+        pgn_tree.next_move();
+        assert!(!pgn_tree.has_next_move());
+    }
+
+    #[test]
+    fn test_game_over() {
+        let mut pgn_tree: PgnTree<Move> = PgnTree::default();
+
+        pgn_tree.game_over(GameStatus::WhiteWins(WinReason::Checkmate));
+
+        assert_eq!(pgn_tree.result, "1-0".to_string());
     }
 }
