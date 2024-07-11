@@ -5,6 +5,7 @@ use super::{Color, GameStatus};
 pub trait Variant {
     fn new() -> Self;
     fn from_fen(fen: &str) -> Self;
+    fn from_pgn(pgn: &str) -> Self;
     fn move_piece(&mut self, move_str: &str) -> Result<GameStatus, MoveError>;
     fn undo(&mut self);
     fn redo(&mut self);

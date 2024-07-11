@@ -440,3 +440,48 @@ impl Display for Move {
         write!(f, "{}", result)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_partial_eq() {
+        let mov1 = Move {
+            piece: Piece {
+                color: Color::White,
+                piece_type: PieceType::Pawn,
+            },
+            from: Position::new(4, 1),
+            to: Position::new(4, 3),
+            move_type: MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            captured_piece: None,
+            rook_from: None,
+            ambiguity: (false, false),
+            check: false,
+            checkmate: false,
+        };
+        let mov2 = Move {
+            piece: Piece {
+                color: Color::White,
+                piece_type: PieceType::Pawn,
+            },
+            from: Position::new(4, 1),
+            to: Position::new(4, 3),
+            move_type: MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            captured_piece: None,
+            rook_from: None,
+            ambiguity: (false, false),
+            check: false,
+            checkmate: false,
+        };
+
+        assert_eq!(mov1, mov2);
+    }
+}

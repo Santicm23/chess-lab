@@ -28,9 +28,11 @@ half_move = { second_move_number ~ move }
 
 // PGN
 metadata = { "[" ~ word ~ "\"" ~ word? ~ "\"]" }
-line = { (full_move)* ~ partial_move? }
-white_sequence = { (full_move* ~ partial_move) ~ ("(" ~ sequence ~ ")")+ ~ (half_move ~ sequence)? }
-black_sequence = { (full_move+ ~ ("(" ~ half_move ~ sequence ~ ")")+ ~ sequence) }
+line = { full_move* ~ partial_move? }
+subsequence = { "(" ~ sequence ~ ")" }
+half_subsequence = { "(" ~ half_move ~ subsequence ~ ")" }
+white_sequence = { (full_move* ~ partial_move) ~ subsequence+ ~ (half_move ~ sequence)? }
+black_sequence = { (full_move+ ~ half_subsequence+ ~ sequence) }
 sequence = {
 	white_sequence
 	| black_sequence

@@ -1,9 +1,8 @@
-use std::{fs::File, io::Write};
-
 use crate::{
     constants::{Color, GameStatus, Variant},
     errors::MoveError,
     logic::Game,
+    utils::os::{read_file, write_file},
 };
 
 pub struct StandardChess {
@@ -21,6 +20,10 @@ impl Variant for StandardChess {
         StandardChess {
             game: Game::from_fen(fen),
         }
+    }
+
+    fn from_pgn(pgn: &str) -> Self {
+        todo!()
     }
 
     fn move_piece(&mut self, move_str: &str) -> Result<GameStatus, MoveError> {
@@ -44,13 +47,14 @@ impl Variant for StandardChess {
     }
 
     fn save(&self, path: &str) -> Result<(), std::io::Error> {
-        let mut file = File::create(path)?;
-        file.write_all(self.game.pgn().as_bytes())?;
+        write_file(path, self.pgn().as_str())?;
         Ok(())
     }
 
     fn load(&mut self, path: &str) -> Result<(), std::io::Error> {
-        todo!()
+        let pgn = read_file(path)?;
+        self.game = Self::from_pgn(pgn.as_str()).game;
+        Ok(())
     }
 
     fn resign(&mut self, color: Color) {

@@ -1,4 +1,8 @@
-use std::{cell::RefCell, fmt::Display, rc::Rc};
+use std::{
+    cell::RefCell,
+    fmt::{Debug, Display},
+    rc::Rc,
+};
 
 use super::{GameStatus, Position};
 
@@ -143,7 +147,7 @@ impl Display for OptionPgnMetadata {
 /// the move number and the move itself
 ///
 #[derive(Debug, Clone)]
-pub struct PgnLine<T: PartialEq + Clone + Display> {
+pub struct PgnLine<T: PartialEq + Clone + Display + Debug> {
     pub lines: Vec<Rc<RefCell<PgnLine<T>>>>,
     pub parent: Option<Rc<RefCell<PgnLine<T>>>>,
     pub halfmove_clock: u32,
@@ -154,7 +158,7 @@ pub struct PgnLine<T: PartialEq + Clone + Display> {
     pub mov: T,
 }
 
-impl<T: PartialEq + Clone + Display> PartialEq for PgnLine<T> {
+impl<T: PartialEq + Clone + Display + Debug> PartialEq for PgnLine<T> {
     /// Compares two PgnLine structs
     /// Two PgnLine structs are equal if their moves are equal
     ///
@@ -165,6 +169,11 @@ impl<T: PartialEq + Clone + Display> PartialEq for PgnLine<T> {
     /// A boolean indicating if the two PgnLine structs are equal
     ///
     fn eq(&self, other: &Self) -> bool {
+        println!(
+            "Comparing {:?} with {:?}",
+            self.mov.to_string(),
+            other.mov.to_string()
+        );
         self.mov == other.mov
     }
 }
@@ -174,7 +183,7 @@ impl<T: PartialEq + Clone + Display> PartialEq for PgnLine<T> {
 /// The current line is the move node that is currently being checked
 ///
 #[derive(Debug, Clone)]
-pub struct PgnTree<T: PartialEq + Clone + Display> {
+pub struct PgnTree<T: PartialEq + Clone + Display + Debug> {
     pub event: String,
     pub site: String,
     pub date: String,
@@ -187,7 +196,7 @@ pub struct PgnTree<T: PartialEq + Clone + Display> {
     current_line: Option<Rc<RefCell<PgnLine<T>>>>,
 }
 
-impl<T: PartialEq + Clone + Display> Default for PgnTree<T> {
+impl<T: PartialEq + Clone + Display + Debug> Default for PgnTree<T> {
     /// Creates a new PgnTree with no metadata and an empty list of lines
     ///
     /// # Returns
@@ -217,7 +226,7 @@ impl<T: PartialEq + Clone + Display> Default for PgnTree<T> {
     }
 }
 
-impl<T: PartialEq + Clone + Display> PgnTree<T> {
+impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     /// Creates a new PgnTree with the provided metadata and an empty list of lines
     ///
     /// # Arguments
@@ -331,14 +340,25 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
                 game_status,
                 mov,
             }));
-            if !current_line.as_ref().borrow_mut().lines.contains(&new_line) {
+
+            if current_line.as_ref().borrow_mut().lines.contains(&new_line) {
+                let index = current_line
+                    .as_ref()
+                    .borrow()
+                    .lines
+                    .iter()
+                    .position(|x| *x == new_line)
+                    .unwrap();
+
+                self.next_move_variant(index as u32);
+            } else {
                 current_line
                     .as_ref()
                     .borrow_mut()
                     .lines
                     .push(Rc::clone(&new_line));
+                self.current_line = Some(new_line);
             }
-            self.current_line = Some(new_line);
         } else {
             let new_line = Rc::new(RefCell::new(PgnLine {
                 lines: Vec::new(),
@@ -350,8 +370,15 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
                 game_status,
                 mov,
             }));
-            self.lines.push(Rc::clone(&new_line));
-            self.current_line = Some(new_line);
+
+            if self.lines.contains(&new_line) {
+                let index = self.lines.iter().position(|x| *x == new_line).unwrap();
+
+                self.next_move_variant(index as u32);
+            } else {
+                self.lines.push(Rc::clone(&new_line));
+                self.current_line = Some(new_line);
+            }
         }
     }
 
@@ -735,6 +762,17 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
         Some(self.current_line.as_ref()?.borrow().mov.clone())
     }
 
+    pub fn has_next_move(&self) -> bool {
+        if self.current_line.is_none() {
+            return !self.lines.is_empty();
+        }
+        self.current_line.as_ref().unwrap().borrow().lines.len() > 0
+    }
+
+    pub fn has_prev_move(&self) -> bool {
+        self.current_line.is_some()
+    }
+
     pub fn pgn(&self) -> String {
         let mut pgn = String::new();
         pgn.push_str(&self.pgn_header());
@@ -865,7 +903,7 @@ impl<T: PartialEq + Clone + Display> PgnTree<T> {
     }
 }
 
-impl<T: PartialEq + Clone + Display> Iterator for PgnTree<T> {
+impl<T: PartialEq + Clone + Display + Debug> Iterator for PgnTree<T> {
     type Item = T;
 
     /// Returns the next move
@@ -920,7 +958,7 @@ impl<T: PartialEq + Clone + Display> Iterator for PgnTree<T> {
     }
 }
 
-impl<T: PartialEq + Clone + Display> DoubleEndedIterator for PgnTree<T> {
+impl<T: PartialEq + Clone + Display + Debug> DoubleEndedIterator for PgnTree<T> {
     /// Returns the previous move
     ///
     /// # Returns

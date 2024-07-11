@@ -546,10 +546,33 @@ impl Game {
         }
 
         let mov = mov.unwrap();
+        self.history.prev_move();
 
         self.move_piece(mov.to_string().as_str()).unwrap();
+    }
 
-        self.history.next_move();
+    pub fn redo_nth(&mut self, n: u32) {
+        let mov = self.history.next_move_variant(n);
+
+        if let None = mov {
+            return;
+        }
+
+        let mov = mov.unwrap();
+
+        self.move_piece(mov.to_string().as_str()).unwrap();
+    }
+
+    pub fn start(&mut self) {
+        while self.history.has_prev_move() {
+            self.undo();
+        }
+    }
+
+    pub fn end(&mut self) {
+        while self.history.has_next_move() {
+            self.redo();
+        }
     }
 
     /// Returns the PGN of the game
@@ -1524,6 +1547,66 @@ mod tests {
     }
 
     #[test]
+    fn test_redo_principal_line() {
+        let mut game = Game::default();
+        game.move_piece("e4").unwrap();
+        game.undo();
+        game.move_piece("d4").unwrap();
+        game.undo();
+
+        assert_eq!(game.history.all_next_moves().len(), 2);
+
+        game.redo();
+        assert_eq!(
+            game.fen(),
+            "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1"
+        );
+    }
+
+    #[test]
+    fn test_multiple_redos() {
+        let mut game = Game::default();
+        game.move_piece("e4").unwrap();
+        game.move_piece("e5").unwrap();
+        game.move_piece("Nf3").unwrap();
+        game.move_piece("Nc6").unwrap();
+        game.move_piece("Bb5").unwrap();
+        game.move_piece("a6").unwrap();
+        game.move_piece("O-O").unwrap();
+
+        game.start();
+
+        game.redo();
+        game.redo();
+        game.redo();
+        game.redo();
+        game.redo();
+        game.redo();
+        game.redo();
+
+        assert_eq!(
+            game.fen(),
+            "r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQ1RK1 b kq - 1 4"
+        );
+    }
+
+    #[test]
+    fn test_auto_redo() {
+        let mut game = Game::default();
+        game.move_piece("e4").unwrap();
+        game.move_piece("e5").unwrap();
+        game.undo();
+        game.undo();
+        game.move_piece("e4").unwrap();
+        game.redo();
+
+        assert_eq!(
+            game.fen(),
+            "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2"
+        );
+    }
+
+    #[test]
     fn test_play_other_move() {
         let mut game = Game::default();
         game.move_piece("e4").unwrap();
@@ -1545,6 +1628,59 @@ mod tests {
         assert_eq!(
             game.fen(),
             "rnbqkbnr/pppp1ppp/8/4p3/4P3/2N5/PPPP1PPP/R1BQKBNR b KQkq - 1 2"
+        );
+    }
+
+    #[test]
+    fn redo_nth() {
+        let mut game = Game::default();
+        game.move_piece("e4").unwrap();
+        game.undo();
+        game.move_piece("d4").unwrap();
+        game.undo();
+        game.redo_nth(1);
+        assert_eq!(
+            game.fen(),
+            "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1"
+        );
+    }
+
+    #[test]
+    fn test_start() {
+        let mut game = Game::default();
+        game.move_piece("e4").unwrap();
+        game.move_piece("e5").unwrap();
+        game.move_piece("Nf3").unwrap();
+        game.move_piece("Nc6").unwrap();
+        game.move_piece("Bb5").unwrap();
+        game.move_piece("a6").unwrap();
+        game.move_piece("O-O").unwrap();
+
+        game.start();
+
+        assert_eq!(
+            game.fen(),
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+        );
+    }
+
+    #[test]
+    fn test_end() {
+        let mut game = Game::default();
+        game.move_piece("e4").unwrap();
+        game.move_piece("e5").unwrap();
+        game.move_piece("Nf3").unwrap();
+        game.move_piece("Nc6").unwrap();
+        game.move_piece("Bb5").unwrap();
+        game.move_piece("a6").unwrap();
+        game.move_piece("O-O").unwrap();
+
+        game.start();
+        game.end();
+
+        assert_eq!(
+            game.fen(),
+            "r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQ1RK1 b kq - 1 4"
         );
     }
 
