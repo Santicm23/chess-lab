@@ -54,6 +54,15 @@ pub enum OptionPgnMetadata {
     PlyCount(u32),
 }
 impl OptionPgnMetadata {
+    /// Create a new OptionPgnMetadata from a key and a value.
+    ///
+    /// # Arguments
+    /// * `key` - The key of the metadata.
+    /// * `value` - The value of the metadata.
+    ///
+    /// # Returns
+    /// An OptionPgnMetadata if the key is valid, otherwise None.
+    ///
     pub fn from_string(key: &str, value: &str) -> Option<OptionPgnMetadata> {
         match key {
             "Variant" => Some(OptionPgnMetadata::Variant(value.to_string())),
@@ -762,6 +771,14 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
         Some(self.current_line.as_ref()?.borrow().mov.clone())
     }
 
+    /// Returns whether there is a next move
+    ///
+    /// # Returns
+    /// Whether there is a next move
+    ///
+    /// # Examples
+    /// TODO
+    ///
     pub fn has_next_move(&self) -> bool {
         if self.current_line.is_none() {
             return !self.lines.is_empty();
@@ -769,10 +786,26 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
         self.current_line.as_ref().unwrap().borrow().lines.len() > 0
     }
 
+    /// Returns whether there is a previous move
+    ///
+    /// # Returns
+    /// Whether there is a previous move
+    ///
+    /// # Examples
+    /// TODO
+    ///
     pub fn has_prev_move(&self) -> bool {
         self.current_line.is_some()
     }
 
+    /// Returns the PGN of the game
+    ///
+    /// # Returns
+    /// The PGN of the game
+    ///
+    /// # Examples
+    /// TODO
+    ///
     pub fn pgn(&self) -> String {
         let mut pgn = String::new();
         pgn.push_str(&self.pgn_header());
@@ -783,6 +816,14 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
         pgn
     }
 
+    /// Sets the game result
+    ///
+    /// # Arguments
+    /// * `game_status` - The game status
+    ///
+    /// # Examples
+    /// TODO
+    ///
     pub fn game_over(&mut self, game_status: GameStatus) {
         if game_status != GameStatus::InProgress {
             match game_status {

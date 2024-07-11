@@ -2,6 +2,25 @@ use crate::errors::MoveError;
 
 use super::{Color, GameStatus};
 
+/// A trait for a chess variant.
+///
+/// A chess variant is a game that is derived from chess, but has different rules.
+///
+/// Methods:
+/// * `new` - creates a new instance of the variant.
+/// * `from_fen` - creates a new instance of the variant from a FEN string.
+/// * `from_pgn` - creates a new instance of the variant from a PGN string.
+/// * `move_piece` - moves a piece on the board.
+/// * `undo` - undoes the last move.
+/// * `redo` - redoes the last move.
+/// * `pgn` - returns the PGN string of the game.
+/// * `fen` - returns the FEN string of the game.
+/// * `save` - saves the game to a file.
+/// * `load` - loads the game from a file.
+/// * `resign` - resigns the game for a player.
+/// * `draw` - offers a draw to the opponent.
+/// * `set_lost_in_time` - sets a player as lost in time.
+///
 pub trait Variant {
     fn new() -> Self;
     fn from_fen(fen: &str) -> Self;

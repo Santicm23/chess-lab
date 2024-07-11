@@ -551,6 +551,27 @@ impl Game {
         self.move_piece(mov.to_string().as_str()).unwrap();
     }
 
+    /// Redoes the nth variation of the last undone move
+    ///
+    /// # Arguments
+    /// * `n` - The number of the variation to redo
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lab::logic::Game;
+    ///
+    /// let mut game = Game::default();
+    /// game.move_piece("e4").unwrap();
+    /// game.undo();
+    /// game.move_piece("d4").unwrap();
+    /// game.undo();
+    /// game.redo_nth(1);
+    /// assert_eq!(
+    ///     game.fen(),
+    ///     "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1"
+    /// );
+    /// ```
+    ///
     pub fn redo_nth(&mut self, n: u32) {
         let mov = self.history.next_move_variant(n);
 
@@ -563,12 +584,42 @@ impl Game {
         self.move_piece(mov.to_string().as_str()).unwrap();
     }
 
+    /// Undoes all moves until the starting position
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lab::logic::Game;
+    ///
+    /// let mut game = Game::default();
+    /// game.move_piece("e4").unwrap();
+    /// game.move_piece("e5").unwrap();
+    /// game.start();
+    ///
+    /// assert_eq!(game.fen(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    /// ```
+    ///
     pub fn start(&mut self) {
         while self.history.has_prev_move() {
             self.undo();
         }
     }
 
+    /// Redoes all moves until the last move
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lab::logic::Game;
+    ///
+    /// let mut game = Game::default();
+    /// game.move_piece("e4").unwrap();
+    /// game.move_piece("e5").unwrap();
+    ///
+    /// game.start();
+    /// game.end();
+    ///
+    /// assert_eq!(game.fen(), "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2");
+    /// ```
+    ///
     pub fn end(&mut self) {
         while self.history.has_next_move() {
             self.redo();
