@@ -74,9 +74,7 @@ impl Position {
     ///
     pub fn from_string(s: &str) -> Position {
         assert!(s.len() == 2, "Invalid position string");
-        if s.len() != 2 {
-            assert!(false, "Invalid position string");
-        }
+
         let col = s.chars().nth(0).unwrap() as u8 - 'a' as u8;
         let row = s.chars().nth(1).unwrap() as u8 - '1' as u8;
         Position::new(col, row)

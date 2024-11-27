@@ -23,7 +23,7 @@ move = ${ (((capture | basic_move) ~ promotion?) | castle) ~ check_state? }
 
 // Move sequences
 partial_move = { move_number ~ move }
-full_move = { partial_move ~ move }
+full_move = { move_number ~ move{2} }
 half_move = { second_move_number ~ move }
 
 // PGN

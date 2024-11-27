@@ -1202,8 +1202,7 @@ impl Game {
         end_pos: &Position,
         side: &CastleType,
     ) -> bool {
-        assert!(piece.piece_type == PieceType::King);
-        if start_pos.row != end_pos.row {
+        if piece.piece_type != PieceType::King || start_pos.row != end_pos.row {
             return false;
         }
 

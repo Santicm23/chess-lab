@@ -1,7 +1,7 @@
 use std::{
     cell::RefCell,
     fmt::{Debug, Display},
-    rc::Rc,
+    rc::{Rc, Weak},
 };
 
 use super::{GameStatus, Position};
@@ -158,7 +158,7 @@ impl Display for OptionPgnMetadata {
 #[derive(Debug, Clone)]
 pub struct PgnLine<T: PartialEq + Clone + Display + Debug> {
     pub lines: Vec<Rc<RefCell<PgnLine<T>>>>,
-    pub parent: Option<Rc<RefCell<PgnLine<T>>>>,
+    pub parent: Option<Weak<RefCell<PgnLine<T>>>>,
     pub halfmove_clock: u32,
     pub fullmove_number: u32,
     pub en_passant: Option<Position>,
@@ -178,11 +178,6 @@ impl<T: PartialEq + Clone + Display + Debug> PartialEq for PgnLine<T> {
     /// A boolean indicating if the two PgnLine structs are equal
     ///
     fn eq(&self, other: &Self) -> bool {
-        println!(
-            "Comparing {:?} with {:?}",
-            self.mov.to_string(),
-            other.mov.to_string()
-        );
         self.mov == other.mov
     }
 }
@@ -341,7 +336,7 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
         if let Some(current_line) = &self.current_line {
             let new_line = Rc::new(RefCell::new(PgnLine {
                 lines: Vec::new(),
-                parent: Some(Rc::clone(&current_line)),
+                parent: Some(Rc::downgrade(&current_line)),
                 halfmove_clock,
                 fullmove_number,
                 en_passant,
@@ -429,15 +424,21 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
             return;
         }
 
-        let parent = Rc::clone(&current_line_borrowed.parent.as_ref().unwrap());
+        let parent = current_line_borrowed
+            .parent
+            .as_ref()
+            .unwrap()
+            .upgrade()
+            .unwrap();
         let index = parent
+            .as_ref()
             .borrow()
             .lines
             .iter()
             .position(|x| Rc::ptr_eq(x, &self.current_line.as_ref().unwrap()))
             .unwrap();
 
-        parent.borrow_mut().lines.remove(index);
+        parent.as_ref().borrow_mut().lines.remove(index);
 
         self.current_line = Some(parent);
     }
@@ -628,16 +629,16 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///
     pub fn next_move_variant(&mut self, variant: u32) -> Option<T> {
         if let Some(current_line) = &self.current_line {
-            if current_line.borrow().lines.len() > variant as usize {
-                let next_line = Rc::clone(&current_line.borrow().lines[variant as usize]);
+            if current_line.as_ref().borrow().lines.len() > variant as usize {
+                let next_line = Rc::clone(&current_line.as_ref().borrow().lines[variant as usize]);
                 self.current_line = Some(Rc::clone(&next_line));
-                return Some(next_line.borrow().mov.clone());
+                return Some(next_line.as_ref().borrow().mov.clone());
             }
         } else {
             if self.lines.len() > variant as usize {
                 let next_line = Rc::clone(&self.lines[variant as usize]);
                 self.current_line = Some(Rc::clone(&next_line));
-                return Some(next_line.borrow().mov.clone());
+                return Some(next_line.as_ref().borrow().mov.clone());
             }
         }
         None
@@ -695,12 +696,12 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     pub fn all_next_moves(&self) -> Vec<T> {
         let mut moves = Vec::new();
         if let Some(current_line) = &self.current_line {
-            for line in current_line.borrow().lines.iter() {
-                moves.push(line.borrow().mov.clone());
+            for line in current_line.as_ref().borrow().lines.iter() {
+                moves.push(line.as_ref().borrow().mov.clone());
             }
         } else {
             for line in self.lines.iter() {
-                moves.push(line.borrow().mov.clone());
+                moves.push(line.as_ref().borrow().mov.clone());
             }
         }
         moves
@@ -758,16 +759,15 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
             return None;
         }
 
-        let parent = Rc::clone(
-            &self
-                .current_line
-                .as_ref()?
-                .borrow()
-                .parent
-                .as_ref()
-                .unwrap(),
-        );
-        self.current_line = Some(Rc::clone(&parent));
+        let parent = &self
+            .current_line
+            .as_ref()?
+            .borrow()
+            .parent
+            .as_ref()?
+            .upgrade()
+            .unwrap();
+        self.current_line = Some(Rc::clone(parent));
         Some(self.current_line.as_ref()?.borrow().mov.clone())
     }
 
@@ -806,7 +806,14 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
         if self.current_line.is_none() {
             return !self.lines.is_empty();
         }
-        self.current_line.as_ref().unwrap().borrow().lines.len() > 0
+        self.current_line
+            .as_ref()
+            .unwrap()
+            .as_ref()
+            .borrow()
+            .lines
+            .len()
+            > 0
     }
 
     /// Returns whether there is a previous move
