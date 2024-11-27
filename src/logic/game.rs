@@ -150,7 +150,7 @@ impl Game {
         game.en_passant = if parts[3] == "-" {
             None
         } else {
-            Some(Position::from_string(parts[3]))
+            Some(Position::from_string(parts[3]).unwrap())
         };
         game.halfmove_clock = parts[4].parse::<u32>().unwrap();
         game.fullmove_number = parts[5].parse::<u32>().unwrap();
@@ -186,7 +186,15 @@ impl Game {
             Color::Black
         };
 
-        let start_pos = self.find_piece(piece_type, color, start_pos_info, &end_pos, &move_type)?;
+        let positions = self.find_pieces(piece_type, color, start_pos_info, &end_pos, &move_type);
+
+        let start_pos = match positions.len() {
+            0 => return Err(MoveError::Illegal(move_str.to_string())),
+            1 => positions[0],
+            _ => {
+                return Err(MoveError::Ambiguous(move_str.to_string()));
+            }
+        };
 
         let mut rook_start: Option<Position> = None;
         let mut captured_piece: Option<PieceType> =
@@ -251,21 +259,24 @@ impl Game {
                 let ambiguity =
                     self.move_ambiguity(piece_type, color, start_pos_info, &end_pos, &move_type);
 
-                self.update_rules(Move::new(
-                    Piece::new(color, piece_type),
-                    start_pos,
-                    end_pos,
-                    move_type,
-                    captured_piece,
-                    rook_start,
-                    ambiguity,
-                    false,
-                    false,
-                ));
+                self.update_rules(
+                    Move::new(
+                        Piece::new(color, piece_type),
+                        start_pos,
+                        end_pos,
+                        move_type,
+                        captured_piece,
+                        rook_start,
+                        ambiguity,
+                        false,
+                        false,
+                    )
+                    .unwrap(),
+                );
 
                 Ok(self.game_status)
             }
-            Err(_) => Err(MoveError::Illegal),
+            Err(_) => Err(MoveError::Invalid(move_str.to_string())),
         }
     }
 
@@ -662,7 +673,7 @@ impl Game {
         let re =
             Regex::new(r"^([NBRQK]?[a-h]?[1-8]?x?[a-h][1-8](=[NBRQ])?|O(-O){1,2})[+#]?").unwrap();
         if !re.is_match(move_str.as_str()) || move_str.starts_with('x') {
-            return Err(MoveError::Invalid);
+            return Err(MoveError::Invalid(move_str));
         }
 
         if move_str.chars().last().unwrap() == '+' || move_str.chars().last().unwrap() == '#' {
@@ -676,29 +687,29 @@ impl Game {
                 if (self.castling_rights & 0b1000 == 0 || !self.is_white_turn)
                     && (self.castling_rights & 0b0010 == 0 || self.is_white_turn)
                 {
-                    return Err(MoveError::Invalid);
+                    return Err(MoveError::Invalid(move_str));
                 }
                 castle_side = CastleType::KingSide;
                 end_pos = if self.is_white_turn {
-                    Position::from_string("g1")
+                    Position::from_string("g1").unwrap()
                 } else {
-                    Position::from_string("g8")
+                    Position::from_string("g8").unwrap()
                 };
             } else if move_str == "O-O-O" {
                 if (self.castling_rights & 0b0100 == 0 || !self.is_white_turn)
                     && (self.castling_rights & 0b0001 == 0 || self.is_white_turn)
                 {
-                    return Err(MoveError::Invalid);
+                    return Err(MoveError::Invalid(move_str));
                 }
                 castle_side = CastleType::QueenSide;
 
                 end_pos = if self.is_white_turn {
-                    Position::from_string("c1")
+                    Position::from_string("c1").unwrap()
                 } else {
-                    Position::from_string("c8")
+                    Position::from_string("c8").unwrap()
                 };
             } else {
-                return Err(MoveError::Invalid);
+                return Err(MoveError::Invalid(move_str));
             }
             return Ok((
                 PieceType::King,
@@ -727,18 +738,19 @@ impl Game {
 
             if move_str.contains('=') {
                 if "NBRQK".contains(move_str.chars().next().unwrap()) {
-                    return Err(MoveError::Invalid);
+                    return Err(MoveError::Invalid(move_str));
                 }
 
                 promotion = Some(PieceType::from_char(move_str.chars().last().unwrap()).unwrap());
-                end_pos = Position::from_string(&move_str[move_str.len() - 4..move_str.len() - 2]);
+                end_pos = Position::from_string(&move_str[move_str.len() - 4..move_str.len() - 2])
+                    .unwrap();
                 end_pos_index = move_str.len() - 4;
 
                 if end_pos.row != 0 && end_pos.row != 7 {
-                    return Err(MoveError::Invalid);
+                    return Err(MoveError::Invalid(move_str));
                 }
             } else {
-                end_pos = Position::from_string(&move_str[move_str.len() - 2..]);
+                end_pos = Position::from_string(&move_str[move_str.len() - 2..]).unwrap();
                 end_pos_index = move_str.len() - 2;
                 promotion = None;
             }
@@ -1018,7 +1030,7 @@ impl Game {
         self.game_status = GameStatus::Draw(DrawReason::Agreement);
     }
 
-    /// Finds the position of a piece that matches the given criteria to move
+    /// Finds the position of the pieces that matches the given criteria to move
     ///
     /// # Arguments
     /// * `piece`: The type of piece to find
@@ -1028,17 +1040,16 @@ impl Game {
     /// * `move_type`: The type of move to find
     ///
     /// # Returns
-    /// The position of the piece on the board
-    /// If the piece is not found or there are multiple pieces that match the criteria, an error is returned
+    /// The position of the pieces on the board
     ///
-    fn find_piece(
+    fn find_pieces(
         &self,
         piece: PieceType,
         color: Color,
         start_pos: (Option<u8>, Option<u8>),
         end_pos: &Position,
         move_type: &MoveType,
-    ) -> Result<Position, MoveError> {
+    ) -> Vec<Position> {
         let mut positions = match move_type {
             MoveType::Normal {
                 capture: _,
@@ -1074,13 +1085,7 @@ impl Game {
             }
         }
 
-        if valid_positions.len() == 0 {
-            return Err(MoveError::Illegal);
-        } else if valid_positions.len() == 1 {
-            return Ok(valid_positions[0]);
-        } else {
-            return Err(MoveError::Ambiguous);
-        }
+        return valid_positions;
     }
 
     /// Checks if the move representation has to contain the column or row of the piece to move
@@ -1215,11 +1220,12 @@ impl Game {
                 }
 
                 for col in start_pos.col + 0..end_pos.col + 1 {
-                    let new_pos = Position::new(col, start_pos.row);
+                    let new_pos = Position::new(col, start_pos.row).unwrap();
                     if (&new_pos != start_pos && self.board.is_ocupied(&new_pos))
-                        || self
-                            .board
-                            .is_attacked(Position::new(col, start_pos.row), piece.color.opposite())
+                        || self.board.is_attacked(
+                            Position::new(col, start_pos.row).unwrap(),
+                            piece.color.opposite(),
+                        )
                     {
                         return false;
                     }
@@ -1234,10 +1240,13 @@ impl Game {
                 }
 
                 for col in start_pos.col - 0..end_pos.col + 1 {
-                    if self.board.is_ocupied(&Position::new(col, start_pos.row))
-                        || self
-                            .board
-                            .is_attacked(Position::new(col, start_pos.row), piece.color.opposite())
+                    if self
+                        .board
+                        .is_ocupied(&Position::new(col, start_pos.row).unwrap())
+                        || self.board.is_attacked(
+                            Position::new(col, start_pos.row).unwrap(),
+                            piece.color.opposite(),
+                        )
                     {
                         return false;
                     }
@@ -1263,7 +1272,7 @@ impl Game {
             let piece = self.board.get_piece(&piece_pos).unwrap();
             for col in 0..8 {
                 for row in 0..8 {
-                    let end_pos = Position::new(col, row);
+                    let end_pos = Position::new(col, row).unwrap();
 
                     let mut board = self.board.clone();
                     if !board.can_capture(&piece_pos, &end_pos) {

@@ -1,3 +1,8 @@
+use crate::{
+    constants::{MoveType, PieceType, Position},
+    logic::Piece,
+};
+
 /// Errors that can occur when trying to move a piece
 ///
 /// # Variants
@@ -7,7 +12,21 @@
 ///
 #[derive(Debug, PartialEq)]
 pub enum MoveError {
-    Invalid,
-    Illegal,
-    Ambiguous,
+    Invalid(String),
+    Illegal(String),
+    Ambiguous(String),
+}
+
+#[derive(Debug)]
+pub struct MoveInfoError {
+    pub error: String,
+    pub piece: Piece,
+    pub from: Position,
+    pub to: Position,
+    pub move_type: MoveType,
+    pub captured_piece: Option<PieceType>,
+    pub rook_from: Option<Position>,
+    pub ambiguity: (bool, bool),
+    pub check: bool,
+    pub checkmate: bool,
 }

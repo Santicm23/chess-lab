@@ -1,5 +1,6 @@
 mod board;
 mod movements;
+mod position;
 
-pub use board::*;
 pub use movements::*;
+pub use position::*;

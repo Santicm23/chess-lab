@@ -1,6 +1,6 @@
 use std::fmt::{self, Display, Error, Formatter};
 
-use crate::logic::Piece;
+use crate::{errors::MoveInfoError, logic::Piece};
 
 use super::Position;
 
@@ -343,45 +343,64 @@ impl Move {
         ambiguity: (bool, bool),
         check: bool,
         checkmate: bool,
-    ) -> Move {
+    ) -> Result<Move, MoveInfoError> {
+        let mut move_info_error = MoveInfoError {
+            error: String::new(),
+            piece,
+            from,
+            to,
+            move_type: move_type.clone(),
+            captured_piece,
+            rook_from,
+            ambiguity,
+            check,
+            checkmate,
+        };
         match &move_type {
             MoveType::Normal { capture, promotion } => {
                 if *capture {
-                    assert!(
-                        captured_piece.is_some(),
-                        "The move is a capture, but no captured piece is provided"
-                    );
+                    if captured_piece.is_none() {
+                        move_info_error.error =
+                            "The move is a capture, but no captured piece is provided".to_string();
+                        return Err(move_info_error);
+                    }
                 } else {
-                    assert!(
-                        captured_piece.is_none(),
-                        "The move is not a capture, but a captured piece is provided"
-                    );
+                    if captured_piece.is_some() {
+                        move_info_error.error =
+                            "The move is not a capture, but a captured piece is provided"
+                                .to_string();
+                        return Err(move_info_error);
+                    }
                 }
                 if promotion.is_some() {
-                    assert!(
-                        piece.piece_type == PieceType::Pawn,
-                        "The move is a promotion, but the piece is not a pawn"
-                    );
+                    if piece.piece_type != PieceType::Pawn {
+                        move_info_error.error =
+                            "The move is a promotion, but the piece is not a pawn".to_string();
+                        return Err(move_info_error);
+                    }
                 }
             }
             MoveType::Castle { side: _ } => {
-                assert!(
-                    piece.piece_type == PieceType::King,
-                    "The move is a castle, but the piece is not a king"
-                );
-                assert!(
-                    rook_from.is_some(),
-                    "The move is a castle, but no rook position is provided"
-                );
+                if piece.piece_type != PieceType::King {
+                    move_info_error.error =
+                        "The move is a castle, but the piece is not a king".to_string();
+                    return Err(move_info_error);
+                }
+                if rook_from.is_none() {
+                    move_info_error.error =
+                        "The move is a castle, but no rook position is provided".to_string();
+                    return Err(move_info_error);
+                }
             }
             MoveType::EnPassant => {
-                assert!(
-                    piece.piece_type == PieceType::Pawn,
-                    "The move is an en passant, but the piece is not a pawn"
-                );
+                if piece.piece_type != PieceType::Pawn {
+                    move_info_error.error =
+                        "The move is an en passant, but the piece is not a pawn".to_string();
+                    return Err(move_info_error);
+                }
             }
         }
-        Move {
+        Ok(Move {
             piece,
             from,
             to,
@@ -391,7 +410,7 @@ impl Move {
             ambiguity,
             check,
             checkmate,
-        }
+        })
     }
 }
 

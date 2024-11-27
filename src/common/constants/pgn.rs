@@ -1174,8 +1174,8 @@ mod tests {
         let mut pgn_tree = PgnTree::default();
         let mov = Move::new(
             Piece::new(Color::Black, PieceType::Pawn),
-            Position::from_string("e2"),
-            Position::from_string("e4"),
+            Position::from_string("e2").unwrap(),
+            Position::from_string("e4").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1185,7 +1185,8 @@ mod tests {
             (false, false),
             false,
             false,
-        );
+        )
+        .unwrap();
         pgn_tree.add_move(mov.clone(), 0, 0, None, 0, GameStatus::InProgress);
 
         assert_eq!(mov, pgn_tree.get_move().unwrap());
@@ -1196,8 +1197,8 @@ mod tests {
         let mut pgn_tree = PgnTree::default();
         let mov = Move::new(
             Piece::new(Color::Black, PieceType::Pawn),
-            Position::from_string("e2"),
-            Position::from_string("e4"),
+            Position::from_string("e2").unwrap(),
+            Position::from_string("e4").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1207,7 +1208,8 @@ mod tests {
             (false, false),
             false,
             false,
-        );
+        )
+        .unwrap();
         pgn_tree.add_move(mov.clone(), 0, 0, None, 0, GameStatus::InProgress);
         pgn_tree.rm_move();
 
@@ -1219,8 +1221,8 @@ mod tests {
         let mut pgn_tree = PgnTree::default();
         let mov1 = Move::new(
             Piece::new(Color::Black, PieceType::Pawn),
-            Position::from_string("e2"),
-            Position::from_string("e4"),
+            Position::from_string("e2").unwrap(),
+            Position::from_string("e4").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1230,11 +1232,12 @@ mod tests {
             (false, false),
             false,
             false,
-        );
+        )
+        .unwrap();
         let mov2 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
-            Position::from_string("e7"),
-            Position::from_string("e5"),
+            Position::from_string("e7").unwrap(),
+            Position::from_string("e5").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1244,7 +1247,8 @@ mod tests {
             (false, false),
             false,
             false,
-        );
+        )
+        .unwrap();
         pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
         pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
 
@@ -1258,8 +1262,8 @@ mod tests {
         let mut pgn_tree = PgnTree::default();
         let mov1 = Move::new(
             Piece::new(Color::Black, PieceType::Pawn),
-            Position::from_string("e2"),
-            Position::from_string("e4"),
+            Position::from_string("e2").unwrap(),
+            Position::from_string("e4").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1269,11 +1273,12 @@ mod tests {
             (false, false),
             false,
             false,
-        );
+        )
+        .unwrap();
         let mov2 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
-            Position::from_string("e7"),
-            Position::from_string("e5"),
+            Position::from_string("e7").unwrap(),
+            Position::from_string("e5").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1283,7 +1288,8 @@ mod tests {
             (false, false),
             false,
             false,
-        );
+        )
+        .unwrap();
         pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
         pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
 
@@ -1297,8 +1303,8 @@ mod tests {
         let mut pgn_tree = PgnTree::default();
         let mov1 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
-            Position::from_string("e4"),
-            Position::from_string("e2"),
+            Position::from_string("e4").unwrap(),
+            Position::from_string("e2").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1308,12 +1314,13 @@ mod tests {
             (false, false),
             false,
             false,
-        );
+        )
+        .unwrap();
 
         let mov2 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
-            Position::from_string("d2"),
-            Position::from_string("d4"),
+            Position::from_string("d2").unwrap(),
+            Position::from_string("d4").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1323,7 +1330,8 @@ mod tests {
             (false, false),
             false,
             false,
-        );
+        )
+        .unwrap();
 
         pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
         pgn_tree.prev_move();
@@ -1352,8 +1360,8 @@ mod tests {
         let mut pgn_tree = PgnTree::default();
         let mov1 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
-            Position::from_string("e2"),
-            Position::from_string("e4"),
+            Position::from_string("e2").unwrap(),
+            Position::from_string("e4").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1363,11 +1371,12 @@ mod tests {
             (false, false),
             false,
             false,
-        );
+        )
+        .unwrap();
         let mov2 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
-            Position::from_string("d2"),
-            Position::from_string("d4"),
+            Position::from_string("d2").unwrap(),
+            Position::from_string("d4").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1377,7 +1386,8 @@ mod tests {
             (false, false),
             false,
             false,
-        );
+        )
+        .unwrap();
         pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
         pgn_tree.prev_move();
         pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
@@ -1394,8 +1404,8 @@ mod tests {
         let mut pgn_tree = PgnTree::default();
         let mov1 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
-            Position::from_string("e2"),
-            Position::from_string("e4"),
+            Position::from_string("e2").unwrap(),
+            Position::from_string("e4").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1405,11 +1415,12 @@ mod tests {
             (false, false),
             false,
             false,
-        );
+        )
+        .unwrap();
         let mov2 = Move::new(
             Piece::new(Color::Black, PieceType::Pawn),
-            Position::from_string("e7"),
-            Position::from_string("e5"),
+            Position::from_string("e7").unwrap(),
+            Position::from_string("e5").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1419,7 +1430,8 @@ mod tests {
             (false, false),
             false,
             false,
-        );
+        )
+        .unwrap();
         pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
         pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
 
@@ -1431,8 +1443,8 @@ mod tests {
         let mut pgn_tree = PgnTree::default();
         let mov1 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
-            Position::from_string("e2"),
-            Position::from_string("e4"),
+            Position::from_string("e2").unwrap(),
+            Position::from_string("e4").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1442,7 +1454,8 @@ mod tests {
             (false, false),
             false,
             false,
-        );
+        )
+        .unwrap();
 
         assert!(!pgn_tree.has_prev_move());
         pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
@@ -1455,8 +1468,8 @@ mod tests {
         let mut pgn_tree = PgnTree::default();
         let mov1 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
-            Position::from_string("e2"),
-            Position::from_string("e4"),
+            Position::from_string("e2").unwrap(),
+            Position::from_string("e4").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1466,11 +1479,12 @@ mod tests {
             (false, false),
             false,
             false,
-        );
+        )
+        .unwrap();
         let mov2 = Move::new(
             Piece::new(Color::Black, PieceType::Pawn),
-            Position::from_string("e7"),
-            Position::from_string("e5"),
+            Position::from_string("e7").unwrap(),
+            Position::from_string("e5").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1480,7 +1494,8 @@ mod tests {
             (false, false),
             false,
             false,
-        );
+        )
+        .unwrap();
 
         pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
         pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);

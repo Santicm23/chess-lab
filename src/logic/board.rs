@@ -5,7 +5,7 @@ use crate::{
         movements::{diagonal_movement, linear_movement},
         Color, PieceType, Position,
     },
-    errors::BoardError,
+    errors::{PositionEmptyError, PositionOccupiedError},
 };
 
 use super::pieces::{piece_movement, Piece};
@@ -117,7 +117,9 @@ impl Board {
 
                 let piece = Piece::from_fen(c);
 
-                board.set_piece(piece, &Position::new(col, row)).unwrap();
+                board
+                    .set_piece(piece, &Position::new(col, row).unwrap())
+                    .unwrap();
 
                 col += 1;
             }
@@ -209,9 +211,9 @@ impl Board {
     /// # Returns
     /// Ok if the piece was set successfully, Err if the position is already occupied
     ///
-    pub fn set_piece(&mut self, piece: Piece, pos: &Position) -> Result<(), BoardError> {
+    pub fn set_piece(&mut self, piece: Piece, pos: &Position) -> Result<(), PositionOccupiedError> {
         if self.is_ocupied(pos) {
-            return Err(BoardError::Occupied);
+            return Err(PositionOccupiedError::new(pos.clone()));
         }
         let bit = pos.to_bitboard();
         match piece.piece_type {
@@ -251,10 +253,10 @@ impl Board {
     /// # Returns
     /// The piece that was deleted or Err if the position is empty
     ///
-    pub fn delete_piece(&mut self, pos: &Position) -> Result<Piece, BoardError> {
+    pub fn delete_piece(&mut self, pos: &Position) -> Result<Piece, PositionEmptyError> {
         let piece = self.get_piece(&pos);
         if piece.is_none() {
-            return Err(BoardError::Empty);
+            return Err(PositionEmptyError::new(pos.clone()));
         }
         let piece = piece.unwrap();
         let bit = pos.to_bitboard();
@@ -355,7 +357,7 @@ impl Board {
     /// # Returns
     /// Ok if the move was successful, Err if the from position is empty
     ///
-    pub fn move_piece(&mut self, from: &Position, to: &Position) -> Result<(), BoardError> {
+    pub fn move_piece(&mut self, from: &Position, to: &Position) -> Result<(), PositionEmptyError> {
         let piece = self.delete_piece(from)?;
 
         if self.is_ocupied(to) {
@@ -458,7 +460,7 @@ impl ToString for Board {
         for row in (0..8).rev() {
             let mut empty = 0;
             for col in 0..8 {
-                let pos = Position::new(col, row);
+                let pos = Position::new(col, row).unwrap();
                 let piece = self.get_piece(&pos);
                 if piece.is_none() {
                     empty += 1;
@@ -519,7 +521,7 @@ mod tests {
     #[test]
     fn test_set_piece() {
         let mut board = Board::default();
-        let pos = Position::new(4, 2);
+        let pos = Position::new(4, 2).unwrap();
         let piece = Piece::new(Color::White, PieceType::Pawn);
         board.set_piece(piece, &pos).unwrap();
         assert_eq!(
@@ -531,7 +533,7 @@ mod tests {
     #[test]
     fn test_delete_piece() {
         let mut board = Board::default();
-        let pos = Position::new(0, 0);
+        let pos = Position::new(0, 0).unwrap();
         board.delete_piece(&pos).unwrap();
         assert_eq!(
             board.to_string(),
@@ -542,7 +544,7 @@ mod tests {
     #[test]
     fn test_get_piece() {
         let board = Board::default();
-        let pos = Position::new(0, 0);
+        let pos = Position::new(0, 0).unwrap();
         let piece = board.get_piece(&pos).unwrap();
         assert_eq!(piece.to_string(), "R");
     }
@@ -550,10 +552,10 @@ mod tests {
     #[test]
     fn test_is_ocupied() {
         let board = Board::default();
-        let pos = Position::new(0, 0);
+        let pos = Position::new(0, 0).unwrap();
         assert!(board.is_ocupied(&pos));
 
-        let pos = Position::new(0, 2);
+        let pos = Position::new(0, 2).unwrap();
         assert!(!board.is_ocupied(&pos));
     }
 
@@ -574,8 +576,8 @@ mod tests {
     #[test]
     fn test_move_piece() {
         let mut board = Board::default();
-        let from = Position::new(4, 1);
-        let to = Position::new(4, 3);
+        let from = Position::new(4, 1).unwrap();
+        let to = Position::new(4, 3).unwrap();
         board.move_piece(&from, &to).unwrap();
         assert_eq!(
             board.to_string(),
@@ -587,18 +589,18 @@ mod tests {
     fn test_is_attacked() {
         let board = Board::default();
 
-        let pos = Position::from_string("e3");
+        let pos = Position::from_string("e3").unwrap();
         assert!(board.is_attacked(pos, Color::White));
 
-        let pos = Position::from_string("e4");
+        let pos = Position::from_string("e4").unwrap();
         assert!(!board.is_attacked(pos, Color::White));
     }
 
     #[test]
     fn test_piece_between() {
         let board = Board::default();
-        let from = Position::new(0, 0);
-        let to = Position::new(0, 6);
+        let from = Position::new(0, 0).unwrap();
+        let to = Position::new(0, 6).unwrap();
         assert!(board.piece_between(&from, &to));
     }
 }

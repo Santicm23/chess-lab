@@ -266,519 +266,519 @@ mod tests {
     fn test_pawn_movement() {
         assert!(pawn_movement(
             Color::White,
-            &Position::from_string("e2"),
-            &Position::from_string("e3")
+            &Position::from_string("e2").unwrap(),
+            &Position::from_string("e3").unwrap()
         ));
         assert!(pawn_movement(
             Color::White,
-            &Position::from_string("e2"),
-            &Position::from_string("e4")
+            &Position::from_string("e2").unwrap(),
+            &Position::from_string("e4").unwrap()
         ));
         assert!(pawn_movement(
             Color::White,
-            &Position::from_string("e2"),
-            &Position::from_string("d3")
+            &Position::from_string("e2").unwrap(),
+            &Position::from_string("d3").unwrap()
         ));
         assert!(pawn_movement(
             Color::White,
-            &Position::from_string("e2"),
-            &Position::from_string("f3")
+            &Position::from_string("e2").unwrap(),
+            &Position::from_string("f3").unwrap()
         ));
         assert!(pawn_movement(
             Color::Black,
-            &Position::from_string("e7"),
-            &Position::from_string("e6")
+            &Position::from_string("e7").unwrap(),
+            &Position::from_string("e6").unwrap()
         ));
         assert!(pawn_movement(
             Color::Black,
-            &Position::from_string("e7"),
-            &Position::from_string("e5")
+            &Position::from_string("e7").unwrap(),
+            &Position::from_string("e5").unwrap()
         ));
         assert!(pawn_movement(
             Color::Black,
-            &Position::from_string("e7"),
-            &Position::from_string("d6")
+            &Position::from_string("e7").unwrap(),
+            &Position::from_string("d6").unwrap()
         ));
         assert!(pawn_movement(
             Color::Black,
-            &Position::from_string("e7"),
-            &Position::from_string("f6")
+            &Position::from_string("e7").unwrap(),
+            &Position::from_string("f6").unwrap()
         ));
         assert!(!pawn_movement(
             Color::White,
-            &Position::from_string("e4"),
-            &Position::from_string("e4")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("e4").unwrap()
         ));
         assert!(!pawn_movement(
             Color::White,
-            &Position::from_string("e2"),
-            &Position::from_string("e5")
+            &Position::from_string("e2").unwrap(),
+            &Position::from_string("e5").unwrap()
         ));
         assert!(!pawn_movement(
             Color::White,
-            &Position::from_string("e2"),
-            &Position::from_string("d4")
+            &Position::from_string("e2").unwrap(),
+            &Position::from_string("d4").unwrap()
         ));
         assert!(!pawn_movement(
             Color::White,
-            &Position::from_string("e2"),
-            &Position::from_string("f4")
+            &Position::from_string("e2").unwrap(),
+            &Position::from_string("f4").unwrap()
         ));
         assert!(!pawn_movement(
             Color::Black,
-            &Position::from_string("e4"),
-            &Position::from_string("e4")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("e4").unwrap()
         ));
         assert!(!pawn_movement(
             Color::Black,
-            &Position::from_string("e7"),
-            &Position::from_string("e4")
+            &Position::from_string("e7").unwrap(),
+            &Position::from_string("e4").unwrap()
         ));
         assert!(!pawn_movement(
             Color::Black,
-            &Position::from_string("e7"),
-            &Position::from_string("d5")
+            &Position::from_string("e7").unwrap(),
+            &Position::from_string("d5").unwrap()
         ));
         assert!(!pawn_movement(
             Color::Black,
-            &Position::from_string("e7"),
-            &Position::from_string("f5")
+            &Position::from_string("e7").unwrap(),
+            &Position::from_string("f5").unwrap()
         ));
     }
 
     #[test]
     fn test_knight_movement() {
         assert!(knight_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("f6")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("f6").unwrap()
         ));
         assert!(knight_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("g5")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("g5").unwrap()
         ));
         assert!(knight_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("g3")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("g3").unwrap()
         ));
         assert!(knight_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("f2")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("f2").unwrap()
         ));
         assert!(knight_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("d2")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("d2").unwrap()
         ));
         assert!(knight_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("c3")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("c3").unwrap()
         ));
         assert!(knight_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("c5")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("c5").unwrap()
         ));
         assert!(knight_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("d6")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("d6").unwrap()
         ));
         assert!(!knight_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("e4")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("e4").unwrap()
         ));
         assert!(!knight_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("e6")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("e6").unwrap()
         ));
         assert!(!knight_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("g6")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("g6").unwrap()
         ));
         assert!(!knight_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("g4")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("g4").unwrap()
         ));
         assert!(!knight_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("f3")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("f3").unwrap()
         ));
         assert!(!knight_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("d3")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("d3").unwrap()
         ));
     }
 
     #[test]
     fn test_bishop_movement() {
         assert!(bishop_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("f5")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("f5").unwrap()
         ));
         assert!(bishop_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("g6")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("g6").unwrap()
         ));
         assert!(bishop_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("h7")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("h7").unwrap()
         ));
         assert!(bishop_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("f3")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("f3").unwrap()
         ));
         assert!(bishop_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("g2")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("g2").unwrap()
         ));
         assert!(bishop_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("h1")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("h1").unwrap()
         ));
         assert!(bishop_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("d3")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("d3").unwrap()
         ));
         assert!(bishop_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("c2")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("c2").unwrap()
         ));
         assert!(bishop_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("b1")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("b1").unwrap()
         ));
         assert!(bishop_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("d5")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("d5").unwrap()
         ));
         assert!(bishop_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("c6")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("c6").unwrap()
         ));
         assert!(bishop_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("b7")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("b7").unwrap()
         ));
         assert!(!bishop_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("e4")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("e4").unwrap()
         ));
         assert!(!bishop_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("e5")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("e5").unwrap()
         ));
         assert!(!bishop_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("f6")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("f6").unwrap()
         ));
         assert!(!bishop_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("g7")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("g7").unwrap()
         ));
     }
 
     #[test]
     fn test_rook_movement() {
         assert!(rook_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("e5")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("e5").unwrap()
         ));
         assert!(rook_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("e6")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("e6").unwrap()
         ));
         assert!(rook_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("e7")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("e7").unwrap()
         ));
         assert!(rook_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("e8")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("e8").unwrap()
         ));
         assert!(rook_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("e3")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("e3").unwrap()
         ));
         assert!(rook_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("e2")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("e2").unwrap()
         ));
         assert!(rook_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("e1")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("e1").unwrap()
         ));
         assert!(rook_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("f4")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("f4").unwrap()
         ));
         assert!(rook_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("g4")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("g4").unwrap()
         ));
         assert!(rook_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("h4")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("h4").unwrap()
         ));
         assert!(rook_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("d4")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("d4").unwrap()
         ));
         assert!(rook_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("c4")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("c4").unwrap()
         ));
         assert!(rook_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("b4")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("b4").unwrap()
         ));
         assert!(rook_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("a4")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("a4").unwrap()
         ));
         assert!(!rook_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("e4")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("e4").unwrap()
         ));
         assert!(!rook_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("f5")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("f5").unwrap()
         ));
         assert!(!rook_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("g6")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("g6").unwrap()
         ));
         assert!(!rook_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("h7")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("h7").unwrap()
         ));
         assert!(!rook_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("d3")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("d3").unwrap()
         ));
         assert!(!rook_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("c2")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("c2").unwrap()
         ));
         assert!(!rook_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("b1")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("b1").unwrap()
         ));
     }
 
     #[test]
     fn test_queen_movement() {
         assert!(queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("f5")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("f5").unwrap()
         ));
         assert!(queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("g6")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("g6").unwrap()
         ));
         assert!(queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("h7")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("h7").unwrap()
         ));
         assert!(queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("f3")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("f3").unwrap()
         ));
         assert!(queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("g2")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("g2").unwrap()
         ));
         assert!(queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("h1")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("h1").unwrap()
         ));
         assert!(queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("d3")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("d3").unwrap()
         ));
         assert!(queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("c2")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("c2").unwrap()
         ));
         assert!(queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("b1")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("b1").unwrap()
         ));
         assert!(queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("d5")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("d5").unwrap()
         ));
         assert!(queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("c6")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("c6").unwrap()
         ));
         assert!(queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("b7")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("b7").unwrap()
         ));
         assert!(queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("e5")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("e5").unwrap()
         ));
         assert!(queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("e6")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("e6").unwrap()
         ));
         assert!(queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("e7")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("e7").unwrap()
         ));
         assert!(queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("e8")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("e8").unwrap()
         ));
         assert!(queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("e3")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("e3").unwrap()
         ));
         assert!(queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("e2")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("e2").unwrap()
         ));
         assert!(queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("e1")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("e1").unwrap()
         ));
         assert!(queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("f4")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("f4").unwrap()
         ));
         assert!(queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("g4")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("g4").unwrap()
         ));
         assert!(queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("h4")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("h4").unwrap()
         ));
         assert!(queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("d4")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("d4").unwrap()
         ));
         assert!(queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("c4")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("c4").unwrap()
         ));
         assert!(queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("b4")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("b4").unwrap()
         ));
         assert!(queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("a4")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("a4").unwrap()
         ));
         assert!(!queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("e4")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("e4").unwrap()
         ));
         assert!(!queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("d7")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("d7").unwrap()
         ));
         assert!(!queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("d1")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("d1").unwrap()
         ));
         assert!(!queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("f7")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("f7").unwrap()
         ));
         assert!(!queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("f1")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("f1").unwrap()
         ));
         assert!(!queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("g7")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("g7").unwrap()
         ));
         assert!(!queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("g1")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("g1").unwrap()
         ));
         assert!(!queen_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("h8")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("h8").unwrap()
         ));
     }
 
     #[test]
     fn test_king_movement() {
         assert!(king_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("f5")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("f5").unwrap()
         ));
         assert!(king_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("e5")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("e5").unwrap()
         ));
         assert!(king_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("d5")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("d5").unwrap()
         ));
         assert!(king_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("d4")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("d4").unwrap()
         ));
         assert!(king_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("d3")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("d3").unwrap()
         ));
         assert!(king_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("e3")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("e3").unwrap()
         ));
         assert!(king_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("f3")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("f3").unwrap()
         ));
         assert!(king_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("f4")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("f4").unwrap()
         ));
         assert!(!king_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("e4")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("e4").unwrap()
         ));
         assert!(!king_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("e6")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("e6").unwrap()
         ));
         assert!(!king_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("f6")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("f6").unwrap()
         ));
         assert!(!king_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("g6")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("g6").unwrap()
         ));
         assert!(!king_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("g5")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("g5").unwrap()
         ));
         assert!(!king_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("g4")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("g4").unwrap()
         ));
         assert!(!king_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("g3")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("g3").unwrap()
         ));
         assert!(!king_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("f2")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("f2").unwrap()
         ));
         assert!(!king_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("e2")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("e2").unwrap()
         ));
         assert!(!king_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("d2")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("d2").unwrap()
         ));
         assert!(!king_movement(
-            &Position::from_string("e4"),
-            &Position::from_string("d6")
+            &Position::from_string("e4").unwrap(),
+            &Position::from_string("d6").unwrap()
         ));
     }
 
