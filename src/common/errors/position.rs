@@ -150,6 +150,28 @@ pub struct UnalignedPositionsError {
     pub position2: Position,
 }
 
+impl UnalignedPositionsError {
+    /// Creates a new `UnalignedPositionsError` with the given positions.
+    ///
+    /// # Arguments
+    ///
+    /// * `position1` - The first position that is not aligned.
+    /// * `position2` - The second position that is not aligned.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let error = UnalignedPositionsError::new(position1, position2);
+    /// ```
+    ///
+    pub fn new(position1: Position, position2: Position) -> UnalignedPositionsError {
+        UnalignedPositionsError {
+            position1,
+            position2,
+        }
+    }
+}
+
 /// Error type to handle errors on `piece_between` function
 ///
 /// This enum encapsulates different kinds of invalid position errors, including:

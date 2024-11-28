@@ -1,4 +1,4 @@
-use crate::errors::MoveError;
+use crate::errors::{FenError, MoveError};
 
 use super::{Color, GameStatus};
 
@@ -21,9 +21,9 @@ use super::{Color, GameStatus};
 /// * `draw` - offers a draw to the opponent.
 /// * `set_lost_in_time` - sets a player as lost in time.
 ///
-pub trait Variant {
+pub trait Variant: Sized {
     fn new() -> Self;
-    fn from_fen(fen: &str) -> Self;
+    fn from_fen(fen: &str) -> Result<Self, FenError>;
     fn from_pgn(pgn: &str) -> Self;
     fn move_piece(&mut self, move_str: &str) -> Result<GameStatus, MoveError>;
     fn undo(&mut self);

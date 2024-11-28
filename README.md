@@ -8,7 +8,7 @@ It also includes the feature to save multiple lines of a game and to load them b
 - [x] Playable Chess game
 - [x] FEN/PGN support
 - [x] Multiple lines of a game
-- [ ] Multiple variants
+- [x] Multiple variants
 - [ ] Chess engine
 
 ## Variants

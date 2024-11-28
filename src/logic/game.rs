@@ -10,7 +10,7 @@ use crate::{
         pgn::PgnTree, CastleType, Color, DrawReason, GameStatus, Move, MoveType, PieceType,
         Position, WinReason,
     },
-    errors::MoveError,
+    errors::{FenError, MoveError},
     logic::pieces::{piece_movement, Piece},
 };
 
@@ -101,12 +101,12 @@ impl Game {
     /// assert_eq!(game.to_string(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     /// ```
     ///
-    pub fn new(fen: &str, capture_king: bool) -> Game {
-        let mut game = Game::from_fen(fen);
+    pub fn new(fen: &str, capture_king: bool) -> Result<Game, FenError> {
+        let mut game = Game::from_fen(fen)?;
 
         game.capture_king = capture_king;
 
-        game
+        Ok(game)
     }
 
     /// Creates a new game from a FEN string
@@ -128,9 +128,12 @@ impl Game {
     /// assert_eq!(game.to_string(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     /// ```
     ///
-    pub fn from_fen(fen: &str) -> Game {
+    pub fn from_fen(fen: &str) -> Result<Game, FenError> {
         let re = Regex::new(r"^([1-8PpNnBbRrQqKk]{1,8}/){7}[1-8PpNnBbRrQqKk]{1,8} [wb] (-|[KQkq]{1,4}) (-|[a-h][1-8]) \d+ ([1-9]\d*)$").unwrap();
-        assert!(re.is_match(fen), "Invalid FEN");
+
+        if !re.is_match(fen) {
+            return Err(FenError::InvalidFen(fen.to_string()));
+        }
 
         let mut game = Game::default();
         game.start_position = fen.to_string();
@@ -139,7 +142,7 @@ impl Game {
         game.prev_positions.insert(game.get_fen_reduced(), 1);
 
         let parts = fen.split(' ').collect::<Vec<&str>>();
-        game.board = Board::new(parts[0]);
+        game.board = Board::new(parts[0])?;
         game.is_white_turn = parts[1] == "w";
         game.castling_rights = parts[2].chars().fold(0, |acc, c| match c {
             'K' => acc | 0b1000,
@@ -156,7 +159,8 @@ impl Game {
         };
         game.halfmove_clock = parts[4].parse::<u32>().unwrap();
         game.fullmove_number = parts[5].parse::<u32>().unwrap();
-        game
+
+        Ok(game)
     }
 
     /// Moves a piece on the board
@@ -1340,7 +1344,8 @@ mod tests {
 
     #[test]
     fn test_from_fen() {
-        let game = Game::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        let game =
+            Game::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1").unwrap();
         assert_eq!(
             game.fen(),
             "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
@@ -1828,7 +1833,7 @@ mod tests {
 
     #[test]
     fn test_stalemate() {
-        let game = Game::from_fen("8/8/8/8/8/4KQ2/8/4k3 b - - 0 1");
+        let game = Game::from_fen("8/8/8/8/8/4KQ2/8/4k3 b - - 0 1").unwrap();
         assert!(game.stalemate());
     }
 }

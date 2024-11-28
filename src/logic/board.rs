@@ -8,7 +8,8 @@ use crate::{
         Color, PieceType, Position,
     },
     errors::{
-        PositionBetweenError, PositionEmptyError, PositionOccupiedError, UnalignedPositionsError,
+        FenError, PositionBetweenError, PositionEmptyError, PositionOccupiedError,
+        PositionOutOfRangeError, UnalignedPositionsError,
     },
 };
 
@@ -66,7 +67,7 @@ impl Board {
     /// # Returns
     /// A new board with the position represented by the FEN string
     ///
-    pub fn new(fen: &str) -> Board {
+    pub fn new(fen: &str) -> Result<Board, FenError> {
         Board::from_fen(fen)
     }
 
@@ -100,9 +101,12 @@ impl Board {
     /// # Returns
     /// A new board with the position represented by the FEN string
     ///
-    pub fn from_fen(fen: &str) -> Board {
+    pub fn from_fen(fen: &str) -> Result<Board, FenError> {
         let re = Regex::new(r"^([1-8PpNnBbRrQqKk]{1,8}/){7}[1-8PpNnBbRrQqKk]{1,8}$").unwrap();
-        assert!(re.is_match(fen), "Invalid FEN"); // FIXME
+
+        if !re.is_match(fen) {
+            return Err(FenError::InvalidFen(fen.to_string()));
+        }
 
         let mut board = Board::empty();
         let ranks = fen.split('/').collect::<Vec<&str>>();
@@ -115,20 +119,23 @@ impl Board {
             for c in rank.chars() {
                 if c.is_digit(10) {
                     col += c.to_digit(10).unwrap() as u8;
-                    assert!(col <= 8, "Invalid FEN");
                     continue;
                 }
 
                 let piece = Piece::from_fen(c);
 
                 board
-                    .set_piece(piece, &Position::new(col, row).unwrap())
+                    .set_piece(
+                        piece,
+                        &Position::new(col, row)
+                            .map_err(|_| FenError::InvalidFen(fen.to_string()))?,
+                    )
                     .unwrap();
 
                 col += 1;
             }
         }
-        board
+        Ok(board)
     }
 
     /// Checks if a position is occupied by a piece
@@ -259,10 +266,12 @@ impl Board {
     ///
     pub fn delete_piece(&mut self, pos: &Position) -> Result<Piece, PositionEmptyError> {
         let piece = self.get_piece(&pos);
-        if piece.is_none() {
-            return Err(PositionEmptyError::new(pos.clone()));
-        }
-        let piece = piece.unwrap();
+
+        let piece = match piece {
+            Some(piece) => piece,
+            None => return Err(PositionEmptyError::new(pos.clone())),
+        };
+
         let bit = pos.to_bitboard();
         match piece.piece_type {
             PieceType::Pawn => match piece.color {
@@ -364,8 +373,9 @@ impl Board {
     pub fn move_piece(&mut self, from: &Position, to: &Position) -> Result<(), PositionEmptyError> {
         let piece = self.delete_piece(from)?;
 
-        if self.is_ocupied(to) {
-            self.delete_piece(to).unwrap();
+        match self.delete_piece(to) {
+            Ok(_) => (),
+            Err(_) => (),
         }
 
         self.set_piece(piece, to).unwrap();
@@ -461,10 +471,10 @@ impl Board {
         to: &Position,
     ) -> Result<bool, PositionBetweenError> {
         if !linear_movement(from, to) && !diagonal_movement(from, to) {
-            return Err(PositionBetweenError::Unaligned(UnalignedPositionsError {
-                position1: from.clone(),
-                position2: to.clone(),
-            }));
+            return Err(PositionBetweenError::from(UnalignedPositionsError::new(
+                from.clone(),
+                to.clone(),
+            )));
         }
 
         let direction = from.direction(to);
@@ -476,7 +486,10 @@ impl Board {
                 || pos.row as i8 + direction.1 < 0
                 || pos.row as i8 + direction.1 > 7
             {
-                panic!("Position out of bounds :(");
+                return Err(PositionBetweenError::from(PositionOutOfRangeError::new(
+                    (pos.col as i8 + direction.0) as u8,
+                    (pos.row as i8 + direction.1) as u8,
+                )));
             }
             pos = &pos + direction;
             if pos == *to {
@@ -543,7 +556,7 @@ mod tests {
 
     #[test]
     fn from_fen() {
-        let board = Board::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+        let board = Board::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR").unwrap();
         assert_eq!(
             board.to_string(),
             "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"

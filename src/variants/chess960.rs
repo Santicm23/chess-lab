@@ -1,6 +1,6 @@
 use crate::{
     constants::{Color, GameStatus, Variant},
-    errors::MoveError,
+    errors::{FenError, MoveError},
     logic::Game,
     utils::os::{read_file, write_file},
 };
@@ -16,10 +16,10 @@ impl Variant for Chess960 {
         }
     }
 
-    fn from_fen(fen: &str) -> Self {
-        Chess960 {
-            game: Game::from_fen(fen),
-        }
+    fn from_fen(fen: &str) -> Result<Chess960, FenError> {
+        Ok(Chess960 {
+            game: Game::from_fen(fen)?,
+        })
     }
 
     fn from_pgn(pgn: &str) -> Self {

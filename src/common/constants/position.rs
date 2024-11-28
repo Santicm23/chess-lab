@@ -317,6 +317,8 @@ mod tests {
         let pos = positions.first().unwrap();
         assert_eq!(pos.to_string(), "h8");
         assert_eq!(positions.len(), 1);
+        let positions = Position::from_bitboard(0xFFFFFFFFFFFFFFFF);
+        assert_eq!(positions.len(), 64);
     }
 
     #[test]
