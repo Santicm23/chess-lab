@@ -460,10 +460,6 @@ impl Board {
         from: &Position,
         to: &Position,
     ) -> Result<bool, PositionBetweenError> {
-        assert!(
-            linear_movement(from, to) || diagonal_movement(from, to),
-            "The positions are not in a straight line"
-        );
         if !linear_movement(from, to) && !diagonal_movement(from, to) {
             return Err(PositionBetweenError::Unaligned(UnalignedPositionsError {
                 position1: from.clone(),

@@ -7,9 +7,8 @@ use regex::Regex;
 
 use crate::{
     constants::{
-        movements::{diagonal_movement, linear_movement},
-        pgn::PgnTree,
-        CastleType, Color, DrawReason, GameStatus, Move, MoveType, PieceType, Position, WinReason,
+        pgn::PgnTree, CastleType, Color, DrawReason, GameStatus, Move, MoveType, PieceType,
+        Position, WinReason,
     },
     errors::MoveError,
     logic::pieces::{piece_movement, Piece},
@@ -470,13 +469,13 @@ impl Game {
     ///
     pub fn undo(&mut self) {
         let mov = self.history.get_move();
-        let info = self.history.get_prev_move_info();
 
         if let None = mov {
             return;
         }
 
         let mov = mov.unwrap();
+        let info = self.history.get_move_info().unwrap();
 
         self.board.move_piece(&mov.to, &mov.from).unwrap();
 
@@ -817,11 +816,9 @@ impl Game {
         move_type: &MoveType,
     ) -> bool {
         if piece.piece_type != PieceType::Knight && piece.piece_type != PieceType::King {
-            if !linear_movement(start_pos, end_pos) && !diagonal_movement(start_pos, end_pos) {
-                return false;
-            }
-            if self.board.piece_between(start_pos, end_pos).unwrap() {
-                return false;
+            match self.board.piece_between(start_pos, end_pos) {
+                Ok(true) | Err(_) => return false,
+                Ok(false) => {}
             }
         }
 

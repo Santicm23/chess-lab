@@ -68,8 +68,8 @@ impl OptionPgnMetadata {
             "Variant" => Some(OptionPgnMetadata::Variant(value.to_string())),
             "TimeControl" => Some(OptionPgnMetadata::TimeControl(value.to_string())),
             "Termination" => Some(OptionPgnMetadata::Termination(value.to_string())),
-            "WhiteElo" => Some(OptionPgnMetadata::WhiteElo(value.parse().unwrap())), // FIXME
-            "BlackElo" => Some(OptionPgnMetadata::BlackElo(value.parse().unwrap())), // FIXME
+            "WhiteElo" => value.parse().ok().map(OptionPgnMetadata::WhiteElo),
+            "BlackElo" => value.parse().ok().map(OptionPgnMetadata::BlackElo),
             "WhiteTitle" => Some(OptionPgnMetadata::WhiteTitle(value.to_string())),
             "BlackTitle" => Some(OptionPgnMetadata::BlackTitle(value.to_string())),
             "WhiteUSCF" => Some(OptionPgnMetadata::WhiteUSCF(value.to_string())),
@@ -95,7 +95,7 @@ impl OptionPgnMetadata {
             "FEN" => Some(OptionPgnMetadata::FEN(value.to_string())),
             "Annotator" => Some(OptionPgnMetadata::Annotator(value.to_string())),
             "Mode" => Some(OptionPgnMetadata::Mode(value.to_string())),
-            "PlyCount" => Some(OptionPgnMetadata::PlyCount(value.parse().unwrap())), // FIXME
+            "PlyCount" => value.parse().ok().map(OptionPgnMetadata::PlyCount),
             _ => None,
         }
     }
@@ -346,13 +346,16 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
             }));
 
             if current_line.as_ref().borrow_mut().lines.contains(&new_line) {
-                let index = current_line
+                let index = match current_line
                     .as_ref()
                     .borrow()
                     .lines
                     .iter()
                     .position(|x| *x == new_line)
-                    .unwrap();
+                {
+                    Some(idx) => idx,
+                    None => return,
+                };
 
                 self.next_move_variant(index as u32);
             } else {
@@ -376,7 +379,10 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
             }));
 
             if self.lines.contains(&new_line) {
-                let index = self.lines.iter().position(|x| *x == new_line).unwrap();
+                let index = match self.lines.iter().position(|x| *x == new_line) {
+                    Some(idx) => idx,
+                    None => return,
+                };
 
                 self.next_move_variant(index as u32);
             } else {
@@ -413,30 +419,30 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     /// ```
     ///
     pub fn rm_move(&mut self) {
-        if let None = &self.current_line {
-            return;
-        }
+        let current_line = match self.current_line.take() {
+            Some(line) => line,
+            None => return,
+        };
 
-        let current_line = self.current_line.take().unwrap();
-        let current_line_borrowed = current_line.borrow();
+        let weak_parent = match &current_line.borrow().parent {
+            Some(parent) => parent.clone(),
+            None => return,
+        };
 
-        if current_line_borrowed.parent.is_none() {
-            return;
-        }
+        let parent = match weak_parent.upgrade() {
+            Some(parent) => parent,
+            None => return, // Could not upgrade Weak reference; parent might have been dropped.
+        };
 
-        let parent = current_line_borrowed
-            .parent
-            .as_ref()
-            .unwrap()
-            .upgrade()
-            .unwrap();
-        let index = parent
-            .as_ref()
+        let index = match parent
             .borrow()
             .lines
             .iter()
-            .position(|x| Rc::ptr_eq(x, &self.current_line.as_ref().unwrap()))
-            .unwrap();
+            .position(|x| Rc::ptr_eq(x, &current_line))
+        {
+            Some(idx) => idx,
+            None => return, // Current line not found in parent's lines.
+        };
 
         parent.as_ref().borrow_mut().lines.remove(index);
 
@@ -503,24 +509,18 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     /// );
     /// tree.add_move(mov.clone(), 0, 0, None, 0, GameStatus::InProgress);
     ///
-    /// assert_eq!(tree.get_prev_move_info(), (0, 0, None, 0, GameStatus::InProgress));
+    /// assert_eq!(tree.get_move_info(), (0, 0, None, 0, GameStatus::InProgress));
     /// ```
     ///
-    pub fn get_prev_move_info(&self) -> (u32, u32, Option<Position>, u8, GameStatus) {
-        let current_line = self
-            .current_line
-            .as_ref()
-            .unwrap_or_else(|| {
-                panic!("No current line found. Please add a move before calling this method")
-            })
-            .borrow();
-        (
+    pub fn get_move_info(&self) -> Option<(u32, u32, Option<Position>, u8, GameStatus)> {
+        let current_line = self.current_line.as_ref()?.borrow();
+        Some((
             current_line.halfmove_clock,
             current_line.fullmove_number,
             current_line.en_passant,
             current_line.castling_rights,
             current_line.game_status,
-        )
+        ))
     }
 
     /// Returns the next move
@@ -754,7 +754,7 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     /// ```
     ///
     pub fn prev_move(&mut self) -> Option<T> {
-        if self.current_line.is_none() || self.current_line.as_ref()?.borrow().parent.is_none() {
+        if self.current_line.as_ref()?.borrow().parent.is_none() {
             self.current_line = None;
             return None;
         }
@@ -765,8 +765,8 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
             .borrow()
             .parent
             .as_ref()?
-            .upgrade()
-            .unwrap();
+            .upgrade()?;
+
         self.current_line = Some(Rc::clone(parent));
         Some(self.current_line.as_ref()?.borrow().mov.clone())
     }
@@ -803,17 +803,10 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     /// ```
     ///
     pub fn has_next_move(&self) -> bool {
-        if self.current_line.is_none() {
-            return !self.lines.is_empty();
+        match &self.current_line {
+            Some(current_line) => current_line.borrow().lines.len() > 0,
+            None => !self.lines.is_empty(),
         }
-        self.current_line
-            .as_ref()
-            .unwrap()
-            .as_ref()
-            .borrow()
-            .lines
-            .len()
-            > 0
     }
 
     /// Returns whether there is a previous move
