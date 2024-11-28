@@ -1,4 +1,7 @@
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    fmt::{Display, Formatter},
+};
 
 use regex::Regex;
 
@@ -817,7 +820,7 @@ impl Game {
             if !linear_movement(start_pos, end_pos) && !diagonal_movement(start_pos, end_pos) {
                 return false;
             }
-            if self.board.piece_between(start_pos, end_pos) {
+            if self.board.piece_between(start_pos, end_pos).unwrap() {
                 return false;
             }
         }
@@ -1275,7 +1278,7 @@ impl Game {
                     let end_pos = Position::new(col, row).unwrap();
 
                     let mut board = self.board.clone();
-                    if !board.can_capture(&piece_pos, &end_pos) {
+                    if !board.can_capture(&piece_pos, &end_pos).unwrap() {
                         continue;
                     }
 
@@ -1306,7 +1309,7 @@ impl Game {
     }
 }
 
-impl ToString for Game {
+impl Display for Game {
     /// Convert the game to a FEN string
     ///
     /// # Returns
@@ -1320,8 +1323,8 @@ impl ToString for Game {
     /// assert_eq!(game.fen(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     /// ```
     ///
-    fn to_string(&self) -> String {
-        self.fen()
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.fen())
     }
 }
 

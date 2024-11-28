@@ -68,8 +68,8 @@ impl OptionPgnMetadata {
             "Variant" => Some(OptionPgnMetadata::Variant(value.to_string())),
             "TimeControl" => Some(OptionPgnMetadata::TimeControl(value.to_string())),
             "Termination" => Some(OptionPgnMetadata::Termination(value.to_string())),
-            "WhiteElo" => Some(OptionPgnMetadata::WhiteElo(value.parse().unwrap())),
-            "BlackElo" => Some(OptionPgnMetadata::BlackElo(value.parse().unwrap())),
+            "WhiteElo" => Some(OptionPgnMetadata::WhiteElo(value.parse().unwrap())), // FIXME
+            "BlackElo" => Some(OptionPgnMetadata::BlackElo(value.parse().unwrap())), // FIXME
             "WhiteTitle" => Some(OptionPgnMetadata::WhiteTitle(value.to_string())),
             "BlackTitle" => Some(OptionPgnMetadata::BlackTitle(value.to_string())),
             "WhiteUSCF" => Some(OptionPgnMetadata::WhiteUSCF(value.to_string())),
@@ -95,7 +95,7 @@ impl OptionPgnMetadata {
             "FEN" => Some(OptionPgnMetadata::FEN(value.to_string())),
             "Annotator" => Some(OptionPgnMetadata::Annotator(value.to_string())),
             "Mode" => Some(OptionPgnMetadata::Mode(value.to_string())),
-            "PlyCount" => Some(OptionPgnMetadata::PlyCount(value.parse().unwrap())),
+            "PlyCount" => Some(OptionPgnMetadata::PlyCount(value.parse().unwrap())), // FIXME
             _ => None,
         }
     }

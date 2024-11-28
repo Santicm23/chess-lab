@@ -2,6 +2,7 @@ use crate::{
     constants::{MoveType, PieceType, Position},
     logic::Piece,
 };
+use thiserror::Error;
 
 /// Errors that can occur when trying to move a piece
 ///
@@ -10,14 +11,18 @@ use crate::{
 /// * `Illegal`: The move is illegal
 /// * `Ambiguous`: The move is ambiguous
 ///
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Error, PartialEq)]
 pub enum MoveError {
+    #[error("Invalid move: {0}")]
     Invalid(String),
+    #[error("Illegal move: {0}")]
     Illegal(String),
+    #[error("Ambiguous move: {0}")]
     Ambiguous(String),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
+#[error("Error moving piece: {error}")]
 pub struct MoveInfoError {
     pub error: String,
     pub piece: Piece,

@@ -1,3 +1,5 @@
+use std::fmt::{self, Display, Formatter};
+
 use crate::constants::{
     movements::{diagonal_movement, l_movement, linear_movement, max_movement, movement_direction},
     Color, PieceType, Position,
@@ -86,7 +88,7 @@ impl Piece {
     }
 }
 
-impl ToString for Piece {
+impl Display for Piece {
     /// Converts the piece to a FEN character
     ///
     /// # Returns
@@ -102,7 +104,7 @@ impl ToString for Piece {
     /// assert_eq!(piece.to_string(), "P");
     /// ```
     ///
-    fn to_string(&self) -> String {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         let char = match self.piece_type {
             PieceType::Pawn => "p",
             PieceType::Knight => "n",
@@ -114,8 +116,8 @@ impl ToString for Piece {
         .to_string();
 
         match self.color {
-            Color::White => char.to_uppercase(),
-            Color::Black => char,
+            Color::White => write!(f, "{}", char.to_uppercase()),
+            Color::Black => write!(f, "{}", char),
         }
     }
 }

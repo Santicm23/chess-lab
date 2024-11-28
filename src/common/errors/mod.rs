@@ -1,4 +1,4 @@
-mod board;
+mod fen;
 mod movements;
 mod position;
 

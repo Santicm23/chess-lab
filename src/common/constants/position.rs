@@ -1,6 +1,6 @@
-use std::ops;
+use std::{fmt::Display, ops};
 
-use crate::errors::{PositionInvalidError, PositionOutOfRangeError};
+use crate::errors::{PositionInvalidError, PositionOutOfRangeError, PositionStringError};
 
 /// Represents a position on the board.
 /// The position is represented by a column and a row.
@@ -76,14 +76,16 @@ impl Position {
     /// assert_eq!(pos.row, 0);
     /// ```
     ///
-    pub fn from_string(s: &str) -> Result<Position, PositionInvalidError> {
+    pub fn from_string(s: &str) -> Result<Position, PositionStringError> {
         if s.len() != 2 {
-            return Err(PositionInvalidError::Invalid(s.to_string()));
+            return Err(PositionStringError::Invalid(PositionInvalidError::new(
+                s.to_string(),
+            )));
         }
 
         let col = s.chars().nth(0).unwrap() as u8 - 'a' as u8;
         let row = s.chars().nth(1).unwrap() as u8 - '1' as u8;
-        Position::new(col, row).map_err(|e| PositionInvalidError::OutOfRange(e))
+        Position::new(col, row).map_err(|e| PositionStringError::OutOfRange(e))
     }
 
     /// Converts the position to a string
@@ -254,7 +256,7 @@ impl ops::Sub<(i8, i8)> for &Position {
     }
 }
 
-impl ToString for Position {
+impl Display for Position {
     /// Converts the position to a string
     ///
     /// # Returns
@@ -269,8 +271,9 @@ impl ToString for Position {
     /// assert_eq!(pos.to_string(), "a1");
     /// ```
     ///
-    fn to_string(&self) -> String {
-        format!(
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
             "{}{}",
             ('a' as u8 + self.col) as char,
             ('1' as u8 + self.row) as char

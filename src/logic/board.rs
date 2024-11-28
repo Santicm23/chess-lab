@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use regex::Regex;
 
 use crate::{
@@ -5,7 +7,9 @@ use crate::{
         movements::{diagonal_movement, linear_movement},
         Color, PieceType, Position,
     },
-    errors::{PositionEmptyError, PositionOccupiedError},
+    errors::{
+        PositionBetweenError, PositionEmptyError, PositionOccupiedError, UnalignedPositionsError,
+    },
 };
 
 use super::pieces::{piece_movement, Piece};
@@ -98,7 +102,7 @@ impl Board {
     ///
     pub fn from_fen(fen: &str) -> Board {
         let re = Regex::new(r"^([1-8PpNnBbRrQqKk]{1,8}/){7}[1-8PpNnBbRrQqKk]{1,8}$").unwrap();
-        assert!(re.is_match(fen), "Invalid FEN");
+        assert!(re.is_match(fen), "Invalid FEN"); // FIXME
 
         let mut board = Board::empty();
         let ranks = fen.split('/').collect::<Vec<&str>>();
@@ -380,33 +384,63 @@ impl Board {
     pub fn is_attacked(&self, pos: Position, color: Color) -> bool {
         let pieces = self.find_all(color);
         for piece in pieces {
-            if self.can_capture(&piece, &pos) {
+            if self.can_capture(&piece, &pos).unwrap() {
                 return true;
             }
         }
         false
     }
 
-    pub fn can_capture(&self, start_pos: &Position, end_pos: &Position) -> bool {
-        let piece = self.get_piece(start_pos).unwrap();
+    /// Checks if a piece can capture another piece
+    /// The function does not check if the move is legal
+    /// It only checks if the piece can capture the other piece
+    ///
+    /// # Arguments
+    /// * `start_pos`: The position of the piece to move
+    /// * `end_pos`: The position of the piece to capture
+    ///
+    /// # Returns
+    /// Whether the piece can capture the other piece
+    ///
+    /// # Errors
+    /// If the start position is empty
+    ///
+    /// ```
+    /// use chess_lab::logic::board::Board;
+    /// use chess_lab::constants::{Color, PieceType, Position};
+    ///
+    /// let board = Board::default();
+    /// let start_pos = Position::new(4, 1).unwrap();
+    ///
+    /// let end_pos = Position::new(4, 3).unwrap();
+    /// assert!(board.can_capture(&start_pos, &end_pos).unwrap());
+    ///
+    pub fn can_capture(
+        &self,
+        start_pos: &Position,
+        end_pos: &Position,
+    ) -> Result<bool, PositionEmptyError> {
+        let piece = self
+            .get_piece(start_pos)
+            .ok_or(PositionEmptyError::new(start_pos.clone()))?;
         let captured_piece = self.get_piece(end_pos);
 
         if captured_piece.is_some() && piece.color == captured_piece.unwrap().color {
-            return false;
+            return Ok(false);
         }
         if piece_movement(&piece, start_pos, end_pos) {
             if piece.piece_type == PieceType::Pawn && start_pos.col == end_pos.col {
-                return false;
+                return Ok(false);
             }
             return match piece.piece_type {
-                PieceType::Pawn => diagonal_movement(start_pos, end_pos),
-                PieceType::Knight | PieceType::King => true,
+                PieceType::Pawn => Ok(diagonal_movement(start_pos, end_pos)),
+                PieceType::Knight | PieceType::King => Ok(true),
                 PieceType::Bishop | PieceType::Rook | PieceType::Queen => {
-                    !self.piece_between(start_pos, end_pos)
+                    Ok(!self.piece_between(start_pos, end_pos).unwrap())
                 }
             };
         }
-        false
+        Ok(false)
     }
 
     /// Checks if there is a piece between two positions
@@ -421,11 +455,22 @@ impl Board {
     /// # Panics
     /// If the positions are not in a straight line
     ///
-    pub fn piece_between(&self, from: &Position, to: &Position) -> bool {
+    pub fn piece_between(
+        &self,
+        from: &Position,
+        to: &Position,
+    ) -> Result<bool, PositionBetweenError> {
         assert!(
             linear_movement(from, to) || diagonal_movement(from, to),
             "The positions are not in a straight line"
         );
+        if !linear_movement(from, to) && !diagonal_movement(from, to) {
+            return Err(PositionBetweenError::Unaligned(UnalignedPositionsError {
+                position1: from.clone(),
+                position2: to.clone(),
+            }));
+        }
+
         let direction = from.direction(to);
         let mut pos = from.to_owned();
 
@@ -442,20 +487,20 @@ impl Board {
                 break;
             }
             if self.is_ocupied(&pos) {
-                return true;
+                return Ok(true);
             }
         }
-        false
+        Ok(false)
     }
 }
 
-impl ToString for Board {
+impl Display for Board {
     /// Converts the board to a string
     ///
     /// # Returns
     /// A string representation of the board in FEN format
     ///
-    fn to_string(&self) -> String {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut board = String::new();
         for row in (0..8).rev() {
             let mut empty = 0;
@@ -480,7 +525,7 @@ impl ToString for Board {
                 board.push('/');
             }
         }
-        board
+        write!(f, "{}", board)
     }
 }
 
@@ -601,6 +646,6 @@ mod tests {
         let board = Board::default();
         let from = Position::new(0, 0).unwrap();
         let to = Position::new(0, 6).unwrap();
-        assert!(board.piece_between(&from, &to));
+        assert!(board.piece_between(&from, &to).unwrap());
     }
 }
