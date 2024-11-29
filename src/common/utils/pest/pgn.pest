@@ -25,19 +25,24 @@ move = ${ (((capture | basic_move) ~ promotion?) | castle) ~ check_state? }
 partial_move = { move_number ~ move }
 full_move = { move_number ~ move{2} }
 half_move = { second_move_number ~ move }
-
-// PGN
-metadata = { "[" ~ word ~ "\"" ~ word? ~ "\"]" }
 line = { full_move* ~ partial_move? }
-subsequence = { "(" ~ sequence ~ ")" }
-half_subsequence = { "(" ~ half_move ~ sequence ~ ")" }
-white_sequence = { (full_move* ~ partial_move) ~ subsequence+ ~ ((half_move | move) ~ sequence)? }
-black_sequence = { (full_move+ ~ half_subsequence+ ~ sequence) }
+
+// Metadata
+metadata = { "[" ~ word ~ "\"" ~ word? ~ "\"]" }
+result = { "1/2-1/2" | "1-0" | "0-1" }
+
+// Sequences
 sequence = {
 	white_sequence
 	| black_sequence
     | line
 }
-result = { "1/2-1/2" | "1-0" | "0-1" }
+subsequence = { "(" ~ sequence ~ ")" }
+half_subsequence = { "(" ~ half_move ~ sequence ~ ")" }
+multi_subsequence = { subsequence+ }
+multi_half_subsequence = { half_subsequence+ }
+white_sequence = { (full_move* ~ partial_move) ~ multi_subsequence ~ ((half_move | move) ~ sequence)? }
+black_sequence = { (full_move+ ~ multi_half_subsequence ~ sequence) }
 
+// PGN
 pgn = { SOI ~ metadata* ~ sequence ~ result? ~ EOI}

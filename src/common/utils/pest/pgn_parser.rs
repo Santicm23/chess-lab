@@ -91,8 +91,8 @@ fn parse_white_sequence(game: &mut Game, white_sequence: Pair<Rule>) {
             Rule::sequence => {
                 parse_sequence(game, mov_type);
             }
-            Rule::subsequence => {
-                parse_subsequence(game, mov_type);
+            Rule::multi_subsequence => {
+                parse_multi_subsequence(game, mov_type);
             }
             Rule::COMMENT => (),
             _ => unreachable!(),
@@ -109,8 +109,20 @@ fn parse_black_sequence(game: &mut Game, black_sequence: Pair<Rule>) {
             Rule::sequence => {
                 parse_sequence(game, mov_type);
             }
-            Rule::half_subsequence => {
-                parse_half_subsequence(game, mov_type);
+            Rule::multi_half_subsequence => {
+                parse_multi_half_subsequence(game, mov_type);
+            }
+            Rule::COMMENT => (),
+            _ => unreachable!(),
+        }
+    }
+}
+
+fn parse_multi_subsequence(game: &mut Game, multi_subsequence: Pair<Rule>) {
+    for subsequence in multi_subsequence.into_inner() {
+        match subsequence.as_rule() {
+            Rule::subsequence => {
+                parse_subsequence(game, subsequence.clone());
             }
             Rule::COMMENT => (),
             _ => unreachable!(),
@@ -119,10 +131,10 @@ fn parse_black_sequence(game: &mut Game, black_sequence: Pair<Rule>) {
 }
 
 fn parse_subsequence(game: &mut Game, subsequence: Pair<Rule>) {
-    println!("{:?}", subsequence.as_span().as_str());
     let sequence = subsequence.into_inner().next().unwrap();
 
     game.undo();
+
     let root_fullmove_number = game.fullmove_number;
 
     parse_sequence(game, sequence);
@@ -136,11 +148,22 @@ fn parse_subsequence(game: &mut Game, subsequence: Pair<Rule>) {
 
     game.undo();
     game.redo();
-    // println!("{}", game.fen());
+}
+
+fn parse_multi_half_subsequence(game: &mut Game, multi_half_subsequence: Pair<Rule>) {
+    for half_subsequence in multi_half_subsequence.into_inner() {
+        match half_subsequence.as_rule() {
+            Rule::half_subsequence => {
+                parse_half_subsequence(game, half_subsequence);
+            }
+            Rule::COMMENT => (),
+            _ => unreachable!(),
+        }
+    }
+    game.undo();
 }
 
 fn parse_half_subsequence(game: &mut Game, half_subsequence: Pair<Rule>) {
-    println!("{}", game.fen());
     let mut pairs = half_subsequence.into_inner();
 
     let half_move = pairs.next().unwrap();
@@ -149,6 +172,7 @@ fn parse_half_subsequence(game: &mut Game, half_subsequence: Pair<Rule>) {
     let sequence = pairs.next().unwrap();
 
     game.undo();
+
     let root_fullmove_number = game.fullmove_number;
 
     parse_sequence(game, sequence);
@@ -194,10 +218,7 @@ fn parse_full_move(game: &mut Game, full_move: Pair<Rule>) {
     let mov1 = pairs.next().unwrap().as_span().as_str();
     let mov2 = pairs.next().unwrap().as_span().as_str();
 
-    game.move_piece(mov1).unwrap_or_else(|_| {
-        println!("{}", game.pgn());
-        panic!()
-    });
+    game.move_piece(mov1).unwrap();
     game.move_piece(mov2).unwrap();
 }
 
