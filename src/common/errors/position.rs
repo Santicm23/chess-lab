@@ -4,8 +4,8 @@ use crate::constants::Position;
 
 /// Error indicating that a specific position is already occupied.
 ///
-/// This error is returned when an attempt is made to place an item
-/// in a position that is already taken.
+/// # Attributes
+/// * `position` - the position that is already occupied.
 ///
 #[derive(Debug, Error)]
 #[error("Position {position} is already occupied")]
@@ -33,8 +33,8 @@ impl PositionOccupiedError {
 
 /// Error indicating that a specific position is empty.
 ///
-/// This error is returned when an operation expects a position to be occupied
-/// but finds it empty instead.
+/// # Attributes
+/// * `position` - the position that is empty.
 ///
 #[derive(Debug, Error)]
 #[error("Position {position} is empty")]
@@ -62,8 +62,9 @@ impl PositionEmptyError {
 
 /// Error indicating that a position is out of the allowed range.
 ///
-/// This error is returned when a specified position exceeds the defined
-/// column (`col`) or row (`row`) boundaries.
+/// # Attributes
+/// * `col` - the column index that is out of range.
+/// * `row` - the row index that is out of range.
 ///
 #[derive(Debug, PartialEq, Error)]
 #[error("Position ({col}, {row}) is out of range")]
@@ -93,13 +94,8 @@ impl PositionOutOfRangeError {
 
 /// Error indicating that a position is invalid.
 ///
-/// This error is returned when a position is fundamentally invalid for other reasons.
-///
-/// # Example
-///
-/// ```
-/// let error = PositionInvalidError::new("Invalid position");
-/// ```
+/// # Attributes
+/// * `position_str` - the string representation of the position that is invalid.
 ///
 #[derive(Debug, PartialEq, Error)]
 #[error("Invalid position: {position_str}")]
@@ -125,23 +121,11 @@ impl PositionInvalidError {
     }
 }
 
-/// Enum representing invalid string position errors.
-///
-/// This enum encapsulates different kinds of invalid position errors, including:
-/// - `OutOfRange`: Indicates that the position is outside the allowed range.
-/// - `Invalid`: Indicates that the position is fundamentally invalid for other reasons.
-///
-#[derive(Debug, PartialEq, Error)]
-pub enum PositionStringError {
-    #[error(transparent)]
-    OutOfRange(#[from] PositionOutOfRangeError),
-    #[error(transparent)]
-    Invalid(#[from] PositionInvalidError),
-}
-
 /// Error indicating that two positions are not aligned.
 ///
-/// This error is returned when two positions are not aligned in the same row, column, or diagonal.
+/// # Attributes
+/// * `position1` - the first position that is not aligned.
+/// * `position2` - the second position that is not aligned.
 ///
 #[derive(Debug, PartialEq, Error)]
 #[error("Positions {position1} and {position2} are not aligned")]
@@ -226,15 +210,6 @@ mod tests {
 
         assert_eq!(error.position_str, position_str);
         assert_eq!(format!("{}", error), "Invalid position: abc");
-    }
-
-    #[test]
-    fn test_position_string_error() {
-        let col = 8;
-        let row = 8;
-        let error = PositionStringError::OutOfRange(PositionOutOfRangeError::new(col, row));
-
-        assert_eq!(error.to_string(), "Position (8, 8) is out of range");
     }
 
     #[test]

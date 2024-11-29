@@ -132,7 +132,7 @@ impl Game {
         let re = Regex::new(r"^([1-8PpNnBbRrQqKk]{1,8}/){7}[1-8PpNnBbRrQqKk]{1,8} [wb] (-|[KQkq]{1,4}) (-|[a-h][1-8]) \d+ ([1-9]\d*)$").unwrap();
 
         if !re.is_match(fen) {
-            return Err(FenError::InvalidFen(fen.to_string()));
+            return Err(FenError::new(fen.to_string()));
         }
 
         let mut game = Game::default();

@@ -344,8 +344,7 @@ impl Move {
         check: bool,
         checkmate: bool,
     ) -> Result<Move, MoveInfoError> {
-        let mut move_info_error = MoveInfoError {
-            error: String::new(),
+        let mov = Move {
             piece,
             from,
             to,
@@ -360,57 +359,53 @@ impl Move {
             MoveType::Normal { capture, promotion } => {
                 if *capture {
                     if captured_piece.is_none() {
-                        move_info_error.error =
-                            "The move is a capture, but no captured piece is provided".to_string();
-                        return Err(move_info_error);
+                        return Err(MoveInfoError::new(
+                            "The move is a capture, but no captured piece is provided".to_string(),
+                            mov,
+                        ));
                     }
                 } else {
                     if captured_piece.is_some() {
-                        move_info_error.error =
+                        return Err(MoveInfoError::new(
                             "The move is not a capture, but a captured piece is provided"
-                                .to_string();
-                        return Err(move_info_error);
+                                .to_string(),
+                            mov,
+                        ));
                     }
                 }
                 if promotion.is_some() {
                     if piece.piece_type != PieceType::Pawn {
-                        move_info_error.error =
-                            "The move is a promotion, but the piece is not a pawn".to_string();
-                        return Err(move_info_error);
+                        return Err(MoveInfoError::new(
+                            "The move is a promotion, but the piece is not a pawn".to_string(),
+                            mov,
+                        ));
                     }
                 }
             }
             MoveType::Castle { side: _ } => {
                 if piece.piece_type != PieceType::King {
-                    move_info_error.error =
-                        "The move is a castle, but the piece is not a king".to_string();
-                    return Err(move_info_error);
+                    return Err(MoveInfoError::new(
+                        "The move is a castle, but the piece is not a king".to_string(),
+                        mov,
+                    ));
                 }
                 if rook_from.is_none() {
-                    move_info_error.error =
-                        "The move is a castle, but no rook position is provided".to_string();
-                    return Err(move_info_error);
+                    return Err(MoveInfoError::new(
+                        "The move is a castle, but no rook position is provided".to_string(),
+                        mov,
+                    ));
                 }
             }
             MoveType::EnPassant => {
                 if piece.piece_type != PieceType::Pawn {
-                    move_info_error.error =
-                        "The move is an en passant, but the piece is not a pawn".to_string();
-                    return Err(move_info_error);
+                    return Err(MoveInfoError::new(
+                        "The move is an en passant, but the piece is not a pawn".to_string(),
+                        mov,
+                    ));
                 }
             }
         }
-        Ok(Move {
-            piece,
-            from,
-            to,
-            move_type,
-            captured_piece,
-            rook_from,
-            ambiguity,
-            check,
-            checkmate,
-        })
+        Ok(mov)
     }
 }
 

@@ -105,7 +105,7 @@ impl Board {
         let re = Regex::new(r"^([1-8PpNnBbRrQqKk]{1,8}/){7}[1-8PpNnBbRrQqKk]{1,8}$").unwrap();
 
         if !re.is_match(fen) {
-            return Err(FenError::InvalidFen(fen.to_string()));
+            return Err(FenError::new(fen.to_string()));
         }
 
         let mut board = Board::empty();
@@ -122,13 +122,12 @@ impl Board {
                     continue;
                 }
 
-                let piece = Piece::from_fen(c);
+                let piece = Piece::from_fen(c).unwrap();
 
                 board
                     .set_piece(
                         piece,
-                        &Position::new(col, row)
-                            .map_err(|_| FenError::InvalidFen(fen.to_string()))?,
+                        &Position::new(col, row).map_err(|_| FenError::new(fen.to_string()))?,
                     )
                     .unwrap();
 

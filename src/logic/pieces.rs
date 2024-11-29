@@ -1,8 +1,13 @@
 use std::fmt::{self, Display, Formatter};
 
-use crate::constants::{
-    movements::{diagonal_movement, l_movement, linear_movement, max_movement, movement_direction},
-    Color, PieceType, Position,
+use crate::{
+    constants::{
+        movements::{
+            diagonal_movement, l_movement, linear_movement, max_movement, movement_direction,
+        },
+        Color, PieceType, Position,
+    },
+    errors::PieceReprError,
 };
 
 /// Represents a piece on the board with a color and a piece type
@@ -68,7 +73,7 @@ impl Piece {
     /// assert_eq!(piece.piece_type, PieceType::Pawn);
     /// ```
     ///
-    pub fn from_fen(char: char) -> Piece {
+    pub fn from_fen(char: char) -> Result<Piece, PieceReprError> {
         let color = match char.is_uppercase() {
             true => Color::White,
             false => Color::Black,
@@ -81,10 +86,10 @@ impl Piece {
             "r" => PieceType::Rook,
             "q" => PieceType::Queen,
             "k" => PieceType::King,
-            _ => panic!("Invalid piece type"),
+            _ => return Err(PieceReprError::new(char)),
         };
 
-        Piece::new(color, piece_type)
+        Ok(Piece::new(color, piece_type))
     }
 }
 
@@ -786,51 +791,51 @@ mod tests {
 
     #[test]
     fn test_from_fen() {
-        let wpawn = Piece::from_fen('P');
+        let wpawn = Piece::from_fen('P').unwrap();
         assert_eq!(wpawn.color, Color::White);
         assert_eq!(wpawn.piece_type, PieceType::Pawn);
 
-        let bpawn = Piece::from_fen('p');
+        let bpawn = Piece::from_fen('p').unwrap();
         assert_eq!(bpawn.color, Color::Black);
         assert_eq!(bpawn.piece_type, PieceType::Pawn);
 
-        let wrook = Piece::from_fen('R');
+        let wrook = Piece::from_fen('R').unwrap();
         assert_eq!(wrook.color, Color::White);
         assert_eq!(wrook.piece_type, PieceType::Rook);
 
-        let brook = Piece::from_fen('r');
+        let brook = Piece::from_fen('r').unwrap();
         assert_eq!(brook.color, Color::Black);
         assert_eq!(brook.piece_type, PieceType::Rook);
 
-        let wknight = Piece::from_fen('N');
+        let wknight = Piece::from_fen('N').unwrap();
         assert_eq!(wknight.color, Color::White);
         assert_eq!(wknight.piece_type, PieceType::Knight);
 
-        let bknight = Piece::from_fen('n');
+        let bknight = Piece::from_fen('n').unwrap();
         assert_eq!(bknight.color, Color::Black);
         assert_eq!(bknight.piece_type, PieceType::Knight);
 
-        let wbishop = Piece::from_fen('B');
+        let wbishop = Piece::from_fen('B').unwrap();
         assert_eq!(wbishop.color, Color::White);
         assert_eq!(wbishop.piece_type, PieceType::Bishop);
 
-        let bbishop = Piece::from_fen('b');
+        let bbishop = Piece::from_fen('b').unwrap();
         assert_eq!(bbishop.color, Color::Black);
         assert_eq!(bbishop.piece_type, PieceType::Bishop);
 
-        let wqueen = Piece::from_fen('Q');
+        let wqueen = Piece::from_fen('Q').unwrap();
         assert_eq!(wqueen.color, Color::White);
         assert_eq!(wqueen.piece_type, PieceType::Queen);
 
-        let bqueen = Piece::from_fen('q');
+        let bqueen = Piece::from_fen('q').unwrap();
         assert_eq!(bqueen.color, Color::Black);
         assert_eq!(bqueen.piece_type, PieceType::Queen);
 
-        let wking = Piece::from_fen('K');
+        let wking = Piece::from_fen('K').unwrap();
         assert_eq!(wking.color, Color::White);
         assert_eq!(wking.piece_type, PieceType::King);
 
-        let bking = Piece::from_fen('k');
+        let bking = Piece::from_fen('k').unwrap();
         assert_eq!(bking.color, Color::Black);
         assert_eq!(bking.piece_type, PieceType::King);
     }

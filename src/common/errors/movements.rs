@@ -1,7 +1,4 @@
-use crate::{
-    constants::{MoveType, PieceType, Position},
-    logic::Piece,
-};
+use crate::constants::Move;
 use thiserror::Error;
 
 /// Errors that can occur when trying to move a piece
@@ -21,17 +18,33 @@ pub enum MoveError {
     Ambiguous(String),
 }
 
+/// Errors that can occur when trying to move a piece
+///
+/// # Arguments
+/// * `error` - The error message
+/// * `mov` - The move that caused the error
+///
 #[derive(Debug, Error)]
 #[error("Error moving piece: {error}")]
 pub struct MoveInfoError {
     pub error: String,
-    pub piece: Piece,
-    pub from: Position,
-    pub to: Position,
-    pub move_type: MoveType,
-    pub captured_piece: Option<PieceType>,
-    pub rook_from: Option<Position>,
-    pub ambiguity: (bool, bool),
-    pub check: bool,
-    pub checkmate: bool,
+    pub mov: Move,
+}
+
+impl MoveInfoError {
+    /// Creates a new `MoveInfoError` with the given error message and move.
+    ///
+    /// # Arguments
+    /// * `error` - The error message
+    /// * `mov` - The move that caused the error
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let error = MoveInfoError::new("Invalid move", mov);
+    /// ```
+    ///
+    pub fn new(error: String, mov: Move) -> MoveInfoError {
+        MoveInfoError { error, mov }
+    }
 }
