@@ -454,3 +454,55 @@ impl Display for Move {
         write!(f, "{}", result)
     }
 }
+
+/// Represents the information of a move
+///
+/// # Fields
+/// * `halfmove_clock`: The number of halfmoves since the last capture or pawn move
+/// * `fullmove_number`: The number of fullmoves
+/// * `en_passant`: The en passant target square
+/// * `castling_rights`: The castling rights
+/// * `game_status`: The status of the game
+///
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub struct MoveInfo {
+    pub halfmove_clock: u32,
+    pub fullmove_number: u32,
+    pub en_passant: Option<Position>,
+    pub castling_rights: u8,
+    pub game_status: GameStatus,
+}
+
+impl MoveInfo {
+    /// Creates a new move info
+    ///
+    /// # Arguments
+    /// * `halfmove_clock`: The number of halfmoves since the last capture or pawn move
+    /// * `fullmove_number`: The number of fullmoves
+    /// * `en_passant`: The en passant target square
+    /// * `castling_rights`: The castling rights
+    /// * `game_status`: The status of the game
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lab::constants::{GameStatus, MoveInfo};
+    ///
+    /// let move_info = MoveInfo::new(0, 1, None, 0, GameStatus::InProgress);
+    /// ```
+    ///
+    pub fn new(
+        halfmove_clock: u32,
+        fullmove_number: u32,
+        en_passant: Option<Position>,
+        castling_rights: u8,
+        game_status: GameStatus,
+    ) -> MoveInfo {
+        MoveInfo {
+            halfmove_clock,
+            fullmove_number,
+            en_passant,
+            castling_rights,
+            game_status,
+        }
+    }
+}

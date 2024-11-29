@@ -4,7 +4,7 @@ use std::{
     rc::{Rc, Weak},
 };
 
-use super::{GameStatus, Position};
+use super::{GameStatus, MoveInfo, Position};
 
 #[derive(Debug, Clone)]
 pub enum OptionPgnMetadata {
@@ -535,9 +535,9 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     /// assert_eq!(tree.get_move_info(), (0, 0, None, 0, GameStatus::InProgress));
     /// ```
     ///
-    pub fn get_move_info(&self) -> Option<(u32, u32, Option<Position>, u8, GameStatus)> {
+    pub fn get_move_info(&self) -> Option<MoveInfo> {
         let current_line = self.current_line.as_ref()?.borrow();
-        Some((
+        Some(MoveInfo::new(
             current_line.halfmove_clock,
             current_line.fullmove_number,
             current_line.en_passant,

@@ -40,12 +40,12 @@ pub fn parse_standard_pgn(input: &str) -> Result<Game, FenError> {
             }
             Rule::sequence => {
                 metadata.iter().for_each(|(key, value)| {
-                    println!("{}", key);
                     game.history.add_metadata(key, value);
                 });
                 parse_sequence(&mut game, record);
             }
             Rule::result => (),
+            Rule::COMMENT => (),
             Rule::EOI => (),
             _ => unreachable!(),
         }
@@ -55,57 +55,151 @@ pub fn parse_standard_pgn(input: &str) -> Result<Game, FenError> {
 }
 
 fn parse_sequence(game: &mut Game, sequence: Pair<Rule>) {
-    let mut num_moves = 0;
     for subsequence in sequence.into_inner() {
         match subsequence.as_rule() {
             Rule::line => {
-                parse_line(game, subsequence, &mut num_moves);
+                parse_line(game, subsequence);
             }
             Rule::white_sequence => {
-                parse_white_sequence(game, subsequence, &mut num_moves);
+                parse_white_sequence(game, subsequence);
             }
             Rule::black_sequence => {
-                parse_black_sequence(game, subsequence, &mut num_moves);
+                parse_black_sequence(game, subsequence);
             }
-            Rule::COMMENT => {}
+            Rule::COMMENT => (),
             _ => unreachable!(),
         }
     }
 }
 
-fn parse_line(game: &mut Game, line: Pair<Rule>, num_moves: &mut i32) {
+fn parse_white_sequence(game: &mut Game, white_sequence: Pair<Rule>) {
+    for mov_type in white_sequence.into_inner() {
+        match mov_type.as_rule() {
+            Rule::partial_move => {
+                parse_partial_move(game, mov_type);
+            }
+            Rule::full_move => {
+                parse_full_move(game, mov_type);
+            }
+            Rule::half_move => {
+                parse_partial_move(game, mov_type);
+            }
+            Rule::r#move => {
+                let mov = mov_type.into_inner().next().unwrap().as_span().as_str();
+                game.move_piece(mov).unwrap();
+            }
+            Rule::sequence => {
+                parse_sequence(game, mov_type);
+            }
+            Rule::subsequence => {
+                parse_subsequence(game, mov_type);
+            }
+            Rule::COMMENT => (),
+            _ => unreachable!(),
+        }
+    }
+}
+
+fn parse_black_sequence(game: &mut Game, black_sequence: Pair<Rule>) {
+    for mov_type in black_sequence.into_inner() {
+        match mov_type.as_rule() {
+            Rule::full_move => {
+                parse_full_move(game, mov_type);
+            }
+            Rule::sequence => {
+                parse_sequence(game, mov_type);
+            }
+            Rule::half_subsequence => {
+                parse_half_subsequence(game, mov_type);
+            }
+            Rule::COMMENT => (),
+            _ => unreachable!(),
+        }
+    }
+}
+
+fn parse_subsequence(game: &mut Game, subsequence: Pair<Rule>) {
+    println!("{:?}", subsequence.as_span().as_str());
+    let sequence = subsequence.into_inner().next().unwrap();
+
+    game.undo();
+    let root_fullmove_number = game.fullmove_number;
+
+    parse_sequence(game, sequence);
+
+    let mut fullmove_number = game.fullmove_number;
+
+    while root_fullmove_number != fullmove_number && game.fen() != game.start_position {
+        game.undo();
+        fullmove_number = game.fullmove_number;
+    }
+
+    game.undo();
+    game.redo();
+    // println!("{}", game.fen());
+}
+
+fn parse_half_subsequence(game: &mut Game, half_subsequence: Pair<Rule>) {
+    println!("{}", game.fen());
+    let mut pairs = half_subsequence.into_inner();
+
+    let half_move = pairs.next().unwrap();
+    parse_partial_move(game, half_move);
+
+    let sequence = pairs.next().unwrap();
+
+    game.undo();
+    let root_fullmove_number = game.fullmove_number;
+
+    parse_sequence(game, sequence);
+
+    let mut fullmove_number = game.fullmove_number;
+
+    while root_fullmove_number != fullmove_number && game.fen() != game.start_position {
+        game.undo();
+        fullmove_number = game.fullmove_number;
+    }
+
+    game.redo();
+}
+
+fn parse_line(game: &mut Game, line: Pair<Rule>) {
     for mov_type in line.into_inner() {
         match mov_type.as_rule() {
             Rule::partial_move => {
-                *num_moves += 1;
-
-                let mut pairs = mov_type.into_inner();
-
-                pairs.next().unwrap();
-                let mov = pairs.next().unwrap().get_input();
-
-                game.move_piece(mov).unwrap();
+                parse_partial_move(game, mov_type);
             }
             Rule::full_move => {
-                *num_moves += 2;
-
-                let mut pairs = mov_type.into_inner();
-
-                pairs.next().unwrap();
-                let mov1 = pairs.next().unwrap().get_input();
-                let mov2 = pairs.next().unwrap().get_input();
-
-                game.move_piece(mov1).unwrap();
-                game.move_piece(mov2).unwrap();
+                parse_full_move(game, mov_type);
             }
+            Rule::COMMENT => (),
             _ => unreachable!(),
         }
     }
 }
 
-fn parse_white_sequence(game: &mut Game, white_sequence: Pair<Rule>, num_moves: &mut i32) {}
+fn parse_partial_move(game: &mut Game, partial_move: Pair<Rule>) {
+    let mut pairs = partial_move.into_inner();
 
-fn parse_black_sequence(game: &mut Game, black_sequence: Pair<Rule>, num_moves: &mut i32) {}
+    pairs.next().unwrap();
+    let mov = pairs.next().unwrap().as_span().as_str();
+
+    game.move_piece(mov).unwrap();
+}
+
+fn parse_full_move(game: &mut Game, full_move: Pair<Rule>) {
+    let mut pairs = full_move.into_inner();
+
+    pairs.next().unwrap();
+    let mov1 = pairs.next().unwrap().as_span().as_str();
+    let mov2 = pairs.next().unwrap().as_span().as_str();
+
+    game.move_piece(mov1).unwrap_or_else(|_| {
+        println!("{}", game.pgn());
+        panic!()
+    });
+    game.move_piece(mov2).unwrap();
+}
 
 #[cfg(test)]
 mod tests {
@@ -115,7 +209,7 @@ mod tests {
     fn test_parse_pgn() {
         let input = "[Event \"caro kann: exchange\"]\
         [Site \"https://lichess.org/study/H6cwzXnM/pE8AwLer\"]\
-        [Result \"\"]\
+        [Result \"1-0\"]\
         [Variant \"Standard\"]\
         [ECO \"B13\"]\
         [Opening \"Caro-Kann Defense: Exchange Variation\"]\

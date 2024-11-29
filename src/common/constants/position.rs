@@ -19,7 +19,7 @@ use crate::errors::{PositionInvalidError, PositionOutOfRangeError};
 /// assert_eq!(pos.row, 0);
 /// ```
 ///
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Position {
     pub col: u8,
     pub row: u8,

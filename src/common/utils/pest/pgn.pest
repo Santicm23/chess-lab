@@ -30,8 +30,8 @@ half_move = { second_move_number ~ move }
 metadata = { "[" ~ word ~ "\"" ~ word? ~ "\"]" }
 line = { full_move* ~ partial_move? }
 subsequence = { "(" ~ sequence ~ ")" }
-half_subsequence = { "(" ~ half_move ~ subsequence ~ ")" }
-white_sequence = { (full_move* ~ partial_move) ~ subsequence+ ~ (half_move ~ sequence)? }
+half_subsequence = { "(" ~ half_move ~ sequence ~ ")" }
+white_sequence = { (full_move* ~ partial_move) ~ subsequence+ ~ ((half_move | move) ~ sequence)? }
 black_sequence = { (full_move+ ~ half_subsequence+ ~ sequence) }
 sequence = {
 	white_sequence

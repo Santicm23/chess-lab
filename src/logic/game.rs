@@ -532,11 +532,11 @@ impl Game {
 
         self.is_white_turn = !self.is_white_turn;
 
-        self.halfmove_clock = info.0;
-        self.fullmove_number = info.1;
-        self.en_passant = info.2;
-        self.castling_rights = info.3;
-        self.game_status = info.4;
+        self.halfmove_clock = info.halfmove_clock;
+        self.fullmove_number = info.fullmove_number;
+        self.en_passant = info.en_passant;
+        self.castling_rights = info.castling_rights;
+        self.game_status = info.game_status;
 
         self.history.prev_move();
     }
