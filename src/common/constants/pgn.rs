@@ -290,6 +290,29 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
         }
     }
 
+    pub fn add_metadata(&mut self, key: &str, value: &str) {
+        if key == "Event" {
+            self.event = value.to_string();
+        } else if key == "Site" {
+            self.site = value.to_string();
+        } else if key == "Date" {
+            self.date = value.to_string();
+        } else if key == "Round" {
+            self.round = value.to_string();
+        } else if key == "White" {
+            self.white = value.to_string();
+        } else if key == "Black" {
+            self.black = value.to_string();
+        } else if key == "Result" {
+            self.result = value.to_string();
+        } else {
+            if let Some(metadata) = OptionPgnMetadata::from_string(key, value) {
+                self.option_metadata.push(metadata);
+            }
+            // Return an error if the key is not supported
+        }
+    }
+
     /// Adds a move to the current line
     ///
     /// # Arguments
