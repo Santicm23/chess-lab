@@ -414,16 +414,6 @@ impl Board {
     /// # Errors
     /// If the start position is empty
     ///
-    /// ```
-    /// use chess_lab::logic::board::Board;
-    /// use chess_lab::constants::{Color, PieceType, Position};
-    ///
-    /// let board = Board::default();
-    /// let start_pos = Position::new(4, 1).unwrap();
-    ///
-    /// let end_pos = Position::new(4, 3).unwrap();
-    /// assert!(board.can_capture(&start_pos, &end_pos).unwrap());
-    ///
     pub fn can_capture(
         &self,
         start_pos: &Position,

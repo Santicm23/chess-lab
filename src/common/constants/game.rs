@@ -237,38 +237,16 @@ pub enum CastleType {
 
 /// Represents a move in a chess game
 ///
-/// # Example
-/// ```
-/// use chess_lab::constants::{Color, PieceType, Position, Move, MoveType};
-/// use chess_lab::logic::Piece;
-///
-/// let piece = Piece {
-///     color: Color::White,
-///     piece_type: PieceType::Pawn,
-/// };
-/// let from = Position::new(4, 1);
-/// let to = Position::new(4, 3);
-/// let move_type = MoveType::Normal {
-///     capture: false,
-///     promotion: None,
-/// };
-/// let captured_piece = None;
-/// let rook_from = None;
-/// let ambiguity = (false, false);
-/// let mv = Move::new(
-///     piece,
-///     from,
-///     to,
-///     move_type,
-///     captured_piece,
-///     rook_from,
-///     ambiguity,
-///     false,
-///     false
-/// );
-///
-/// assert_eq!(mv.to_string(), "e4");
-/// ```
+/// # Attributes
+/// * `piece`: The piece that is moving
+/// * `from`: The position the piece is moving from
+/// * `to`: The position the piece is moving to
+/// * `move_type`: The type of the move
+/// * `captured_piece`: The piece that is captured, if any
+/// * `rook_from`: The position of the rook, if the move is a castle
+/// * `ambiguity`: A tuple of booleans representing the ambiguity of the move
+/// * `check`: Whether the move puts the opponent in check
+/// * `checkmate`: Whether the move puts the opponent in checkmate
 ///
 #[derive(Debug, Clone, PartialEq)]
 pub struct Move {
@@ -314,8 +292,8 @@ impl Move {
     ///     color: Color::White,
     ///     piece_type: PieceType::Pawn,
     /// };
-    /// let from = Position::new(4, 1);
-    /// let to = Position::new(4, 3);
+    /// let from = Position::new(4, 1).unwrap();
+    /// let to = Position::new(4, 3).unwrap();
     /// let move_type = MoveType::Normal {
     ///     capture: false,
     ///     promotion: None,
@@ -333,7 +311,9 @@ impl Move {
     ///     ambiguity,
     ///     false,
     ///     false
-    /// );
+    /// ).unwrap();
+    ///
+    /// assert_eq!(mv.to_string(), "e4");
     /// ```
     ///
     pub fn new(
@@ -346,7 +326,7 @@ impl Move {
         ambiguity: (bool, bool),
         check: bool,
         checkmate: bool,
-    ) -> Result<Move, MoveInfoError> {
+    ) -> Result<Move, MoveInfoError<'static>> {
         let mov = Move {
             piece,
             from,
@@ -363,15 +343,14 @@ impl Move {
                 if *capture {
                     if captured_piece.is_none() {
                         return Err(MoveInfoError::new(
-                            "The move is a capture, but no captured piece is provided".to_string(),
+                            "The move is a capture, but no captured piece is provided",
                             mov,
                         ));
                     }
                 } else {
                     if captured_piece.is_some() {
                         return Err(MoveInfoError::new(
-                            "The move is not a capture, but a captured piece is provided"
-                                .to_string(),
+                            "The move is not a capture, but a captured piece is provided",
                             mov,
                         ));
                     }
@@ -379,7 +358,7 @@ impl Move {
                 if promotion.is_some() {
                     if piece.piece_type != PieceType::Pawn {
                         return Err(MoveInfoError::new(
-                            "The move is a promotion, but the piece is not a pawn".to_string(),
+                            "The move is a promotion, but the piece is not a pawn",
                             mov,
                         ));
                     }
@@ -388,13 +367,13 @@ impl Move {
             MoveType::Castle { side: _ } => {
                 if piece.piece_type != PieceType::King {
                     return Err(MoveInfoError::new(
-                        "The move is a castle, but the piece is not a king".to_string(),
+                        "The move is a castle, but the piece is not a king",
                         mov,
                     ));
                 }
                 if rook_from.is_none() {
                     return Err(MoveInfoError::new(
-                        "The move is a castle, but no rook position is provided".to_string(),
+                        "The move is a castle, but no rook position is provided",
                         mov,
                     ));
                 }
@@ -402,7 +381,7 @@ impl Move {
             MoveType::EnPassant => {
                 if piece.piece_type != PieceType::Pawn {
                     return Err(MoveInfoError::new(
-                        "The move is an en passant, but the piece is not a pawn".to_string(),
+                        "The move is an en passant, but the piece is not a pawn",
                         mov,
                     ));
                 }
@@ -460,7 +439,7 @@ impl Display for Move {
 
 /// Represents the information of a move
 ///
-/// # Fields
+/// # Attributes
 /// * `halfmove_clock`: The number of halfmoves since the last capture or pawn move
 /// * `fullmove_number`: The number of fullmoves
 /// * `en_passant`: The en passant target square
@@ -490,8 +469,16 @@ impl MoveInfo {
     /// # Example
     /// ```
     /// use chess_lab::constants::{GameStatus, MoveInfo};
+    /// use std::collections::HashMap;
     ///
-    /// let move_info = MoveInfo::new(0, 1, None, 0, GameStatus::InProgress);
+    /// let move_info = MoveInfo::new(0, 1, None, 0, GameStatus::InProgress, HashMap::new());
+    ///
+    /// assert_eq!(move_info.halfmove_clock, 0);
+    /// assert_eq!(move_info.fullmove_number, 1);
+    /// assert_eq!(move_info.en_passant, None);
+    /// assert_eq!(move_info.castling_rights, 0);
+    /// assert_eq!(move_info.game_status, GameStatus::InProgress);
+    /// assert_eq!(move_info.prev_positions.len(), 0);
     /// ```
     ///
     pub fn new(

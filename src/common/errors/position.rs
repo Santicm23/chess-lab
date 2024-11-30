@@ -23,6 +23,10 @@ impl PositionOccupiedError {
     /// # Example
     ///
     /// ```
+    /// use chess_lab::errors::PositionOccupiedError;
+    /// use chess_lab::constants::Position;
+    ///
+    /// let position = Position::from_string("a1").unwrap();
     /// let error = PositionOccupiedError::new(position);
     /// ```
     ///
@@ -52,6 +56,10 @@ impl PositionEmptyError {
     /// # Example
     ///
     /// ```
+    /// use chess_lab::errors::PositionEmptyError;
+    /// use chess_lab::constants::Position;
+    ///
+    /// let position = Position::from_string("a1").unwrap();
     /// let error = PositionEmptyError::new(position);
     /// ```
     ///
@@ -84,6 +92,10 @@ impl PositionOutOfRangeError {
     /// # Example
     ///
     /// ```
+    /// use chess_lab::errors::PositionOutOfRangeError;
+    ///
+    /// let col = 8;
+    /// let row = 8;
     /// let error = PositionOutOfRangeError::new(col, row);
     /// ```
     ///
@@ -99,11 +111,11 @@ impl PositionOutOfRangeError {
 ///
 #[derive(Debug, PartialEq, Error)]
 #[error("Invalid position: {position_str}")]
-pub struct PositionInvalidError {
-    pub position_str: String,
+pub struct PositionInvalidError<'a> {
+    pub position_str: &'a str,
 }
 
-impl PositionInvalidError {
+impl PositionInvalidError<'_> {
     /// Creates a new `PositionInvalidError` with the given message.
     ///
     /// # Arguments
@@ -113,10 +125,12 @@ impl PositionInvalidError {
     /// # Example
     ///
     /// ```
+    /// use chess_lab::errors::PositionInvalidError;
+    ///
     /// let error = PositionInvalidError::new("Invalid position");
     /// ```
     ///
-    pub fn new(position_str: String) -> PositionInvalidError {
+    pub fn new(position_str: &str) -> PositionInvalidError {
         PositionInvalidError { position_str }
     }
 }
@@ -145,6 +159,11 @@ impl UnalignedPositionsError {
     /// # Example
     ///
     /// ```
+    /// use chess_lab::errors::UnalignedPositionsError;
+    /// use chess_lab::constants::Position;
+    ///
+    /// let position1 = Position::from_string("a1").unwrap();
+    /// let position2 = Position::from_string("b3").unwrap();
     /// let error = UnalignedPositionsError::new(position1, position2);
     /// ```
     ///
@@ -205,8 +224,8 @@ mod tests {
 
     #[test]
     fn test_position_invalid_error() {
-        let position_str = "abc".to_string();
-        let error = PositionInvalidError::new(position_str.clone());
+        let position_str = "abc";
+        let error = PositionInvalidError::new(position_str);
 
         assert_eq!(error.position_str, position_str);
         assert_eq!(format!("{}", error), "Invalid position: abc");

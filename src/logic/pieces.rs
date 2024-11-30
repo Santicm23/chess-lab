@@ -67,7 +67,7 @@ impl Piece {
     /// use chess_lab::logic::Piece;
     /// use chess_lab::constants::{Color, PieceType};
     ///
-    /// let piece = Piece::from_fen('P');
+    /// let piece = Piece::from_fen('P').unwrap();
     ///
     /// assert_eq!(piece.color, Color::White);
     /// assert_eq!(piece.piece_type, PieceType::Pawn);
@@ -244,8 +244,8 @@ fn king_movement(start_pos: &Position, end_pos: &Position) -> bool {
 /// use chess_lab::constants::{Color, PieceType, Position};
 ///
 /// let piece = Piece::new(Color::White, PieceType::Pawn);
-/// let start_pos = Position::new(0, 1);
-/// let end_pos = Position::new(0, 2);
+/// let start_pos = Position::new(0, 1).unwrap();
+/// let end_pos = Position::new(0, 2).unwrap();
 ///
 /// assert_eq!(piece_movement(&piece, &start_pos, &end_pos), true);
 /// ```

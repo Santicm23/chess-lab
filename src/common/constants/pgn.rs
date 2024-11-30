@@ -188,6 +188,18 @@ impl<T: PartialEq + Clone + Display + Debug> PartialEq for PgnLine<T> {
 /// It contains the game metadata and a list of lines
 /// The current line is the move node that is currently being checked
 ///
+/// # Attributes
+/// * `event`: The event name
+/// * `site`: The site name
+/// * `date`: The date of the game
+/// * `round`: The round number
+/// * `white`: The white player name
+/// * `black`: The black player name
+/// * `result`: The result of the game
+/// * `option_metadata`: The list of other metadata
+/// * `lines`: The list of lines
+/// * `current_line`: The current line
+///
 #[derive(Debug, Clone)]
 pub struct PgnTree<T: PartialEq + Clone + Display + Debug> {
     pub event: String,
@@ -323,17 +335,20 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     /// * `fullmove_number`: The fullmove number
     /// * `en_passant`: The en passant position
     /// * `castling_rights`: The castling rights
+    /// * `game_status`: The game status
+    /// * `prev_positions`: The previous positions
     ///
     /// # Examples
     /// ```
     /// use chess_lab::constants::{pgn::PgnTree, Move, MoveType, PieceType, Color, Position, GameStatus};
     /// use chess_lab::logic::Piece;
+    /// use std::collections::HashMap;
     ///
     /// let mut pgn_tree: PgnTree<Move> = PgnTree::default();
     /// let mov = Move::new(
     ///     Piece::new(Color::Black, PieceType::Pawn),
-    ///     Position::from_string("e2"),
-    ///     Position::from_string("e4"),
+    ///     Position::from_string("e2").unwrap(),
+    ///     Position::from_string("e4").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -343,8 +358,8 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///     (false, false),
     ///     false,
     ///     false,
-    /// );
-    /// pgn_tree.add_move(mov.clone(), 0, 0, None, 0, GameStatus::InProgress);
+    /// ).unwrap();
+    /// pgn_tree.add_move(mov.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
     ///
     /// assert_eq!(mov, pgn_tree.get_move().unwrap());
     /// ```
@@ -426,13 +441,14 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     /// ```
     /// use chess_lab::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use chess_lab::logic::Piece;
+    /// use std::collections::HashMap;
     ///
     /// let mut tree = PgnTree::default();
     ///
     /// tree.add_move(Move::new(
     ///     Piece::new(Color::Black, PieceType::Pawn),
-    ///     Position::from_string("e2"),
-    ///     Position::from_string("e4"),
+    ///     Position::from_string("e2").unwrap(),
+    ///     Position::from_string("e4").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -442,7 +458,8 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///     (false, false),
     ///     false,
     ///     false,
-    /// ), 0, 0, None, 0, GameStatus::InProgress);
+    /// ).unwrap(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
+    ///
     /// tree.rm_move();
     /// ```
     ///
@@ -486,12 +503,13 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     /// ```
     /// use chess_lab::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use chess_lab::logic::Piece;
+    /// use std::collections::HashMap;
     ///
     /// let mut tree = PgnTree::default();
     /// let mov = Move::new(
     ///     Piece::new(Color::Black, PieceType::Pawn),
-    ///     Position::from_string("e2"),
-    ///     Position::from_string("e4"),
+    ///     Position::from_string("e2").unwrap(),
+    ///     Position::from_string("e4").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -501,8 +519,10 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///     (false, false),
     ///     false,
     ///     false,
-    /// );
-    /// tree.add_move(mov.clone(), 0, 0, None, 0, GameStatus::InProgress);
+    /// ).unwrap();
+    ///
+    /// tree.add_move(mov.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
+    ///
     /// assert_eq!(tree.get_move(), Some(mov));
     /// ```
     ///
@@ -517,14 +537,15 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus, MoveInfo};
     /// use chess_lab::logic::Piece;
+    /// use std::collections::HashMap;
     ///
     /// let mut tree = PgnTree::default();
     /// let mov = Move::new(
     ///     Piece::new(Color::Black, PieceType::Pawn),
-    ///     Position::from_string("e2"),
-    ///     Position::from_string("e4"),
+    ///     Position::from_string("e2").unwrap(),
+    ///     Position::from_string("e4").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -534,10 +555,11 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///     (false, false),
     ///     false,
     ///     false,
-    /// );
-    /// tree.add_move(mov.clone(), 0, 0, None, 0, GameStatus::InProgress);
+    /// ).unwrap();
     ///
-    /// assert_eq!(tree.get_move_info(), (0, 0, None, 0, GameStatus::InProgress));
+    /// tree.add_move(mov.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
+    ///
+    /// assert_eq!(tree.get_move_info(), Some(MoveInfo::new(0, 0, None, 0, GameStatus::InProgress, HashMap::new())));
     /// ```
     ///
     pub fn get_move_info(&self) -> Option<MoveInfo> {
@@ -561,12 +583,13 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     /// ```
     /// use chess_lab::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use chess_lab::logic::Piece;
+    /// use std::collections::HashMap;
     ///
     /// let mut pgn_tree = PgnTree::default();
     /// let mov1 = Move::new(
     ///     Piece::new(Color::Black, PieceType::Pawn),
-    ///     Position::from_string("e2"),
-    ///     Position::from_string("e4"),
+    ///     Position::from_string("e2").unwrap(),
+    ///     Position::from_string("e4").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -576,11 +599,11 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///     (false, false),
     ///     false,
     ///     false,
-    /// );
+    /// ).unwrap();
     /// let mov2 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
-    ///     Position::from_string("e7"),
-    ///     Position::from_string("e5"),
+    ///     Position::from_string("e7").unwrap(),
+    ///     Position::from_string("e5").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -590,9 +613,9 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///     (false, false),
     ///     false,
     ///     false,
-    /// );
-    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
-    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
+    /// ).unwrap();
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
+    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
     ///
     /// assert_eq!(mov2, pgn_tree.get_move().unwrap());
     /// assert_eq!(mov1, pgn_tree.prev_move().unwrap());
@@ -615,12 +638,13 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     /// ```
     /// use chess_lab::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use chess_lab::logic::Piece;
+    /// use std::collections::HashMap;
     ///
     /// let mut pgn_tree = PgnTree::default();
     /// let mov1 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
-    ///     Position::from_string("e2"),
-    ///     Position::from_string("e4"),
+    ///     Position::from_string("e2").unwrap(),
+    ///     Position::from_string("e4").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -630,11 +654,11 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///     (false, false),
     ///     false,
     ///     false,
-    /// );
+    /// ).unwrap();
     /// let mov2 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
-    ///     Position::from_string("d2"),
-    ///     Position::from_string("d4"),
+    ///     Position::from_string("d2").unwrap(),
+    ///     Position::from_string("d4").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -644,10 +668,10 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///     (false, false),
     ///     false,
     ///     false,
-    /// );
-    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
+    /// ).unwrap();
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
     /// pgn_tree.prev_move();
-    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
+    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
     ///
     /// pgn_tree.prev_move();
     /// assert_eq!(mov1, pgn_tree.next_move().unwrap());
@@ -682,12 +706,13 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     /// ```
     /// use chess_lab::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use chess_lab::logic::Piece;
+    /// use std::collections::HashMap;
     ///
     /// let mut pgn_tree = PgnTree::default();
     /// let mov1 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
-    ///     Position::from_string("e4"),
-    ///     Position::from_string("e2"),
+    ///     Position::from_string("e4").unwrap(),
+    ///     Position::from_string("e2").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -697,12 +722,12 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///     (false, false),
     ///     false,
     ///     false,
-    /// );
+    /// ).unwrap();
     ///
     /// let mov2 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
-    ///     Position::from_string("d2"),
-    ///     Position::from_string("d4"),
+    ///     Position::from_string("d2").unwrap(),
+    ///     Position::from_string("d4").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -712,11 +737,11 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///     (false, false),
     ///     false,
     ///     false,
-    /// );
+    /// ).unwrap();
     ///
-    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
     /// pgn_tree.prev_move();
-    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
+    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
     /// pgn_tree.prev_move();
     ///
     /// assert_eq!(vec![mov1.clone(), mov2.clone()], pgn_tree.all_next_moves());
@@ -745,12 +770,13 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     /// ```
     /// use chess_lab::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use chess_lab::logic::Piece;
+    /// use std::collections::HashMap;
     ///
     /// let mut pgn_tree = PgnTree::default();
     /// let mov1 = Move::new(
     ///     Piece::new(Color::Black, PieceType::Pawn),
-    ///     Position::from_string("e2"),
-    ///     Position::from_string("e4"),
+    ///     Position::from_string("e2").unwrap(),
+    ///     Position::from_string("e4").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -760,11 +786,11 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///     (false, false),
     ///     false,
     ///     false,
-    /// );
+    /// ). unwrap();
     /// let mov2 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
-    ///     Position::from_string("e7"),
-    ///     Position::from_string("e5"),
+    ///     Position::from_string("e7").unwrap(),
+    ///     Position::from_string("e5").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -774,9 +800,9 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///     (false, false),
     ///     false,
     ///     false,
-    /// );
-    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
-    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
+    /// ).unwrap();
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
+    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
     ///
     /// assert_eq!(mov2, pgn_tree.get_move().unwrap());
     /// assert_eq!(mov1, pgn_tree.prev_move().unwrap());
@@ -809,12 +835,13 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     /// ```
     /// use chess_lab::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use chess_lab::logic::Piece;
+    /// use std::collections::HashMap;
     ///
     /// let mut pgn_tree = PgnTree::default();
     /// let mov1 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
-    ///     Position::from_string("e2"),
-    ///     Position::from_string("e4"),
+    ///     Position::from_string("e2").unwrap(),
+    ///     Position::from_string("e4").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -824,8 +851,8 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///     (false, false),
     ///     false,
     ///     false,
-    /// );
-    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
+    /// ).unwrap();
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
     /// pgn_tree.prev_move();
     ///
     /// assert!(pgn_tree.has_next_move());
@@ -847,12 +874,13 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     /// ```
     /// use chess_lab::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use chess_lab::logic::Piece;
+    /// use std::collections::HashMap;
     ///
     /// let mut pgn_tree = PgnTree::default();
     /// let mov1 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
-    ///     Position::from_string("e2"),
-    ///     Position::from_string("e4"),
+    ///     Position::from_string("e2").unwrap(),
+    ///     Position::from_string("e4").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -862,9 +890,9 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///     (false, false),
     ///     false,
     ///     false,
-    /// );
+    /// ).unwrap();
     ///
-    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
     /// assert!(pgn_tree.has_prev_move());
     /// ```
     ///
@@ -881,12 +909,13 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     /// ```
     /// use chess_lab::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use chess_lab::logic::Piece;
+    /// use std::collections::HashMap;
     ///
     /// let mut pgn_tree = PgnTree::default();
     /// let mov1 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
-    ///     Position::from_string("e2"),
-    ///     Position::from_string("e4"),
+    ///     Position::from_string("e2").unwrap(),
+    ///     Position::from_string("e4").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -896,11 +925,11 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///     (false, false),
     ///     false,
     ///     false,
-    /// );
+    /// ).unwrap();
     /// let mov2 = Move::new(
     ///     Piece::new(Color::Black, PieceType::Pawn),
-    ///     Position::from_string("e7"),
-    ///     Position::from_string("e5"),
+    ///     Position::from_string("e7").unwrap(),
+    ///     Position::from_string("e5").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -910,9 +939,9 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///     (false, false),
     ///     false,
     ///     false,
-    /// );
-    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
-    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
+    /// ).unwrap();
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
+    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
     ///
     /// assert_eq!(pgn_tree.pgn(), "[Event \"\"]\n[Site \"\"]\n[Date \"\"]\n[Round \"\"]\n[White \"\"]\n[Black \"\"]\n[Result \"\"]\n1. e4 e5");
     /// ```
@@ -1090,12 +1119,13 @@ impl<T: PartialEq + Clone + Display + Debug> Iterator for PgnTree<T> {
     /// ```
     /// use chess_lab::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use chess_lab::logic::Piece;
+    /// use std::collections::HashMap;
     ///
     /// let mut pgn_tree = PgnTree::default();
     /// let mov1 = Move::new(
     ///     Piece::new(Color::Black, PieceType::Pawn),
-    ///     Position::from_string("e2"),
-    ///     Position::from_string("e4"),
+    ///     Position::from_string("e2").unwrap(),
+    ///     Position::from_string("e4").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -1105,11 +1135,11 @@ impl<T: PartialEq + Clone + Display + Debug> Iterator for PgnTree<T> {
     ///     (false, false),
     ///     false,
     ///     false,
-    /// );
+    /// ).unwrap();
     /// let mov2 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
-    ///     Position::from_string("e7"),
-    ///     Position::from_string("e5"),
+    ///     Position::from_string("e7").unwrap(),
+    ///     Position::from_string("e5").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -1119,9 +1149,9 @@ impl<T: PartialEq + Clone + Display + Debug> Iterator for PgnTree<T> {
     ///     (false, false),
     ///     false,
     ///     false,
-    /// );
-    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
-    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
+    /// ).unwrap();
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
+    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
     ///
     /// assert_eq!(mov2, pgn_tree.get_move().unwrap());
     /// assert_eq!(mov1, pgn_tree.next_back().unwrap());
@@ -1143,12 +1173,13 @@ impl<T: PartialEq + Clone + Display + Debug> DoubleEndedIterator for PgnTree<T> 
     /// ```
     /// use chess_lab::constants::{pgn::PgnTree, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use chess_lab::logic::Piece;
+    /// use std::collections::HashMap;
     ///
     /// let mut pgn_tree = PgnTree::default();
     /// let mov1 = Move::new(
     ///     Piece::new(Color::Black, PieceType::Pawn),
-    ///     Position::from_string("e2"),
-    ///     Position::from_string("e4"),
+    ///     Position::from_string("e2").unwrap(),
+    ///     Position::from_string("e4").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -1158,11 +1189,11 @@ impl<T: PartialEq + Clone + Display + Debug> DoubleEndedIterator for PgnTree<T> 
     ///     (false, false),
     ///     false,
     ///     false,
-    /// );
+    /// ).unwrap();
     /// let mov2 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
-    ///     Position::from_string("e7"),
-    ///     Position::from_string("e5"),
+    ///     Position::from_string("e7").unwrap(),
+    ///     Position::from_string("e5").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -1172,9 +1203,9 @@ impl<T: PartialEq + Clone + Display + Debug> DoubleEndedIterator for PgnTree<T> 
     ///     (false, false),
     ///     false,
     ///     false,
-    /// );
-    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
-    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
+    /// ).unwrap();
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
+    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
     ///
     /// assert_eq!(mov2, pgn_tree.get_move().unwrap());
     /// assert_eq!(mov1, pgn_tree.next_back().unwrap());

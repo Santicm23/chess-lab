@@ -97,7 +97,7 @@ impl Game {
     /// ```
     /// use chess_lab::logic::Game;
     ///
-    /// let game = Game::new("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", true);
+    /// let game = Game::new("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", true).unwrap();
     /// assert_eq!(game.to_string(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     /// ```
     ///
@@ -124,7 +124,7 @@ impl Game {
     /// ```
     /// use chess_lab::logic::Game;
     ///
-    /// let game = Game::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    /// let game = Game::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1").unwrap();
     /// assert_eq!(game.to_string(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     /// ```
     ///
@@ -957,7 +957,7 @@ impl Game {
     /// ```
     /// use chess_lab::logic::Game;
     ///
-    /// let game = Game::from_fen("8/8/8/8/8/4KQ2/8/4k3 b - - 0 1");
+    /// let game = Game::from_fen("8/8/8/8/8/4KQ2/8/4k3 b - - 0 1").unwrap();
     ///
     /// assert!(game.stalemate());
     /// ```

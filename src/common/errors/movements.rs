@@ -26,12 +26,12 @@ pub enum MoveError {
 ///
 #[derive(Debug, Error)]
 #[error("Error moving piece: {error}")]
-pub struct MoveInfoError {
-    pub error: String,
+pub struct MoveInfoError<'a> {
+    pub error: &'a str,
     pub mov: Move,
 }
 
-impl MoveInfoError {
+impl MoveInfoError<'_> {
     /// Creates a new `MoveInfoError` with the given error message and move.
     ///
     /// # Arguments
@@ -41,10 +41,39 @@ impl MoveInfoError {
     /// # Example
     ///
     /// ```
+    /// use chess_lab::constants::{Color, PieceType, Position, Move, MoveType};
+    /// use chess_lab::logic::Piece;
+    /// use chess_lab::errors::MoveInfoError;
+    ///
+    /// let piece = Piece {
+    ///     color: Color::White,
+    ///     piece_type: PieceType::Pawn,
+    /// };
+    /// let from = Position::new(4, 1).unwrap();
+    /// let to = Position::new(4, 3).unwrap();
+    /// let move_type = MoveType::Normal {
+    ///     capture: false,
+    ///     promotion: None,
+    /// };
+    /// let captured_piece = None;
+    /// let rook_from = None;
+    /// let ambiguity = (false, false);
+    ///
+    /// let mov = Move::new(
+    ///     piece,
+    ///     from,
+    ///     to,
+    ///     move_type,
+    ///     captured_piece,
+    ///     rook_from,
+    ///     ambiguity,
+    ///     false,
+    ///     false
+    /// ).unwrap();
     /// let error = MoveInfoError::new("Invalid move", mov);
     /// ```
     ///
-    pub fn new(error: String, mov: Move) -> MoveInfoError {
+    pub fn new(error: &str, mov: Move) -> MoveInfoError {
         MoveInfoError { error, mov }
     }
 }

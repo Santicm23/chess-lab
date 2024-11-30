@@ -9,11 +9,11 @@ use crate::errors::{PositionInvalidError, PositionOutOfRangeError};
 /// ```
 /// use chess_lab::constants::Position;
 ///
-/// let pos = Position::new(0, 0);
+/// let pos = Position::new(0, 0).unwrap();
 ///
 /// assert_eq!(pos.to_string(), "a1");
 ///
-/// let pos = Position::from_string("a1");
+/// let pos = Position::from_string("a1").unwrap();
 ///
 /// assert_eq!(pos.col, 0);
 /// assert_eq!(pos.row, 0);
@@ -42,7 +42,7 @@ impl Position {
     /// ```
     /// use chess_lab::constants::Position;
     ///
-    /// let pos = Position::new(0, 0);
+    /// let pos = Position::new(0, 0).unwrap();
     ///
     /// assert_eq!(pos.col, 0);
     /// assert_eq!(pos.row, 0);
@@ -70,7 +70,7 @@ impl Position {
     /// ```
     /// use chess_lab::constants::Position;
     ///
-    /// let pos = Position::from_string("a1");
+    /// let pos = Position::from_string("a1").unwrap();
     ///
     /// assert_eq!(pos.col, 0);
     /// assert_eq!(pos.row, 0);
@@ -78,12 +78,12 @@ impl Position {
     ///
     pub fn from_string(s: &str) -> Result<Position, PositionInvalidError> {
         if s.len() != 2 {
-            return Err(PositionInvalidError::new(s.to_string()));
+            return Err(PositionInvalidError::new(s));
         }
 
         let col = s.chars().nth(0).unwrap() as u8 - 'a' as u8;
         let row = s.chars().nth(1).unwrap() as u8 - '1' as u8;
-        Position::new(col, row).map_err(|_| PositionInvalidError::new(s.to_string()))
+        Position::new(col, row).map_err(|_| PositionInvalidError::new(s))
     }
 
     /// Converts the position to a string
@@ -95,7 +95,7 @@ impl Position {
     /// ```
     /// use chess_lab::constants::Position;
     ///
-    /// let pos = Position::new(0, 0);
+    /// let pos = Position::new(0, 0).unwrap();
     ///
     /// assert_eq!(pos.to_bitboard(), 0x0000000000000001);
     /// ```
@@ -145,8 +145,8 @@ impl Position {
     /// ```
     /// use chess_lab::constants::Position;
     ///
-    /// let pos1 = Position::new(0, 0);
-    /// let pos2 = Position::new(1, 1);
+    /// let pos1 = Position::new(0, 0).unwrap();
+    /// let pos2 = Position::new(1, 1).unwrap();
     ///
     /// let direction = pos1.direction(&pos2);
     ///
@@ -177,7 +177,7 @@ impl ops::Add<(i8, i8)> for &Position {
     /// ```
     /// use chess_lab::constants::Position;
     ///
-    /// let pos = Position::new(0, 0);
+    /// let pos = Position::new(0, 0).unwrap();
     /// let new_pos = &pos + (1, 1);
     ///
     /// assert_eq!(new_pos.col, 1);
@@ -208,8 +208,8 @@ impl ops::Sub<&Position> for &Position {
     /// ```
     /// use chess_lab::constants::Position;
     ///
-    /// let pos1 = Position::new(0, 0);
-    /// let pos2 = Position::new(1, 1);
+    /// let pos1 = Position::new(0, 0).unwrap();
+    /// let pos2 = Position::new(1, 1).unwrap();
     ///
     /// let offset = &pos1 - &pos2;
     ///
@@ -239,7 +239,7 @@ impl ops::Sub<(i8, i8)> for &Position {
     /// ```
     /// use chess_lab::constants::Position;
     ///
-    /// let pos = Position::new(1, 1);
+    /// let pos = Position::new(1, 1).unwrap();
     /// let new_pos = &pos - (1, 1);
     ///
     /// assert_eq!(new_pos.col, 0);
@@ -264,7 +264,7 @@ impl Display for Position {
     /// ```
     /// use chess_lab::constants::Position;
     ///
-    /// let pos = Position::new(0, 0);
+    /// let pos = Position::new(0, 0).unwrap();
     ///
     /// assert_eq!(pos.to_string(), "a1");
     /// ```
