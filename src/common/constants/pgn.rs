@@ -1,5 +1,6 @@
 use std::{
     cell::RefCell,
+    collections::HashMap,
     fmt::{Debug, Display},
     rc::{Rc, Weak},
 };
@@ -164,6 +165,7 @@ pub struct PgnLine<T: PartialEq + Clone + Display + Debug> {
     pub en_passant: Option<Position>,
     pub castling_rights: u8,
     pub game_status: GameStatus,
+    pub prev_positions: HashMap<String, u32>,
     pub mov: T,
 }
 
@@ -355,6 +357,7 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
         en_passant: Option<Position>,
         castling_rights: u8,
         game_status: GameStatus,
+        prev_positions: HashMap<String, u32>,
     ) {
         if let Some(current_line) = &self.current_line {
             let new_line = Rc::new(RefCell::new(PgnLine {
@@ -366,6 +369,7 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
                 castling_rights,
                 game_status,
                 mov,
+                prev_positions,
             }));
 
             if current_line.as_ref().borrow_mut().lines.contains(&new_line) {
@@ -399,6 +403,7 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
                 castling_rights,
                 game_status,
                 mov,
+                prev_positions,
             }));
 
             if self.lines.contains(&new_line) {
@@ -543,6 +548,7 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
             current_line.en_passant,
             current_line.castling_rights,
             current_line.game_status,
+            current_line.prev_positions.clone(),
         ))
     }
 
@@ -1181,6 +1187,8 @@ impl<T: PartialEq + Clone + Display + Debug> DoubleEndedIterator for PgnTree<T> 
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashMap;
+
     use crate::constants::pgn::PgnTree;
     use crate::constants::{Color, GameStatus, Move, MoveType, PieceType, Position, WinReason};
     use crate::logic::Piece;
@@ -1203,7 +1211,15 @@ mod tests {
             false,
         )
         .unwrap();
-        pgn_tree.add_move(mov.clone(), 0, 0, None, 0, GameStatus::InProgress);
+        pgn_tree.add_move(
+            mov.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
 
         assert_eq!(mov, pgn_tree.get_move().unwrap());
     }
@@ -1226,7 +1242,15 @@ mod tests {
             false,
         )
         .unwrap();
-        pgn_tree.add_move(mov.clone(), 0, 0, None, 0, GameStatus::InProgress);
+        pgn_tree.add_move(
+            mov.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
         pgn_tree.rm_move();
 
         assert!(pgn_tree.get_move().is_none());
@@ -1265,8 +1289,24 @@ mod tests {
             false,
         )
         .unwrap();
-        pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
-        pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.add_move(
+            mov2.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
 
         assert_eq!(mov2, pgn_tree.get_move().unwrap());
         assert_eq!(mov1, pgn_tree.prev_move().unwrap());
@@ -1306,8 +1346,24 @@ mod tests {
             false,
         )
         .unwrap();
-        pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
-        pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.add_move(
+            mov2.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
 
         assert_eq!(mov2, pgn_tree.get_move().unwrap());
         assert_eq!(mov1, pgn_tree.prev_move().unwrap());
@@ -1349,9 +1405,25 @@ mod tests {
         )
         .unwrap();
 
-        pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
         pgn_tree.prev_move();
-        pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
+        pgn_tree.add_move(
+            mov2.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
         pgn_tree.prev_move();
 
         assert_eq!(vec![mov1.clone(), mov2.clone()], pgn_tree.all_next_moves());
@@ -1404,9 +1476,25 @@ mod tests {
             false,
         )
         .unwrap();
-        pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
         pgn_tree.prev_move();
-        pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
+        pgn_tree.add_move(
+            mov2.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
 
         pgn_tree.prev_move();
         assert_eq!(mov1, pgn_tree.next_move().unwrap());
@@ -1448,8 +1536,24 @@ mod tests {
             false,
         )
         .unwrap();
-        pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
-        pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.add_move(
+            mov2.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
 
         assert_eq!(pgn_tree.pgn(), "[Event \"\"]\n[Site \"\"]\n[Date \"\"]\n[Round \"\"]\n[White \"\"]\n[Black \"\"]\n[Result \"\"]\n1. e4 e5");
     }
@@ -1474,7 +1578,15 @@ mod tests {
         .unwrap();
 
         assert!(!pgn_tree.has_prev_move());
-        pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
 
         assert!(pgn_tree.has_prev_move());
     }
@@ -1513,8 +1625,24 @@ mod tests {
         )
         .unwrap();
 
-        pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress);
-        pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress);
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.add_move(
+            mov2.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
         pgn_tree.prev_move();
 
         assert!(pgn_tree.has_next_move());

@@ -192,6 +192,9 @@ impl Game {
             Color::Black
         };
 
+        let ambiguity =
+            self.move_ambiguity(piece_type, color, start_pos_info, &end_pos, &move_type);
+
         let positions = self.find_pieces(piece_type, color, start_pos_info, &end_pos, &move_type);
 
         let start_pos = match positions.len() {
@@ -262,8 +265,6 @@ impl Game {
                         .set_piece(Piece::new(color, piece_type), &end_pos)
                         .unwrap();
                 }
-                let ambiguity =
-                    self.move_ambiguity(piece_type, color, start_pos_info, &end_pos, &move_type);
 
                 self.update_rules(
                     Move::new(
@@ -304,6 +305,7 @@ impl Game {
             self.en_passant,
             self.castling_rights,
             self.game_status,
+            self.prev_positions.clone(),
         );
 
         if matches!(mov.move_type, MoveType::Castle { .. })
@@ -537,6 +539,7 @@ impl Game {
         self.en_passant = info.en_passant;
         self.castling_rights = info.castling_rights;
         self.game_status = info.game_status;
+        self.prev_positions = info.prev_positions;
 
         self.history.prev_move();
     }
@@ -1119,7 +1122,6 @@ impl Game {
             (None, None) => (false, false),
             (Some(_), None) => {
                 let positions = self.board.find(piece, color);
-
                 let valid_positions = positions
                     .iter()
                     .filter(|pos| {
@@ -1331,6 +1333,8 @@ impl Display for Game {
 
 #[cfg(test)]
 mod tests {
+    use crate::constants::{Color, MoveType, PieceType, Position};
+
     use super::Game;
 
     #[test]
@@ -1835,5 +1839,25 @@ mod tests {
     fn test_stalemate() {
         let game = Game::from_fen("8/8/8/8/8/4KQ2/8/4k3 b - - 0 1").unwrap();
         assert!(game.stalemate());
+    }
+
+    #[test]
+    fn move_ambiguity() {
+        let game =
+            Game::from_fen("r3k1nr/ppq2ppp/2nbp3/3p3b/3P4/2PB1N1P/PP3PP1/RNBQR1K1 w kq - 3 10")
+                .unwrap();
+        assert_eq!(
+            game.move_ambiguity(
+                PieceType::Knight,
+                Color::White,
+                (Some(1), None),
+                &Position::from_string("d2").unwrap(),
+                &MoveType::Normal {
+                    capture: false,
+                    promotion: None
+                }
+            ),
+            (true, false)
+        );
     }
 }

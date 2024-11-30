@@ -1,4 +1,7 @@
-use std::fmt::{self, Display, Error, Formatter};
+use std::{
+    collections::HashMap,
+    fmt::{self, Display, Error, Formatter},
+};
 
 use crate::{errors::MoveInfoError, logic::Piece};
 
@@ -471,6 +474,7 @@ pub struct MoveInfo {
     pub en_passant: Option<Position>,
     pub castling_rights: u8,
     pub game_status: GameStatus,
+    pub prev_positions: HashMap<String, u32>,
 }
 
 impl MoveInfo {
@@ -496,6 +500,7 @@ impl MoveInfo {
         en_passant: Option<Position>,
         castling_rights: u8,
         game_status: GameStatus,
+        prev_positions: HashMap<String, u32>,
     ) -> MoveInfo {
         MoveInfo {
             halfmove_clock,
@@ -503,6 +508,7 @@ impl MoveInfo {
             en_passant,
             castling_rights,
             game_status,
+            prev_positions,
         }
     }
 }
