@@ -26,12 +26,12 @@ pub enum MoveError {
 ///
 #[derive(Debug, Error)]
 #[error("Error moving piece: {error}")]
-pub struct MoveInfoError<'a> {
-    pub error: &'a str,
+pub struct MoveInfoError {
+    pub error: String,
     pub mov: Move,
 }
 
-impl MoveInfoError<'_> {
+impl MoveInfoError {
     /// Creates a new `MoveInfoError` with the given error message and move.
     ///
     /// # Arguments
@@ -70,10 +70,10 @@ impl MoveInfoError<'_> {
     ///     false,
     ///     false
     /// ).unwrap();
-    /// let error = MoveInfoError::new("Invalid move", mov);
+    /// let error = MoveInfoError::new("Invalid move".to_string(), mov);
     /// ```
     ///
-    pub fn new(error: &str, mov: Move) -> MoveInfoError {
+    pub fn new(error: String, mov: Move) -> MoveInfoError {
         MoveInfoError { error, mov }
     }
 }

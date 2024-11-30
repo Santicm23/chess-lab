@@ -74,12 +74,12 @@ impl Position {
     ///
     pub fn from_string(s: &str) -> Result<Position, PositionInvalidError> {
         if s.len() != 2 {
-            return Err(PositionInvalidError::new(s));
+            return Err(PositionInvalidError::new(s.to_string()));
         }
 
         let col = s.chars().nth(0).unwrap() as u8 - 'a' as u8;
         let row = s.chars().nth(1).unwrap() as u8 - '1' as u8;
-        Position::new(col, row).map_err(|_| PositionInvalidError::new(s))
+        Position::new(col, row).map_err(|_| PositionInvalidError::new(s.to_string()))
     }
 
     /// Converts the position to a string

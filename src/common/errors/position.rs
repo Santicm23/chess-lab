@@ -111,11 +111,11 @@ impl PositionOutOfRangeError {
 ///
 #[derive(Debug, PartialEq, Error)]
 #[error("Invalid position: {position_str}")]
-pub struct PositionInvalidError<'a> {
-    pub position_str: &'a str,
+pub struct PositionInvalidError {
+    pub position_str: String,
 }
 
-impl PositionInvalidError<'_> {
+impl PositionInvalidError {
     /// Creates a new `PositionInvalidError` with the given message.
     ///
     /// # Arguments
@@ -127,10 +127,10 @@ impl PositionInvalidError<'_> {
     /// ```
     /// use chess_lab::errors::PositionInvalidError;
     ///
-    /// let error = PositionInvalidError::new("Invalid position");
+    /// let error = PositionInvalidError::new("Invalid position".to_string());
     /// ```
     ///
-    pub fn new(position_str: &str) -> PositionInvalidError {
+    pub fn new(position_str: String) -> PositionInvalidError {
         PositionInvalidError { position_str }
     }
 }
@@ -224,8 +224,8 @@ mod tests {
 
     #[test]
     fn test_position_invalid_error() {
-        let position_str = "abc";
-        let error = PositionInvalidError::new(position_str);
+        let position_str = "abc".to_string();
+        let error = PositionInvalidError::new(position_str.clone());
 
         assert_eq!(error.position_str, position_str);
         assert_eq!(format!("{}", error), "Invalid position: abc");

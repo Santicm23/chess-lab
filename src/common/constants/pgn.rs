@@ -5,6 +5,8 @@ use std::{
     rc::{Rc, Weak},
 };
 
+use crate::errors::PgnMetadataError;
+
 use super::{GameStatus, MoveInfo, Position};
 
 #[derive(Debug, Clone)]
@@ -302,7 +304,7 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
         }
     }
 
-    pub fn add_metadata(&mut self, key: &str, value: &str) {
+    pub fn add_metadata(&mut self, key: &str, value: &str) -> Result<(), PgnMetadataError> {
         if key == "Event" {
             self.event = value.to_string();
         } else if key == "Site" {
@@ -318,11 +320,12 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
         } else if key == "Result" {
             self.result = value.to_string();
         } else {
-            if let Some(metadata) = OptionPgnMetadata::from_string(key, value) {
-                self.option_metadata.push(metadata);
-            }
+            let metadata = OptionPgnMetadata::from_string(key, value)
+                .ok_or(PgnMetadataError::new(format!("[{} \"{}\"]", key, value)))?;
+            self.option_metadata.push(metadata);
             // Return an error if the key is not supported
         }
+        Ok(())
     }
 
     /// Adds a move to the current line

@@ -1,4 +1,9 @@
 # Chess Lab
+[![Crates.io](https://img.shields.io/crates/v/chess-lab.svg?logo=rust&style=flat-square)](https://crates.io/crates/chess-lab)
+[![Docs.rs](https://docs.rs/chess-lab/badge.svg)](https://docs.rs/chess-lab)
+[![License](https://img.shields.io/crates/l/chess-lab.svg)](https://creativecommons.org/legal-code-defined/)
+[![Actions Status](https://github.com/Santicm23/chess-lab/actions/workflows/rust.yml/badge.svg)](https://github.com/Santicm23/chess-lab/actions)
+
 ## Description
 Chess Lab is a comprehensive chess library written in rust that supports multiple game variants along with FEN and PGN notations. It offers a straightforward API for seamless interaction with the game, enabling developers to integrate chess functionalities into their applications effortlessly. Additionally, it provides the capability to save and retrieve multiple game lines, facilitating the management of complex game scenarios.
 

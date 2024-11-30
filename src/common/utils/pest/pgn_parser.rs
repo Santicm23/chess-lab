@@ -41,7 +41,7 @@ pub fn parse_standard_pgn(input: &str) -> Result<Game, PgnError> {
             }
             Rule::sequence => {
                 metadata.iter().for_each(|(key, value)| {
-                    game.history.add_metadata(key, value);
+                    game.history.add_metadata(key, value).ok(); // TODO log warning
                 });
                 parse_sequence(&mut game, record);
             }

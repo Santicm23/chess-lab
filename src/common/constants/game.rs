@@ -322,7 +322,7 @@ impl Move {
         ambiguity: (bool, bool),
         check: bool,
         checkmate: bool,
-    ) -> Result<Move, MoveInfoError<'static>> {
+    ) -> Result<Move, MoveInfoError> {
         let mov = Move {
             piece,
             from,
@@ -339,14 +339,18 @@ impl Move {
                 if *capture {
                     if captured_piece.is_none() {
                         return Err(MoveInfoError::new(
-                            "The move is a capture, but no captured piece is provided",
+                            String::from(
+                                "The move is a capture, but no captured piece is provided",
+                            ),
                             mov,
                         ));
                     }
                 } else {
                     if captured_piece.is_some() {
                         return Err(MoveInfoError::new(
-                            "The move is not a capture, but a captured piece is provided",
+                            String::from(
+                                "The move is not a capture, but a captured piece is provided",
+                            ),
                             mov,
                         ));
                     }
@@ -354,7 +358,7 @@ impl Move {
                 if promotion.is_some() {
                     if piece.piece_type != PieceType::Pawn {
                         return Err(MoveInfoError::new(
-                            "The move is a promotion, but the piece is not a pawn",
+                            String::from("The move is a promotion, but the piece is not a pawn"),
                             mov,
                         ));
                     }
@@ -363,13 +367,13 @@ impl Move {
             MoveType::Castle { side: _ } => {
                 if piece.piece_type != PieceType::King {
                     return Err(MoveInfoError::new(
-                        "The move is a castle, but the piece is not a king",
+                        String::from("The move is a castle, but the piece is not a king"),
                         mov,
                     ));
                 }
                 if rook_from.is_none() {
                     return Err(MoveInfoError::new(
-                        "The move is a castle, but no rook position is provided",
+                        String::from("The move is a castle, but no rook position is provided"),
                         mov,
                     ));
                 }
@@ -377,7 +381,7 @@ impl Move {
             MoveType::EnPassant => {
                 if piece.piece_type != PieceType::Pawn {
                     return Err(MoveInfoError::new(
-                        "The move is an en passant, but the piece is not a pawn",
+                        String::from("The move is an en passant, but the piece is not a pawn"),
                         mov,
                     ));
                 }

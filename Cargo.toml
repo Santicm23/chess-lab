@@ -1,6 +1,6 @@
 [package]
 name = "chess-lab"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 description = "Chess library with multiple variants and FEN/PGN support."
 authors = ["Santicm23 <santicastrom@outlook.com>"]
