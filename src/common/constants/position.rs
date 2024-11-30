@@ -33,10 +33,8 @@ impl Position {
     /// * `row`: The row of the position (between 0 and 7)
     ///
     /// # Returns
-    /// A new position
-    ///
-    /// # Panics
-    /// Panics if the column or row is out of bounds
+    /// * `Ok(Position)`: The new position
+    /// * `Err(PositionOutOfRangeError)`: If the position is out of range
     ///
     /// # Examples
     /// ```
@@ -61,10 +59,8 @@ impl Position {
     /// * `s`: The string representation of the position
     ///
     /// # Returns
-    /// A new position
-    ///
-    /// # Panics
-    /// Panics if the string is not a valid position
+    /// * `Ok(Position)`: The new position
+    /// * `Err(PositionInvalidError)`: If the string is invalid
     ///
     /// # Examples
     /// ```

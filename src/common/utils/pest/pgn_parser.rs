@@ -9,6 +9,7 @@ use crate::{errors::PgnError, logic::Game};
 #[grammar = "./src/common/utils/pest/pgn.pest"]
 struct PGNParser;
 
+/// TODO
 pub fn parse_standard_pgn(input: &str) -> Result<Game, PgnError> {
     let pair = PGNParser::parse(Rule::pgn, input)
         .expect("Failed to parse PGN")

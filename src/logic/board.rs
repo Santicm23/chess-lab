@@ -65,7 +65,8 @@ impl Board {
     /// * `fen`: A FEN string representing the board
     ///
     /// # Returns
-    /// A new board with the position represented by the FEN string
+    /// * `Ok(Board)`: A new board with the position represented by the FEN string
+    /// * `Err(FenError)`: If the FEN string is invalid
     ///
     pub fn new(fen: &str) -> Result<Board, FenError> {
         Board::from_fen(fen)
@@ -99,7 +100,8 @@ impl Board {
     /// * `fen`: A FEN string representing the board
     ///
     /// # Returns
-    /// A new board with the position represented by the FEN string
+    /// * `Ok(Board)`: A new board with the position represented by the FEN string
+    /// * `Err(FenError)`: If the FEN string is invalid
     ///
     pub fn from_fen(fen: &str) -> Result<Board, FenError> {
         let re = Regex::new(r"^([1-8PpNnBbRrQqKk]{1,8}/){7}[1-8PpNnBbRrQqKk]{1,8}$").unwrap();
@@ -219,7 +221,8 @@ impl Board {
     /// * `pos`: The position to set the piece
     ///
     /// # Returns
-    /// Ok if the piece was set successfully, Err if the position is already occupied
+    /// * `Ok(())`: If the piece was set successfully
+    /// * `Err(PositionOccupiedError)`: If the position is already occupied
     ///
     pub fn set_piece(&mut self, piece: Piece, pos: &Position) -> Result<(), PositionOccupiedError> {
         if self.is_ocupied(pos) {
@@ -261,7 +264,8 @@ impl Board {
     /// * `pos`: The position to delete the piece
     ///
     /// # Returns
-    /// The piece that was deleted or Err if the position is empty
+    /// * `Ok(Piece)`: The piece that was deleted
+    /// * `Err(PositionEmptyError)`: If the position is empty
     ///
     pub fn delete_piece(&mut self, pos: &Position) -> Result<Piece, PositionEmptyError> {
         let piece = self.get_piece(&pos);
@@ -367,7 +371,8 @@ impl Board {
     /// * `to`: The position to move the piece to
     ///
     /// # Returns
-    /// Ok if the move was successful, Err if the from position is empty
+    /// * `Ok(())`: If the piece was moved successfully
+    /// * `Err(PositionEmptyError)`: If the start position is empty
     ///
     pub fn move_piece(&mut self, from: &Position, to: &Position) -> Result<(), PositionEmptyError> {
         let piece = self.delete_piece(from)?;
@@ -409,10 +414,8 @@ impl Board {
     /// * `end_pos`: The position of the piece to capture
     ///
     /// # Returns
-    /// Whether the piece can capture the other piece
-    ///
-    /// # Errors
-    /// If the start position is empty
+    /// * `Ok(bool)`: Whether the piece can capture the other piece
+    /// * `Err(PositionEmptyError)`: If the start position is empty
     ///
     pub fn can_capture(
         &self,
@@ -449,10 +452,8 @@ impl Board {
     /// * `to`: The ending position
     ///
     /// # Returns
-    /// Whether there is a piece between the two positions
-    ///
-    /// # Panics
-    /// If the positions are not in a straight line
+    /// * `Ok(bool)`: Whether there is a piece between the two positions
+    /// * `Err(PositionBetweenError)`: If the positions are not aligned
     ///
     pub fn piece_between(
         &self,

@@ -60,7 +60,8 @@ impl Piece {
     /// * `char`: The FEN character representing the piece
     ///
     /// # Returns
-    /// A new piece with the color and piece type represented by the FEN character
+    /// * `Ok(Piece)`: The new piece
+    /// * `Err(PieceReprError)`: If the FEN character is invalid
     ///
     /// # Examples
     /// ```

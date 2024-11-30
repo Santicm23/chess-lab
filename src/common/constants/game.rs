@@ -275,13 +275,9 @@ impl Move {
     /// * `check`: Whether the move puts the opponent in check
     /// * `checkmate`: Whether the move puts the opponent in checkmate
     ///
-    /// # Panics
-    /// Panics if the move is a capture, but no captured piece is provided
-    /// Panics if the move is not a capture, but a captured piece is provided
-    /// Panics if the move is a promotion, but the piece is not a pawn
-    /// Panics if the move is a castle, but the piece is not a king
-    /// Panics if the move is a castle, but the rook position is not provided
-    /// Panics if the move is an en passant, but the piece is not a pawn
+    /// # Returns
+    /// * `Ok(Move)`: The move if it is valid
+    /// * `Err(MoveInfoError)`: The error if the move is invalid
     ///
     /// # Example
     /// ```

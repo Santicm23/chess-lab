@@ -88,10 +88,8 @@ impl Game {
     /// * `capture_king`: A boolean that indicates if the king needs to be captured
     ///
     /// # Returns
-    /// A new game
-    ///
-    /// # Panics
-    /// Panics if the FEN is invalid
+    /// * `Ok(Game)`: A new game
+    /// * `Err(FenError)`: An error if the FEN is invalid
     ///
     /// # Example
     /// ```
@@ -115,10 +113,8 @@ impl Game {
     /// * `fen`: A string slice that holds the FEN representation of the game
     ///
     /// # Returns
-    /// A new game
-    ///
-    /// # Panics
-    /// Panics if the FEN is invalid
+    /// * `Ok(Game)`: A new game
+    /// * `Err(FenError)`: An error if the FEN is invalid
     ///
     /// # Example
     /// ```
@@ -169,7 +165,8 @@ impl Game {
     /// * `move_str`: A string slice that holds the move
     ///
     /// # Returns
-    /// The game status if the move was successful, otherwise an error
+    /// * `Ok(GameStatus)`: The status of the game after the move
+    /// * `Err(MoveError)`: An error if the move is invalid
     ///
     /// # Example
     /// ```
@@ -671,8 +668,8 @@ impl Game {
     /// * `move_str`: A string slice that holds the move to be parsed
     ///
     /// # Returns
-    /// A tuple containing the piece type, start position, end position and the move type
-    /// If the move is invalid, a MoveError is returned
+    /// * `Ok((PieceType, (Option<u8>, Option<u8>), Position, MoveType))`: A tuple containing the piece type, the start position, the end position and the move type
+    /// * `Err(MoveError)`: An error if the move is invalid
     ///
     pub fn parse_move(
         &self,
