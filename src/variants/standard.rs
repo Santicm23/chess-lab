@@ -1,8 +1,11 @@
 use crate::{
     constants::{Color, GameStatus, Variant},
-    errors::{FenError, MoveError},
+    errors::{FenError, MoveError, PgnError},
     logic::Game,
-    utils::os::{read_file, write_file},
+    utils::{
+        os::{read_file, write_file},
+        pest::pgn_parser::parse_standard_pgn,
+    },
 };
 
 pub struct StandardChess {
@@ -22,8 +25,10 @@ impl Variant for StandardChess {
         })
     }
 
-    fn from_pgn(pgn: &str) -> Self {
-        todo!()
+    fn from_pgn(pgn: &str) -> Result<StandardChess, PgnError> {
+        Ok(StandardChess {
+            game: parse_standard_pgn(pgn)?,
+        })
     }
 
     fn move_piece(&mut self, move_str: &str) -> Result<GameStatus, MoveError> {
@@ -51,9 +56,9 @@ impl Variant for StandardChess {
         Ok(())
     }
 
-    fn load(&mut self, path: &str) -> Result<(), std::io::Error> {
+    fn load(&mut self, path: &str) -> Result<(), PgnError> {
         let pgn = read_file(path)?;
-        self.game = Self::from_pgn(pgn.as_str()).game;
+        self.game = Self::from_pgn(pgn.as_str())?.game;
         Ok(())
     }
 

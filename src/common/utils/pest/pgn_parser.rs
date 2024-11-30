@@ -3,17 +3,17 @@ use std::collections::HashMap;
 use pest::{iterators::Pair, Parser};
 use pest_derive::Parser;
 
-use crate::{errors::FenError, logic::Game};
+use crate::{errors::PgnError, logic::Game};
 
 #[derive(Parser)]
 #[grammar = "./src/common/utils/pest/pgn.pest"]
 struct PGNParser;
 
-pub fn parse_standard_pgn(input: &str) -> Result<Game, FenError> {
+pub fn parse_standard_pgn(input: &str) -> Result<Game, PgnError> {
     let pair = PGNParser::parse(Rule::pgn, input)
         .expect("Failed to parse PGN")
         .next()
-        .unwrap();
+        .ok_or(PgnError::InvalidPgn(input.to_string()))?;
 
     let mut game = Game::default();
 

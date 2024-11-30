@@ -1,4 +1,4 @@
-use crate::errors::{FenError, MoveError};
+use crate::errors::{FenError, MoveError, PgnError};
 
 use super::{Color, GameStatus};
 
@@ -24,14 +24,14 @@ use super::{Color, GameStatus};
 pub trait Variant: Sized {
     fn new() -> Self;
     fn from_fen(fen: &str) -> Result<Self, FenError>;
-    fn from_pgn(pgn: &str) -> Self;
+    fn from_pgn(pgn: &str) -> Result<Self, PgnError>;
     fn move_piece(&mut self, move_str: &str) -> Result<GameStatus, MoveError>;
     fn undo(&mut self);
     fn redo(&mut self);
     fn pgn(&self) -> String;
     fn fen(&self) -> String;
     fn save(&self, path: &str) -> Result<(), std::io::Error>;
-    fn load(&mut self, path: &str) -> Result<(), std::io::Error>;
+    fn load(&mut self, path: &str) -> Result<(), PgnError>;
     fn resign(&mut self, color: Color);
     fn draw(&mut self);
     fn set_lost_in_time(&mut self, color: Color);
