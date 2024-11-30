@@ -241,8 +241,25 @@ mod tests {
 
         let game = parse_standard_pgn(input).unwrap();
 
-        let game = parse_standard_pgn(&game.pgn()).unwrap();
-        let parsed_game = parse_standard_pgn(&game.pgn()).unwrap();
-        assert_eq!(game.pgn(), parsed_game.pgn());
+        assert_eq!(game.history.event, "caro kann: exchange");
+        assert_eq!(
+            game.history.site,
+            "https://lichess.org/study/H6cwzXnM/pE8AwLer"
+        );
+
+        assert_eq!(game.history.result, "1-0");
+        assert_eq!(
+            game.history.site,
+            "https://lichess.org/study/H6cwzXnM/pE8AwLer"
+        );
+        assert_eq!(game.history.date, "");
+        assert_eq!(game.history.round, "");
+        assert_eq!(game.history.white, "");
+        assert_eq!(game.history.black, "");
+        assert_eq!(game.history.result, "1-0");
+        game.history.option_metadata.iter().for_each(|metadata| {
+            println!("{}", metadata);
+            assert!(input.contains(&format!("{}", metadata)));
+        });
     }
 }
