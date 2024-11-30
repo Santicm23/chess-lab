@@ -9,7 +9,15 @@ use crate::{errors::PgnError, logic::Game};
 #[grammar = "./src/common/utils/pest/pgn.pest"]
 struct PGNParser;
 
-/// TODO
+/// Parse a PGN string into a Game struct
+///
+/// # Arguments
+/// * `input` - A string slice that holds the PGN to be parsed
+///
+/// # Returns
+/// * `Ok(Game)` - A Game struct with the parsed PGN
+/// * `Err(PgnError)` - An error with the reason why the PGN could not be parsed
+///
 pub fn parse_standard_pgn(input: &str) -> Result<Game, PgnError> {
     let pair = PGNParser::parse(Rule::pgn, input)
         .expect("Failed to parse PGN")
@@ -55,6 +63,12 @@ pub fn parse_standard_pgn(input: &str) -> Result<Game, PgnError> {
     Ok(game)
 }
 
+/// Plays a sequence of moves in a game
+///
+/// # Arguments
+/// * `game` - A mutable reference to a Game struct
+/// * `sequence` - A Pair<Rule> that holds the sequence of moves to be played
+///
 fn parse_sequence(game: &mut Game, sequence: Pair<Rule>) {
     for subsequence in sequence.into_inner() {
         match subsequence.as_rule() {
@@ -73,6 +87,12 @@ fn parse_sequence(game: &mut Game, sequence: Pair<Rule>) {
     }
 }
 
+/// Plays a white variation of moves in a game
+///
+/// # Arguments
+/// * `game` - A mutable reference to a Game struct
+/// * `white_sequence` - A Pair<Rule> that holds the white sequence of moves to be played
+///
 fn parse_white_sequence(game: &mut Game, white_sequence: Pair<Rule>) {
     for mov_type in white_sequence.into_inner() {
         match mov_type.as_rule() {
@@ -101,6 +121,12 @@ fn parse_white_sequence(game: &mut Game, white_sequence: Pair<Rule>) {
     }
 }
 
+/// Plays a black variation of moves in a game
+///
+/// # Arguments
+/// * `game` - A mutable reference to a Game struct
+/// * `black_sequence` - A Pair<Rule> that holds the black sequence of moves to be played
+///
 fn parse_black_sequence(game: &mut Game, black_sequence: Pair<Rule>) {
     for mov_type in black_sequence.into_inner() {
         match mov_type.as_rule() {
@@ -119,6 +145,12 @@ fn parse_black_sequence(game: &mut Game, black_sequence: Pair<Rule>) {
     }
 }
 
+/// Plays a multi subsequence of moves in a game
+///
+/// # Arguments
+/// * `game` - A mutable reference to a Game struct
+/// * `multi_subsequence` - A Pair<Rule> that holds the multi subsequence of moves to be played
+///
 fn parse_multi_subsequence(game: &mut Game, multi_subsequence: Pair<Rule>) {
     for subsequence in multi_subsequence.into_inner() {
         match subsequence.as_rule() {
@@ -131,6 +163,12 @@ fn parse_multi_subsequence(game: &mut Game, multi_subsequence: Pair<Rule>) {
     }
 }
 
+/// Plays a sub variation of moves in a game
+///
+/// # Arguments
+/// * `game` - A mutable reference to a Game struct
+/// * `subsequence` - A Pair<Rule> that holds the subsequence of moves to be played
+///
 fn parse_subsequence(game: &mut Game, subsequence: Pair<Rule>) {
     let sequence = subsequence.into_inner().next().unwrap();
 
@@ -142,7 +180,7 @@ fn parse_subsequence(game: &mut Game, subsequence: Pair<Rule>) {
 
     let mut fullmove_number = game.fullmove_number;
 
-    while root_fullmove_number != fullmove_number && game.fen() != game.start_position {
+    while root_fullmove_number != fullmove_number && game.fen() != game.starting_fen {
         game.undo();
         fullmove_number = game.fullmove_number;
     }
@@ -151,6 +189,12 @@ fn parse_subsequence(game: &mut Game, subsequence: Pair<Rule>) {
     game.redo();
 }
 
+/// Plays a multi half subsequence of moves in a game
+///
+/// # Arguments
+/// * `game` - A mutable reference to a Game struct
+/// * `multi_half_subsequence` - A Pair<Rule> that holds the multi half subsequence of moves to be played
+///
 fn parse_multi_half_subsequence(game: &mut Game, multi_half_subsequence: Pair<Rule>) {
     for half_subsequence in multi_half_subsequence.into_inner() {
         match half_subsequence.as_rule() {
@@ -164,6 +208,12 @@ fn parse_multi_half_subsequence(game: &mut Game, multi_half_subsequence: Pair<Ru
     game.undo();
 }
 
+/// Plays a sub variation of moves in a game that starts with a half move
+///
+/// # Arguments
+/// * `game` - A mutable reference to a Game struct
+/// * `half_subsequence` - A Pair<Rule> that holds the half subsequence of moves to be played
+///
 fn parse_half_subsequence(game: &mut Game, half_subsequence: Pair<Rule>) {
     let mut pairs = half_subsequence.into_inner();
 
@@ -180,7 +230,7 @@ fn parse_half_subsequence(game: &mut Game, half_subsequence: Pair<Rule>) {
 
     let mut fullmove_number = game.fullmove_number;
 
-    while root_fullmove_number != fullmove_number && game.fen() != game.start_position {
+    while root_fullmove_number != fullmove_number && game.fen() != game.starting_fen {
         game.undo();
         fullmove_number = game.fullmove_number;
     }
@@ -188,6 +238,12 @@ fn parse_half_subsequence(game: &mut Game, half_subsequence: Pair<Rule>) {
     game.redo();
 }
 
+/// Plays a line of moves in a game
+///
+/// # Arguments
+/// * `game` - A mutable reference to a Game struct
+/// * `line` - A Pair<Rule> that holds the line of moves to be played
+///
 fn parse_line(game: &mut Game, line: Pair<Rule>) {
     for mov_type in line.into_inner() {
         match mov_type.as_rule() {
@@ -203,6 +259,12 @@ fn parse_line(game: &mut Game, line: Pair<Rule>) {
     }
 }
 
+/// Plays a partial move in a game
+///
+/// # Arguments
+/// * `game` - A mutable reference to a Game struct
+/// * `partial_move` - A Pair<Rule> that holds the partial move to be played
+///
 fn parse_partial_move(game: &mut Game, partial_move: Pair<Rule>) {
     let mut pairs = partial_move.into_inner();
 
@@ -212,6 +274,12 @@ fn parse_partial_move(game: &mut Game, partial_move: Pair<Rule>) {
     game.move_piece(mov).unwrap();
 }
 
+/// Plays a full move in a game
+///
+/// # Arguments
+/// * `game` - A mutable reference to a Game struct
+/// * `full_move` - A Pair<Rule> that holds the full move to be played
+///
 fn parse_full_move(game: &mut Game, full_move: Pair<Rule>) {
     let mut pairs = full_move.into_inner();
 

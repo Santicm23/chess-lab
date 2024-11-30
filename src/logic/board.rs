@@ -530,7 +530,6 @@ impl Display for Board {
 
 #[cfg(test)]
 mod tests {
-
     use super::Board;
     use crate::constants::{Color, PieceType, Position};
     use crate::logic::pieces::Piece;

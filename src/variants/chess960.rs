@@ -1,19 +1,20 @@
 use crate::{
     constants::{Color, GameStatus, Variant},
     errors::{FenError, MoveError, PgnError},
-    logic::Game,
+    logic::{Board, Game},
     utils::{
         os::{read_file, write_file},
         pest::pgn_parser::parse_standard_pgn,
     },
 };
 
+#[derive(Debug, Clone)]
 pub struct Chess960 {
     game: Game,
 }
 
 impl Variant for Chess960 {
-    fn new() -> Self {
+    fn new() -> Chess960 {
         Chess960 {
             game: Game::default(),
         }
@@ -28,6 +29,13 @@ impl Variant for Chess960 {
     fn from_pgn(pgn: &str) -> Result<Chess960, PgnError> {
         Ok(Chess960 {
             game: parse_standard_pgn(pgn)?,
+        })
+    }
+
+    fn load(path: &str) -> Result<Chess960, PgnError> {
+        let pgn = read_file(path)?;
+        Ok(Chess960 {
+            game: Self::from_pgn(pgn.as_str())?.game,
         })
     }
 
@@ -56,12 +64,6 @@ impl Variant for Chess960 {
         Ok(())
     }
 
-    fn load(&mut self, path: &str) -> Result<(), PgnError> {
-        let pgn = read_file(path)?;
-        self.game = Self::from_pgn(pgn.as_str())?.game;
-        Ok(())
-    }
-
     fn resign(&mut self, color: Color) {
         self.game.resign(color)
     }
@@ -72,5 +74,45 @@ impl Variant for Chess960 {
 
     fn set_lost_in_time(&mut self, color: Color) {
         self.game.set_lost_in_time(color)
+    }
+
+    fn get_board(&self) -> Board {
+        todo!()
+    }
+
+    fn is_white_turn(&self) -> bool {
+        todo!()
+    }
+
+    fn get_halfmove_clock(&self) -> u32 {
+        todo!()
+    }
+
+    fn get_fullmove_number(&self) -> u32 {
+        todo!()
+    }
+
+    fn get_castling_rights(&self) -> String {
+        todo!()
+    }
+
+    fn get_en_passant(&self) -> Option<crate::constants::Position> {
+        todo!()
+    }
+
+    fn get_starting_fen(&self) -> String {
+        todo!()
+    }
+
+    fn get_history(&self) -> crate::constants::pgn::PgnTree<crate::constants::Move> {
+        todo!()
+    }
+
+    fn get_prev_positions(&self) -> std::collections::HashMap<String, u32> {
+        todo!()
+    }
+
+    fn get_status(&self) -> GameStatus {
+        todo!()
     }
 }

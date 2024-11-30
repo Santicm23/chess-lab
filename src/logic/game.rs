@@ -39,10 +39,10 @@ pub struct Game {
     pub fullmove_number: u32,
     pub en_passant: Option<Position>,
     pub castling_rights: u8,
-    pub start_position: String,
+    pub starting_fen: String,
     pub history: PgnTree<Move>,
     pub prev_positions: HashMap<String, u32>,
-    pub game_status: GameStatus,
+    pub status: GameStatus,
 }
 
 impl Default for Game {
@@ -71,11 +71,11 @@ impl Default for Game {
             en_passant: None,
             halfmove_clock: 0,
             fullmove_number: 1,
-            start_position: fen,
+            starting_fen: fen,
             history: PgnTree::default(),
             capture_king: false,
             prev_positions: map,
-            game_status: GameStatus::InProgress,
+            status: GameStatus::InProgress,
         }
     }
 }
@@ -132,7 +132,7 @@ impl Game {
         }
 
         let mut game = Game::default();
-        game.start_position = fen.to_string();
+        game.starting_fen = fen.to_string();
 
         game.prev_positions.clear();
         game.prev_positions.insert(game.get_fen_reduced(), 1);
@@ -178,8 +178,8 @@ impl Game {
     /// ```
     ///
     pub fn move_piece(&mut self, move_str: &str) -> Result<GameStatus, MoveError> {
-        if self.game_status != GameStatus::InProgress {
-            return Ok(self.game_status);
+        if self.status != GameStatus::InProgress {
+            return Ok(self.status);
         }
 
         let (piece_type, start_pos_info, end_pos, move_type) = self.parse_move(move_str)?;
@@ -278,7 +278,7 @@ impl Game {
                     .unwrap(),
                 );
 
-                Ok(self.game_status)
+                Ok(self.status)
             }
             Err(_) => Err(MoveError::Invalid(move_str.to_string())),
         }
@@ -301,7 +301,7 @@ impl Game {
             self.fullmove_number,
             self.en_passant,
             self.castling_rights,
-            self.game_status,
+            self.status,
             self.prev_positions.clone(),
         );
 
@@ -388,23 +388,23 @@ impl Game {
         self.prev_positions.insert(current_pos, posistions + 1);
 
         if mov.checkmate {
-            self.game_status = if self.is_white_turn {
+            self.status = if self.is_white_turn {
                 GameStatus::BlackWins(WinReason::Checkmate)
             } else {
                 GameStatus::WhiteWins(WinReason::Checkmate)
             };
         } else if self.stalemate() {
-            self.game_status = GameStatus::Draw(DrawReason::Stalemate);
+            self.status = GameStatus::Draw(DrawReason::Stalemate);
         } else if posistions == 2 {
-            self.game_status = GameStatus::Draw(DrawReason::ThreefoldRepetition);
+            self.status = GameStatus::Draw(DrawReason::ThreefoldRepetition);
         } else if self.halfmove_clock >= 100 {
-            self.game_status = GameStatus::Draw(DrawReason::FiftyMoveRule);
+            self.status = GameStatus::Draw(DrawReason::FiftyMoveRule);
         } else {
-            self.game_status = GameStatus::InProgress;
+            self.status = GameStatus::InProgress;
         };
 
-        if self.game_status != GameStatus::InProgress {
-            self.history.game_over(self.game_status);
+        if self.status != GameStatus::InProgress {
+            self.history.game_over(self.status);
         }
     }
 
@@ -535,7 +535,7 @@ impl Game {
         self.fullmove_number = info.fullmove_number;
         self.en_passant = info.en_passant;
         self.castling_rights = info.castling_rights;
-        self.game_status = info.game_status;
+        self.status = info.game_status;
         self.prev_positions = info.prev_positions;
 
         self.history.prev_move();
@@ -983,11 +983,11 @@ impl Game {
     /// let mut game = Game::default();
     /// game.resign(Color::White);
     ///
-    /// assert_eq!(game.game_status, GameStatus::BlackWins(WinReason::Resignation));
+    /// assert_eq!(game.status, GameStatus::BlackWins(WinReason::Resignation));
     /// ```
     ///
     pub fn resign(&mut self, color: Color) {
-        self.game_status = if color == Color::White {
+        self.status = if color == Color::White {
             GameStatus::BlackWins(WinReason::Resignation)
         } else {
             GameStatus::WhiteWins(WinReason::Resignation)
@@ -1007,11 +1007,11 @@ impl Game {
     /// let mut game = Game::default();
     /// game.set_lost_in_time(Color::White);
     ///
-    /// assert_eq!(game.game_status, GameStatus::BlackWins(WinReason::Time));
+    /// assert_eq!(game.status, GameStatus::BlackWins(WinReason::Time));
     /// ```
     ///
     pub fn set_lost_in_time(&mut self, color: Color) {
-        self.game_status = if color == Color::White {
+        self.status = if color == Color::White {
             GameStatus::BlackWins(WinReason::Time)
         } else {
             GameStatus::WhiteWins(WinReason::Time)
@@ -1028,10 +1028,10 @@ impl Game {
     /// let mut game = Game::default();
     /// game.set_draw_by_agreement();
     ///
-    /// assert_eq!(game.game_status, GameStatus::Draw(DrawReason::Agreement));
+    /// assert_eq!(game.status, GameStatus::Draw(DrawReason::Agreement));
     ///
     pub fn set_draw_by_agreement(&mut self) {
-        self.game_status = GameStatus::Draw(DrawReason::Agreement);
+        self.status = GameStatus::Draw(DrawReason::Agreement);
     }
 
     /// Finds the position of the pieces that matches the given criteria to move
