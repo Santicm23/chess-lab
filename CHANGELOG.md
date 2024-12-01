@@ -1,4 +1,4 @@
-All notable changes to this project will be documented in this file.
+All notable changes to this project will be documented in this file based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 We follow the [Semantic Versioning 2.0.0](http://semver.org/) format.
 
 
