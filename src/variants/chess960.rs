@@ -1,10 +1,10 @@
 use crate::{
-    constants::{Color, GameStatus, Variant},
+    constants::{Color, GameStatus, Variant, VariantBuilder},
     errors::{FenError, MoveError, PgnError},
     logic::{Board, Game},
     utils::{
         os::{read_file, write_file},
-        pest::pgn_parser::parse_pgn,
+        pest::pgn_parser::{parse_pgn, parse_pgn_file},
     },
 };
 
@@ -13,11 +13,21 @@ pub struct Chess960 {
     game: Game,
 }
 
-impl Variant for Chess960 {
-    fn new() -> Chess960 {
+impl Default for Chess960 {
+    fn default() -> Chess960 {
         Chess960 {
             game: Game::default(),
         }
+    }
+}
+
+impl VariantBuilder for Chess960 {
+    fn name() -> &'static str {
+        "Chess960"
+    }
+
+    fn new(game: Game) -> Chess960 {
+        Chess960 { game }
     }
 
     fn from_fen(fen: &str) -> Result<Chess960, FenError> {
@@ -27,18 +37,21 @@ impl Variant for Chess960 {
     }
 
     fn from_pgn(pgn: &str) -> Result<Chess960, PgnError> {
-        Ok(Chess960 {
-            game: parse_pgn(pgn)?,
-        })
+        parse_pgn(pgn)
     }
 
     fn load(path: &str) -> Result<Chess960, PgnError> {
         let pgn = read_file(path)?;
-        Ok(Chess960 {
-            game: Self::from_pgn(pgn.as_str())?.game,
-        })
+        Chess960::from_pgn(&pgn)
     }
 
+    fn load_all(path: &str) -> Result<Vec<Chess960>, PgnError> {
+        let pgn = read_file(path)?;
+        parse_pgn_file(&pgn)
+    }
+}
+
+impl Variant for Chess960 {
     fn move_piece(&mut self, move_str: &str) -> Result<GameStatus, MoveError> {
         self.game.move_piece(move_str)
     }
@@ -59,8 +72,8 @@ impl Variant for Chess960 {
         self.game.fen()
     }
 
-    fn save(&self, path: &str) -> Result<(), std::io::Error> {
-        write_file(path, self.pgn().as_str())?;
+    fn save(&self, path: &str, overwrite: bool) -> Result<(), std::io::Error> {
+        write_file(path, self.pgn().as_str(), !overwrite)?;
         Ok(())
     }
 

@@ -159,6 +159,13 @@ impl Game {
         Ok(game)
     }
 
+    pub fn get_variant(&self) -> String {
+        match self.history.variant.clone() {
+            Some(variant) => variant,
+            None => String::from("Standard"),
+        }
+    }
+
     /// Moves a piece on the board
     ///
     /// # Arguments

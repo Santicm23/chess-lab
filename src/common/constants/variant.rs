@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::{
     errors::{FenError, MoveError, PgnError},
-    logic::Board,
+    logic::{Board, Game},
 };
 
 use super::{pgn::PgnTree, Color, GameStatus, Move, Position};
@@ -26,47 +26,7 @@ use super::{pgn::PgnTree, Color, GameStatus, Move, Position};
 /// * `draw` - offers a draw to the opponent.
 /// * `set_lost_in_time` - sets a player as lost in time.
 ///
-pub trait Variant: Sized {
-    /// Creates a new instance of the variant.
-    ///
-    /// # Returns
-    /// A new instance of the variant.
-    ///
-    fn new() -> Self;
-
-    /// Creates a new instance of the variant from a FEN string.
-    ///
-    /// # Arguments
-    /// * `fen` - A FEN string.
-    ///
-    /// # Returns
-    /// * `Ok(Self)` - A new instance of the variant.
-    /// * `Err(FenError)` - An error occurred while parsing the FEN string.
-    ///
-    fn from_fen(fen: &str) -> Result<Self, FenError>;
-
-    /// Creates a new instance of the variant from a PGN string.
-    ///
-    /// # Arguments
-    /// * `pgn` - A PGN string.
-    ///
-    /// # Returns
-    /// * `Ok(Self)` - A new instance of the variant.
-    /// * `Err(PgnError)` - An error occurred while parsing the PGN string.
-    ///
-    fn from_pgn(pgn: &str) -> Result<Self, PgnError>;
-
-    /// Loads the game from a file.
-    ///
-    /// # Arguments
-    /// * `path` - The path to the file.
-    ///
-    /// # Returns
-    /// * `Ok(Self)` - The game was loaded successfully.
-    /// * `Err(PgnError)` - An error occurred while loading the game.
-    ///
-    fn load(path: &str) -> Result<Self, PgnError>;
-
+pub trait Variant {
     /// Moves a piece on the board.
     ///
     /// # Arguments
@@ -104,12 +64,13 @@ pub trait Variant: Sized {
     ///
     /// # Arguments
     /// * `path` - The path to the file.
+    /// * `overwrite` - Whether to overwrite the file if it already exists.
     ///
     /// # Returns
     /// * `Ok(())` - The game was saved successfully.
     /// * `Err(std::io::Error)` - An error occurred while saving the game.
     ///
-    fn save(&self, path: &str) -> Result<(), std::io::Error>;
+    fn save(&self, path: &str, overwrite: bool) -> Result<(), std::io::Error>;
 
     /// Resigns the game for a player.
     ///
@@ -198,4 +159,64 @@ pub trait Variant: Sized {
     /// The status of the game.
     ///
     fn get_status(&self) -> GameStatus;
+}
+
+pub trait VariantBuilder: Sized + Default {
+    /// The name of the variant.
+    ///
+    /// # Returns
+    /// The name of the variant.
+    ///
+    fn name() -> &'static str;
+
+    /// Creates a new instance of the variant.
+    ///
+    /// # Returns
+    /// A new instance of the variant.
+    ///
+    fn new(game: Game) -> Self;
+
+    /// Creates a new instance of the variant from a FEN string.
+    ///
+    /// # Arguments
+    /// * `fen` - A FEN string.
+    ///
+    /// # Returns
+    /// * `Ok(Self)` - A new instance of the variant.
+    /// * `Err(FenError)` - An error occurred while parsing the FEN string.
+    ///
+    fn from_fen(fen: &str) -> Result<Self, FenError>;
+
+    /// Creates a new instance of the variant from a PGN string.
+    ///
+    /// # Arguments
+    /// * `pgn` - A PGN string.
+    ///
+    /// # Returns
+    /// * `Ok(Self)` - A new instance of the variant.
+    /// * `Err(PgnError)` - An error occurred while parsing the PGN string.
+    ///
+    fn from_pgn(pgn: &str) -> Result<Self, PgnError>;
+
+    /// Loads the game from a file.
+    ///
+    /// # Arguments
+    /// * `path` - The path to the file.
+    ///
+    /// # Returns
+    /// * `Ok(Self)` - The game was loaded successfully.
+    /// * `Err(PgnError)` - An error occurred while loading the game.
+    ///
+    fn load(path: &str) -> Result<Self, PgnError>;
+
+    /// Loads multiple games from a file.
+    ///
+    /// # Arguments
+    /// * `path` - The path to the file.
+    ///
+    /// # Returns
+    /// * `Ok(Vec<Self>)` - The games were loaded successfully.
+    /// * `Err(PgnError)` - An error occurred while loading the games.
+    ///
+    fn load_all(path: &str) -> Result<Vec<Self>, PgnError>;
 }

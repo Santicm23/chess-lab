@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 
 use crate::{
-    constants::{pgn::PgnTree, Color, GameStatus, Move, Position, Variant},
+    constants::{pgn::PgnTree, Color, GameStatus, Move, Position, Variant, VariantBuilder},
     errors::{FenError, MoveError, PgnError},
     logic::{Board, Game},
     utils::{
         os::{read_file, write_file},
-        pest::pgn_parser::parse_pgn,
+        pest::pgn_parser::{parse_pgn, parse_pgn_file},
     },
 };
 
@@ -47,8 +47,8 @@ pub struct StandardChess {
     game: Game,
 }
 
-impl Variant for StandardChess {
-    /// Creates a new instance of the StandardChess variant.
+impl Default for StandardChess {
+    /// Creates a new instance of the StandardChess variant with default values.
     ///
     /// # Returns
     /// A new instance of the StandardChess variant.
@@ -58,13 +58,42 @@ impl Variant for StandardChess {
     /// use chess_lab::constants::Variant;
     /// use chess_lab::variants::StandardChess;
     ///
-    /// let game = StandardChess::new();
+    /// let game = StandardChess::default();
     /// ```
     ///
-    fn new() -> StandardChess {
+    fn default() -> StandardChess {
         StandardChess {
             game: Game::default(),
         }
+    }
+}
+
+impl VariantBuilder for StandardChess {
+    /// Returns the name of the variant.
+    ///
+    /// # Returns
+    /// The name of the variant.
+    ///
+    fn name() -> &'static str {
+        "Standard"
+    }
+
+    /// Creates a new instance of the StandardChess variant.
+    ///
+    /// # Returns
+    /// A new instance of the StandardChess variant.
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::constants::{Variant, VariantBuilder};
+    /// use chess_lab::logic::Game;
+    /// use chess_lab::variants::StandardChess;
+    ///
+    /// let game = StandardChess::new(Game::default());
+    /// ```
+    ///
+    fn new(game: Game) -> StandardChess {
+        StandardChess { game }
     }
 
     /// Creates a new instance of the StandardChess variant from a FEN string.
@@ -78,7 +107,7 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Variant;
+    /// use chess_lab::constants::{Variant, VariantBuilder};
     /// use chess_lab::variants::StandardChess;
     ///
     /// let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
@@ -102,7 +131,7 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Variant;
+    /// use chess_lab::constants::{Variant, VariantBuilder};
     /// use chess_lab::variants::StandardChess;
     ///
     /// let pgn = "1. e4 e5 2. Nf3 Nc6 3. Bb5 a6";
@@ -111,9 +140,7 @@ impl Variant for StandardChess {
     /// ```
     ///
     fn from_pgn(pgn: &str) -> Result<StandardChess, PgnError> {
-        Ok(StandardChess {
-            game: parse_pgn(pgn)?,
-        })
+        parse_pgn(pgn)
     }
 
     /// Loads the game from a file.
@@ -127,7 +154,7 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Variant;
+    /// use chess_lab::constants::{Variant, VariantBuilder};
     /// use chess_lab::variants::StandardChess;
     ///
     /// let path = "data/ex1.pgn";
@@ -136,11 +163,34 @@ impl Variant for StandardChess {
     ///
     fn load(path: &str) -> Result<StandardChess, PgnError> {
         let pgn = read_file(path)?;
-        Ok(StandardChess {
-            game: Self::from_pgn(pgn.as_str())?.game,
-        })
+        StandardChess::from_pgn(&pgn)
     }
 
+    /// Loads multiple games from a file.
+    ///
+    /// # Arguments
+    /// * `path` - The path to the file.
+    ///
+    /// # Returns
+    /// * `Ok(Vec<StandardChess>)` - The games were loaded successfully.
+    /// * `Err(PgnError)` - An error occurred while loading the games.
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::constants::{Variant, VariantBuilder};
+    /// use chess_lab::variants::StandardChess;
+    ///
+    /// let path = "data/ex3.pgn";
+    /// let games = StandardChess::load_all(path).unwrap();
+    /// ```
+    ///
+    fn load_all(path: &str) -> Result<Vec<Self>, PgnError> {
+        let pgn = read_file(path)?;
+        parse_pgn_file(&pgn)
+    }
+}
+
+impl Variant for StandardChess {
     /// Moves a piece on the board.
     ///
     /// # Arguments
@@ -155,7 +205,7 @@ impl Variant for StandardChess {
     /// use chess_lab::constants::{Variant, GameStatus};
     /// use chess_lab::variants::StandardChess;
     ///
-    /// let mut game = StandardChess::new();
+    /// let mut game = StandardChess::default();
     /// let status = game.move_piece("e4");
     ///
     /// assert_eq!(status, Ok(GameStatus::InProgress));
@@ -172,7 +222,7 @@ impl Variant for StandardChess {
     /// use chess_lab::constants::Variant;
     /// use chess_lab::variants::StandardChess;
     ///
-    /// let mut game = StandardChess::new();
+    /// let mut game = StandardChess::default();
     /// game.move_piece("e4").unwrap();
     /// game.undo();
     ///
@@ -190,7 +240,7 @@ impl Variant for StandardChess {
     /// use chess_lab::constants::Variant;
     /// use chess_lab::variants::StandardChess;
     ///
-    /// let mut game = StandardChess::new();
+    /// let mut game = StandardChess::default();
     /// game.move_piece("e4").unwrap();
     /// game.undo();
     /// game.redo();
@@ -212,7 +262,7 @@ impl Variant for StandardChess {
     /// use chess_lab::constants::Variant;
     /// use chess_lab::variants::StandardChess;
     ///
-    /// let mut game = StandardChess::new();
+    /// let mut game = StandardChess::default();
     /// game.move_piece("e4").unwrap();
     /// game.move_piece("e5").unwrap();
     /// let pgn = game.pgn();
@@ -234,7 +284,7 @@ impl Variant for StandardChess {
     /// use chess_lab::constants::Variant;
     /// use chess_lab::variants::StandardChess;
     ///
-    /// let game = StandardChess::new();
+    /// let game = StandardChess::default();
     /// let fen = game.fen();
     ///
     /// assert_eq!(fen, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
@@ -248,6 +298,7 @@ impl Variant for StandardChess {
     ///
     /// # Arguments
     /// * `path` - The path to the file.
+    /// * `overwrite` - Whether to overwrite the file if it already exists.
     ///
     /// # Returns
     /// * `Ok(())` - The game was saved successfully.
@@ -258,13 +309,14 @@ impl Variant for StandardChess {
     /// use chess_lab::constants::Variant;
     /// use chess_lab::variants::StandardChess;
     ///
-    /// let game = StandardChess::new();
+    /// let game = StandardChess::default();
     /// let path = "data/ex.pgn";
-    /// game.save(path).unwrap();
+    ///
+    /// game.save(path, true).unwrap();
     /// ```
     ///
-    fn save(&self, path: &str) -> Result<(), std::io::Error> {
-        write_file(path, self.pgn().as_str())?;
+    fn save(&self, path: &str, overwrite: bool) -> Result<(), std::io::Error> {
+        write_file(path, self.pgn().as_str(), !overwrite)?;
         Ok(())
     }
 
@@ -278,7 +330,7 @@ impl Variant for StandardChess {
     /// use chess_lab::constants::{Variant, Color};
     /// use chess_lab::variants::StandardChess;
     ///
-    /// let mut game = StandardChess::new();
+    /// let mut game = StandardChess::default();
     /// game.resign(Color::White);
     /// ```
     ///
@@ -293,7 +345,7 @@ impl Variant for StandardChess {
     /// use chess_lab::constants::Variant;
     /// use chess_lab::variants::StandardChess;
     ///
-    /// let mut game = StandardChess::new();
+    /// let mut game = StandardChess::default();
     /// game.draw();
     /// ```
     ///
@@ -311,7 +363,7 @@ impl Variant for StandardChess {
     /// use chess_lab::constants::{Variant, Color};
     /// use chess_lab::variants::StandardChess;
     ///
-    /// let mut game = StandardChess::new();
+    /// let mut game = StandardChess::default();
     /// game.set_lost_in_time(Color::Black);
     /// ```
     ///

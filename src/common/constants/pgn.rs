@@ -12,7 +12,6 @@ use super::{GameStatus, MoveInfo, Position};
 #[derive(Debug, Clone)]
 pub(crate) enum OptionPgnMetadata {
     // Game metadata
-    Variant(String),
     TimeControl(String),
     Termination(String),
 
@@ -68,7 +67,6 @@ impl OptionPgnMetadata {
     ///
     pub fn from_string(key: &str, value: &str) -> Option<OptionPgnMetadata> {
         match key {
-            "Variant" => Some(OptionPgnMetadata::Variant(value.to_string())),
             "TimeControl" => Some(OptionPgnMetadata::TimeControl(value.to_string())),
             "Termination" => Some(OptionPgnMetadata::Termination(value.to_string())),
             "WhiteElo" => value.parse().ok().map(OptionPgnMetadata::WhiteElo),
@@ -107,7 +105,6 @@ impl OptionPgnMetadata {
 impl Display for OptionPgnMetadata {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            OptionPgnMetadata::Variant(variant) => write!(f, "[Variant \"{}\"]", variant),
             OptionPgnMetadata::TimeControl(time_control) => {
                 write!(f, "[TimeControl \"{}\"]", time_control)
             }
@@ -211,6 +208,7 @@ pub struct PgnTree<T: PartialEq + Clone + Display + Debug> {
     pub white: String,
     pub black: String,
     pub result: String,
+    pub variant: Option<String>,
     pub(crate) option_metadata: Vec<OptionPgnMetadata>,
     lines: Vec<Rc<RefCell<PgnLine<T>>>>,
     current_line: Option<Rc<RefCell<PgnLine<T>>>>,
@@ -239,6 +237,7 @@ impl<T: PartialEq + Clone + Display + Debug> Default for PgnTree<T> {
             white: "".to_string(),
             black: "".to_string(),
             result: "".to_string(),
+            variant: None,
             option_metadata: Vec::new(),
             lines: Vec::new(),
             current_line: None,
@@ -278,6 +277,7 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///    "White".to_string(),
     ///    "Black".to_string(),
     ///    "Result".to_string(),
+    ///    None,
     /// );
     /// ```
     ///
@@ -289,6 +289,7 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
         white: String,
         black: String,
         result: String,
+        variant: Option<String>,
     ) -> PgnTree<T> {
         PgnTree {
             event,
@@ -298,6 +299,7 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
             white,
             black,
             result,
+            variant,
             option_metadata: Vec::new(),
             lines: Vec::new(),
             current_line: None,

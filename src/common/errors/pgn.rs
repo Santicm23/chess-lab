@@ -20,6 +20,8 @@ pub enum PgnError {
     NoSuchFile(#[from] std::io::Error),
     #[error("Invalid or not supported metadata: {0}")]
     InvalidMetadata(#[from] PgnMetadataError),
+    #[error("Invalid or not variant: {0}")]
+    InvalidVariant(String),
 }
 
 /// An error that occurs when parsing PGN metadata.
