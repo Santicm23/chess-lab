@@ -822,7 +822,7 @@ impl Game {
         if piece.piece_type != PieceType::Knight && piece.piece_type != PieceType::King {
             match self.board.piece_between(start_pos, end_pos) {
                 Ok(true) | Err(_) => return false,
-                Ok(false) => {}
+                Ok(false) => (),
             }
         }
 
@@ -865,7 +865,8 @@ impl Game {
         let mut board = self.board.clone();
         board.move_piece(start_pos, end_pos).unwrap();
 
-        let king = self.board.find(PieceType::King, piece.color)[0];
+        let king = board.find(PieceType::King, piece.color)[0];
+
         return !board.is_attacked(king, piece.color.opposite());
     }
 
@@ -1063,16 +1064,18 @@ impl Game {
             MoveType::Castle { side: _ } => self.board.find(PieceType::King, color),
         };
 
-        positions = positions
-            .iter()
-            .filter(|pos| match start_pos {
-                (Some(col), Some(row)) => pos.col == col && pos.row == row,
-                (Some(col), None) => pos.col == col,
-                (None, Some(row)) => pos.row == row,
-                (None, None) => true,
-            })
-            .cloned()
-            .collect();
+        if start_pos != (None, None) {
+            positions = positions
+                .iter()
+                .filter(|pos| match start_pos {
+                    (Some(col), Some(row)) => pos.col == col && pos.row == row,
+                    (Some(col), None) => pos.col == col,
+                    (None, Some(row)) => pos.row == row,
+                    (None, None) => true,
+                })
+                .cloned()
+                .collect();
+        }
 
         let mut valid_positions = Vec::new();
         for pos in positions {

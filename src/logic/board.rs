@@ -268,9 +268,7 @@ impl Board {
     /// * `Err(PositionEmptyError)`: If the position is empty
     ///
     pub fn delete_piece(&mut self, pos: &Position) -> Result<Piece, PositionEmptyError> {
-        let piece = self.get_piece(&pos);
-
-        let piece = match piece {
+        let piece = match self.get_piece(&pos) {
             Some(piece) => piece,
             None => return Err(PositionEmptyError::new(pos.clone())),
         };

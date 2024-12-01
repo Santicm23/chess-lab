@@ -4,7 +4,7 @@ use crate::{
     logic::{Board, Game},
     utils::{
         os::{read_file, write_file},
-        pest::pgn_parser::parse_standard_pgn,
+        pest::pgn_parser::parse_pgn,
     },
 };
 
@@ -28,7 +28,7 @@ impl Variant for Chess960 {
 
     fn from_pgn(pgn: &str) -> Result<Chess960, PgnError> {
         Ok(Chess960 {
-            game: parse_standard_pgn(pgn)?,
+            game: parse_pgn(pgn)?,
         })
     }
 

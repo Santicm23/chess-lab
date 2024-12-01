@@ -1,16 +1,18 @@
-
-[Event "Grand Chess Tour Croatia Rapid & Blitz 2021"]
-[Site ""]
-[Date "2021.07.11"]
+[Event "Live Chess"]
+[Site "Chess.com"]
+[Date "2024.06.18"]
 [Round "?"]
-[White "Garry Kasparov"]
-[Black "Jorden van Foreest"]
+[White "S4nt1cm"]
+[Black "TraeshMane"]
 [Result "1-0"]
+[ECO "C64"]
+[WhiteElo "1621"]
+[BlackElo "1572"]
+[TimeControl "600"]
+[EndTime "16:26:33 PDT"]
+[Termination "S4nt1cm won by resignation"]
 
-1. e4 e5 2. Nf3 Nc6 3. d4 exd4 4. Nxd4 Nf6 5. Nxc6 bxc6 6. e5 Qe7 7. Qe2 Nd5 8.
-c4 Qb4+ 9. Nd2 Nf4 10. Qe3 Ng6 11. Bd3 Bc5 12. Qg3 O-O 13. O-O d6 14. Nb3 Nxe5
-15. a3 Qb6 16. Nxc5 Qxc5 17. Be3 Qa5 18. b4 Qa4 19. Bd4 f6 20. Bxe5 fxe5 21. f4
-Bf5 22. fxe5 Bxd3 23. Qxd3 dxe5 24. Qd7 Qb3 25. Qxc6 Qe3+ 26. Kh1 Kh8 27. Rfe1
-Qc3 28. Qxc7 Rac8 29. Qxa7 Rxc4 30. h3 Rcf4 31. Qc5 Qb2 32. Qxe5 Qb3 33. Qe3 Qc4
-34. Rac1 Qf7 35. Qg3 h6 36. b5 Qd5 37. a4 Rxa4 38. Rb1 Rf5 39. b6 Rg5 40. b7
-Qxb7 41. Qxg5 1-0
+1. e4 e5 2. Nf3 Nc6 3. Bb5 Bc5 4. O-O Nge7 5. c3 O-O 6. d3 a6 7. Ba4 d6 8. Be3
+Bxe3 9. fxe3 Be6 10. d4 exd4 11. exd4 d5 12. e5 Ng6 13. Nbd2 Nce7 14. Qe1 c6 15.
+Qg3 Nf5 16. Qf2 Qb6 17. Bb3 Rfd8 18. Rae1 a5 19. a4 h6 20. Qe2 Nf4 21. Qd1 c5
+22. dxc5 Qxc5+ 23. Kh1 d4 24. Nxd4 Bxb3 25. N2xb3 Nh3 26. Nxc5 1-0

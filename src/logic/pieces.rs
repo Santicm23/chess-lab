@@ -352,6 +352,11 @@ mod tests {
             &Position::from_string("e7").unwrap(),
             &Position::from_string("f5").unwrap()
         ));
+        assert!(!pawn_movement(
+            Color::Black,
+            &Position::from_string("a6").unwrap(),
+            &Position::from_string("b7").unwrap()
+        ));
     }
 
     #[test]

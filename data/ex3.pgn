@@ -1,18 +1,628 @@
-[Event "Live Chess"]
-[Site "Chess.com"]
-[Date "2024.06.18"]
-[Round "?"]
-[White "S4nt1cm"]
-[Black "TraeshMane"]
+[Event "GCT Rapid Paris 2019"]
+[Site "Paris FRA"]
+[Date "2019.07.27"]
+[Round "2.3"]
+[White "Grischuk, A."]
+[Black "Nakamura, Hi"]
 [Result "1-0"]
-[ECO "C64"]
-[WhiteElo "1621"]
-[BlackElo "1572"]
-[TimeControl "600"]
-[EndTime "16:26:33 PDT"]
-[Termination "S4nt1cm won by resignation"]
+[ECO "E06"]
+[WhiteElo "2766"]
+[BlackElo "2754"]
+[PlyCount "111"]
+[EventDate "2019.07.27"]
+[EventType "tourn (rapid)"]
+[EventRounds "9"]
+[EventCountry "FRA"]
+[EventCategory "21"]
+[SourceTitle "The Week in Chess 1290"]
+[Source "Mark Crowther"]
+[SourceDate "2019.07.29"]
+[SourceVersion "2"]
+[SourceVersionDate "2019.07.30"]
+[SourceQuality "2"]
 
-1. e4 e5 2. Nf3 Nc6 3. Bb5 Bc5 4. O-O Nge7 5. c3 O-O 6. d3 a6 7. Ba4 d6 8. Be3
-Bxe3 9. fxe3 Be6 10. d4 exd4 11. exd4 d5 12. e5 Ng6 13. Nbd2 Nce7 14. Qe1 c6 15.
-Qg3 Nf5 16. Qf2 Qb6 17. Bb3 Rfd8 18. Rae1 a5 19. a4 h6 20. Qe2 Nf4 21. Qd1 c5
-22. dxc5 Qxc5+ 23. Kh1 d4 24. Nxd4 Bxb3 25. N2xb3 Nh3 26. Nxc5 1-0
+1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. g3 Be7 5. Bg2 O-O 6. O-O dxc4 7. Qc2 b6 8. Bg5
+Nd5 9. Bxe7 Qxe7 10. Nbd2 b5 11. b3 cxb3 12. Nxb3 a5 13. Ne5 a4 14. Nc5 c6 15.
+a3 Ra7 16. Rac1 Rc7 17. Qb2 Nb6 18. Qc3 f6 19. Qa5 Nd5 20. Ned3 Ra7 21. Qd2 Nd7
+22. Qa2 Nxc5 23. Rxc5 Bd7 24. Rfc1 Kh8 25. h4 Qf7 26. e3 Rd8 27. Qb2 Be8 28.
+Nb4 Nxb4 29. Qxb4 Qe7 30. Qb2 Ra6 31. Bxc6 Bxc6 32. Rxc6 Rxc6 33. Rxc6 e5 34.
+dxe5 Qxe5 35. Qxe5 fxe5 36. Rb6 Kg8 37. Rxb5 Rd3 38. Rxe5 Rxa3 39. Re7 Ra1+ 40.
+Kg2 a3 41. h5 Rb1 42. Ra7 Rb3 43. g4 h6 44. Kf3 Kf8 45. Kf4 Rb2 46. f3 a2 47.
+e4 Rf2 48. e5 Ke8 49. Ke3 Rg2 50. Ke4 Rf2 51. Kf5 Kf8 52. Ke6 Kg8 53. Ke7 Rxf3
+54. Rxa2 Rf4 55. e6 g6 56. Kd6 1-0
+
+[Event "Riga FIDE Grand Prix 2019"]
+[Site "Riga LAT"]
+[Date "2019.07.18"]
+[Round "3.1"]
+[White "Mamedyarov, S."]
+[Black "So, W."]
+[Result "1-0"]
+[ECO "E06"]
+[WhiteElo "2765"]
+[BlackElo "2763"]
+[PlyCount "67"]
+[EventDate "2019.07.12"]
+[EventType "k.o."]
+[EventRounds "4"]
+[EventCountry "LAT"]
+[SourceTitle "The Week in Chess 1158"]
+[Source "Mark Crowther"]
+[SourceDate "2017.01.16"]
+[SourceVersion "1"]
+[SourceVersionDate "2017.01.16"]
+[SourceQuality "2"]
+
+1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. g3 Be7 5. Bg2 O-O 6. O-O dxc4 7. Ne5 Nc6 8.
+Nxc6 bxc6 9. Na3 Bxa3 10. bxa3 Ba6 11. Qd2 Rb8 12. Qa5 Rb6 13. a4 Qd6 14. a3
+Rfb8 15. e4 c3 16. e5 Qd8 17. exf6 Bxf1 18. Bxf1 c2 19. Ra2 Qd5 20. Qxd5 cxd5
+21. Rxc2 gxf6 22. Rxc7 R8b7 23. Rc5 Kg7 24. Kg2 Rb1 25. Bb5 Ra1 26. Rc3 Rb6 27.
+Bf4 Rb7 28. Kf3 Rd1 29. Be3 Rb1 30. Kg4 Rh1 31. h4 Kg6 32. Bd3+ f5+ 33. Kf3 Rd1
+34. g4 1-0
+
+[Event "Croatia GCT 2019"]
+[Site "Zagreb CRO"]
+[Date "2019.07.04"]
+[Round "8.1"]
+[White "Ding Liren"]
+[Black "Carlsen, M."]
+[Result "0-1"]
+[ECO "E06"]
+[WhiteElo "2805"]
+[BlackElo "2875"]
+[PlyCount "118"]
+[EventDate "2019.06.26"]
+[EventType "tourn"]
+[EventRounds "11"]
+[EventCountry "CRO"]
+[EventCategory "22"]
+[SourceTitle "The Week in Chess 1287"]
+[Source "Mark Crowther"]
+[SourceDate "2019.07.08"]
+[SourceVersion "3"]
+[SourceVersionDate "2019.07.11"]
+[SourceQuality "2"]
+
+1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. g3 Be7 5. Bg2 O-O 6. O-O dxc4 7. Qc2 b5 8. a4
+b4 9. Nfd2 Nd5 10. Nxc4 c5 11. dxc5 Ba6 12. Ne3 Nd7 13. Nxd5 exd5 14. c6 Rc8
+15. Bf4 Nc5 16. c7 Qd7 17. Nd2 g5 18. Be5 f6 19. Bd4 Rxc7 20. Qd1 Ne6 21. Nb3
+Bc4 22. Na5 Nxd4 23. Qxd4 Kg7 24. Rfc1 Bxe2 25. Rxc7 Qxc7 26. Re1 Bc5 27. Qxd5
+Re8 28. Qb7 Qxb7 29. Nxb7 Bf8 30. Bc6 Re7 31. f3 Bc4 32. Rxe7+ Bxe7 33. Kf2 f5
+34. Ke3 Bg8 35. Kd3 g4 36. Na5 Bc5 37. Nc4 Bg1 38. Ne3 Be6 39. fxg4 fxg4 40.
+Ke2 h5 41. Bd5 Bd7 42. Bb3 Bxh2 43. Kf2 h4 44. gxh4 Be5 45. Nc4 g3+ 46. Kg1 Bf4
+47. Bd1 Bc6 48. b3 Kh6 49. a5 Be4 50. Kf1 Kg7 51. Kg1 Kf6 52. Kf1 Ke6 53. h5
+Kd5 54. a6 Kd4 55. Bg4 Kc3 56. Be6 Bc2 57. Na5 Bc7 58. Nb7 Bd3+ 59. Kg1 Bxa6
+0-1
+
+[Event "Xinqiao Cup Men 2019"]
+[Site "Wenzhou CHN"]
+[Date "2019.07.17"]
+[Round "3"]
+[White "Ding Liren"]
+[Black "Andreikin, D."]
+[Result "1/2-1/2"]
+[ECO "A14"]
+[WhiteElo "2812"]
+[BlackElo "2727"]
+[PlyCount "111"]
+[EventDate "2019.07.15"]
+[EventType "match"]
+[EventRounds "4"]
+[EventCountry "CHN"]
+[SourceTitle "The Week in Chess 1158"]
+[Source "Mark Crowther"]
+[SourceDate "2017.01.16"]
+[SourceVersion "1"]
+[SourceVersionDate "2017.01.16"]
+[SourceQuality "2"]
+
+1. c4 Nf6 2. g3 e6 3. Bg2 d5 4. Nf3 Be7 5. O-O O-O 6. d4 dxc4 7. Qc2 c6 8. Qxc4
+b5 9. Qb3 Bb7 10. Rd1 Nbd7 11. Bg5 Qb6 12. Nc3 Rfd8 13. Rac1 h6 14. Bxf6 Nxf6
+15. e3 Rab8 16. Ne5 c5 17. dxc5 Rxd1+ 18. Qxd1 Bxc5 19. Bxb7 Qxb7 20. Qf3 Qxf3
+21. Nxf3 Kf8 22. Ne2 Bb6 23. Ned4 a6 24. Kf1 Ke8 25. Ke2 Nd5 26. g4 Ne7 27. h4
+Rc8 28. Rxc8+ Nxc8 29. h5 Ne7 30. Kd3 Nd5 31. a3 Bc7 32. Nd2 Nf6 33. f3 Nd7 34.
+b4 Ne5+ 35. Ke4 Bd6 36. N4b3 Kd7 37. Na5 g6 38. Nb7 f5+ 39. gxf5 gxf5+ 40. Kd4
+Nc6+ 41. Kd3 Be7 42. f4 Kc7 43. Nc5 Bxc5 44. bxc5 a5 45. Nf3 Kd7 46. Kc3 Kc7
+47. Kb3 Kb7 48. Kc3 Kc7 49. Kb2 Ne7 50. Nd4 Nd5 51. Nxe6+ Kd7 52. Nd4 Nxe3 53.
+Kb3 Nd5 54. Nxb5 Kc6 55. Nd4+ Kxc5 56. Nxf5 1/2-1/2
+
+[Event "FIDE World Cup 2017"]
+[Site "Tbilisi GEO"]
+[Date "2017.09.08"]
+[Round "2.3"]
+[White "Bu Xiangzhi"]
+[Black "Bacrot, E."]
+[Result "1/2-1/2"]
+[ECO "A07"]
+[WhiteElo "2714"]
+[BlackElo "2728"]
+[PlyCount "90"]
+[EventDate "2017.09.03"]
+[EventType "k.o."]
+[EventRounds "7"]
+[EventCountry "GEO"]
+[SourceTitle "The Week in Chess 1192"]
+[Source "Mark Crowther"]
+[SourceDate "2017.09.11"]
+[SourceVersion "2"]
+[SourceVersionDate "2017.09.16"]
+[SourceQuality "2"]
+
+1. Nf3 d5 2. g3 Nf6 3. Bg2 e6 4. O-O Be7 5. d4 O-O 6. c4 dxc4 7. Qc2 b6 8. Qxc4
+Bb7 9. Nc3 Nbd7 10. Rd1 c5 11. dxc5 Bxc5 12. b4 Bxf2+ 13. Kxf2 Rc8 14. Qf4 Rxc3
+15. Bb2 Rc7 16. Bxf6 gxf6 17. Rac1 Rxc1 18. Qxc1 Qc8 19. Qxc8 Bxc8 20. Rc1 Rd8
+21. Rc7 a6 22. a4 Nb8 23. Nd2 Bd7 24. a5 bxa5 25. bxa5 Kf8 26. Ke3 Ke7 27. Kd4
+Rg8 28. Rb7 Rc8 29. Nc4 Nc6+ 30. Bxc6 Rxc6 31. Nb6 Rd6+ 32. Kc5 Rd2 33. Nxd7
+Rxd7 34. Kc6 Rxb7 35. Kxb7 Kd7 36. Kxa6 Kc6 37. Ka7 Kc7 38. Ka6 Kc6 39. Ka7 Kc7
+40. g4 f5 41. gxf5 exf5 42. e3 h5 43. h4 f6 44. a6 f4 45. exf4 f5 1/2-1/2
+
+[Event "5th Asian Team Men KO Rapid"]
+[Site "Ashgabat TKM"]
+[Date "2017.09.25"]
+[Round "2.1"]
+[White "Le Quang Liem"]
+[Black "Wang Yue"]
+[Result "1-0"]
+[ECO "E06"]
+[WhiteElo "2739"]
+[BlackElo "2699"]
+[PlyCount "79"]
+[EventDate "2017.09.25"]
+[EventType "team-k.o. (rapid)"]
+[EventRounds "2"]
+[EventCountry "TKM"]
+[SourceTitle "The Week in Chess 1195"]
+[Source "Mark Crowther"]
+[SourceDate "2017.10.02"]
+[SourceVersion "2"]
+[SourceVersionDate "2017.10.09"]
+[SourceQuality "2"]
+[WhiteTeam "Vietnam"]
+[BlackTeam "China"]
+[WhiteTeamCountry "VIE"]
+[BlackTeamCountry "CHN"]
+
+1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. g3 Be7 5. Bg2 O-O 6. O-O dxc4 7. Qc2 a6 8. a4
+Bd7 9. Qxc4 Bc6 10. Bf4 Bd6 11. Qc1 Nbd7 12. Nc3 Nd5 13. Bg5 Be7 14. Bxe7 Qxe7
+15. Re1 Nxc3 16. bxc3 Nf6 17. Qf4 Nd5 18. Qc1 Nf6 19. Ne5 Bxg2 20. Kxg2 Nd7 21.
+Nf3 a5 22. e4 b6 23. Qc2 Rac8 24. Rad1 Rfd8 25. e5 c5 26. d5 exd5 27. Rxd5 Nf8
+28. c4 Ne6 29. Red1 h6 30. Qb3 Qc7 31. Rd6 Nd4 32. Nxd4 cxd4 33. R1xd4 Rxd6 34.
+exd6 Qc6+ 35. Qf3 Qd7 36. h3 Rd8 37. Qd5 Rc8 38. Qb5 Rc6 39. Kg1 Kf8 40. Qxc6
+1-0
+
+[Event "43rd Olympiad 2018"]
+[Site "Batumi GEO"]
+[Date "2018.09.26"]
+[Round "3.14"]
+[White "Maghsoodloo, Parham"]
+[Black "Kovalev, Vl"]
+[Result "1-0"]
+[ECO "E06"]
+[WhiteElo "2649"]
+[BlackElo "2664"]
+[PlyCount "89"]
+[EventDate "2018.09.24"]
+[EventType "team"]
+[EventRounds "11"]
+[EventCountry "GEO"]
+[SourceTitle "The Week in Chess 1247"]
+[Source "Mark Crowther"]
+[SourceDate "2018.10.01"]
+[SourceVersion "1"]
+[SourceVersionDate "2018.10.01"]
+[SourceQuality "2"]
+[WhiteTeam "Iran"]
+[BlackTeam "Belarus"]
+[WhiteTeamCountry "IRI"]
+[BlackTeamCountry "BLR"]
+
+1. Nf3 Nf6 2. d4 e6 3. c4 d5 4. g3 Be7 5. Bg2 O-O 6. O-O dxc4 7. Qc2 a6 8. a4
+Bd7 9. Bg5 Bc6 10. Rd1 b5 11. Bxf6 Bxf6 12. Nbd2 Bb7 13. Ng5 Bxg5 14. Bxb7 Ra7
+15. Be4 c6 16. Bxh7+ Kh8 17. Be4 Qxd4 18. Nf3 Qc5 19. Nxg5 Qxg5 20. Rd6 Rd8 21.
+Rad1 Rxd6 22. Rxd6 Rd7 23. Rxd7 Nxd7 24. Bxc6 Nb6 25. axb5 axb5 26. Qe4 b4 27.
+Qd4 Qc1+ 28. Kg2 Nd5 29. Be8 c3 30. Bxf7 Qg5 31. bxc3 bxc3 32. Qc4 g6 33. h4
+Qf6 34. e4 Ne7 35. Be8 Kh7 36. Qc5 Kh6 37. Ba4 Qg7 38. Bb3 Qf6 39. e5 Qf7 40.
+Qxc3 Nf5 41. Qc8 Qg7 42. Qxe6 Nd4 43. Qd5 Nxb3 44. Qxb3 Qxe5 45. Qe3+ 1-0
+
+[Event "12th World Teams 2019"]
+[Site "Astana KAZ"]
+[Date "2019.03.13"]
+[Round "8.3"]
+[White "Ganguly, S."]
+[Black "Onischuk, Al"]
+[Result "1-0"]
+[ECO "E06"]
+[WhiteElo "2633"]
+[BlackElo "2647"]
+[PlyCount "106"]
+[EventDate "2019.03.05"]
+[EventType "team"]
+[EventRounds "9"]
+[EventCountry "KAZ"]
+[SourceTitle "The Week in Chess 1271"]
+[Source "Mark Crowther"]
+[SourceDate "2019.03.18"]
+[SourceVersion "1"]
+[SourceVersionDate "2019.03.18"]
+[SourceQuality "2"]
+[WhiteTeam "India"]
+[BlackTeam "United States of America"]
+[WhiteTeamCountry "IND"]
+
+1. d4 Nf6 2. c4 e6 3. g3 d5 4. Bg2 Be7 5. Nf3 O-O 6. O-O dxc4 7. Qc2 a6 8. a4
+Bd7 9. Qxc4 Bc6 10. Bg5 Nbd7 11. Nc3 h6 12. Bxf6 Nxf6 13. a5 Qd6 14. Rfd1 b5
+15. axb6 cxb6 16. Qd3 Bb7 17. e4 Qb8 18. e5 Nd5 19. Nxd5 Bxd5 20. Rxa6 Rxa6 21.
+Qxa6 Rd8 22. Ne1 Bxg2 23. Kxg2 Qc7 24. Qe2 Qc6+ 25. Qf3 Qb5 26. b3 Qa5 27. h4
+Bf8 28. Qe4 Bb4 29. Nc2 Bc3 30. Rd3 Bd2 31. Qc6 Bc1 32. Rd1 Bb2 33. h5 Qa8 34.
+Qxa8 Rxa8 35. Ne3 Rd8 36. d5 Bxe5 37. dxe6 Re8 38. f4 Bf6 39. exf7+ Kxf7 40.
+Nc4 Re2+ 41. Kf3 Rc2 42. Ke4 Rh2 43. Rd5 g5 44. Rd7+ Ke8 45. Rd6 Bg7 46. Re6+
+Kf7 47. Rxb6 gxf4 48. g4 Bf6 49. Nd6+ Kf8 50. Kxf4 Bg5+ 51. Kg3 Rd2 52. Nf5
+Rd3+ 53. Kg2 Rc3 1-0
+
+[Event "FIDE World Cup 2017"]
+[Site "Tbilisi GEO"]
+[Date "2017.09.08"]
+[Round "2.3"]
+[White "Aronian, L."]
+[Black "Hou Yifan"]
+[Result "1/2-1/2"]
+[ECO "E06"]
+[WhiteElo "2802"]
+[BlackElo "2670"]
+[PlyCount "74"]
+[EventDate "2017.09.03"]
+[EventType "k.o."]
+[EventRounds "7"]
+[EventCountry "GEO"]
+[SourceTitle "The Week in Chess 1192"]
+[Source "Mark Crowther"]
+[SourceDate "2017.09.11"]
+[SourceVersion "2"]
+[SourceVersionDate "2017.09.16"]
+[SourceQuality "2"]
+
+1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. g3 Be7 5. Bg2 O-O 6. O-O dxc4 7. Qc2 b6 8. Ne5
+Qxd4 9. Bxa8 Qxe5 10. Bf3 Nd5 11. Qxc4 Ba6 12. Qa4 c5 13. Re1 b5 14. Qe4 Nc6
+15. Nc3 Rd8 16. Rd1 Qxe4 17. Bxe4 Nd4 18. Bxd5 b4 19. Bb3 bxc3 20. bxc3 Nxe2+
+21. Kg2 Bb7+ 22. f3 Rxd1 23. Bxd1 Nxc3 24. Bd2 Nxd1 25. Rxd1 Bd5 26. Rb1 g5 27.
+Kf2 Bxa2 28. Ra1 Bd5 29. Bc3 f6 30. Rxa7 Kf7 31. Ke3 e5 32. h4 gxh4 33. gxh4 h5
+34. f4 exf4+ 35. Kxf4 Ke6 36. Ra6+ Bd6+ 37. Rxd6+ Kxd6 1/2-1/2
+
+[Event "Du Te Cup 2017"]
+[Site "Shenzhen CHN"]
+[Date "2017.03.24"]
+[Round "2.3"]
+[White "Adams, Mi"]
+[Black "Harikrishna, P."]
+[Result "0-1"]
+[ECO "A14"]
+[WhiteElo "2761"]
+[BlackElo "2758"]
+[PlyCount "102"]
+[EventDate "2017.03.23"]
+[EventType "tourn"]
+[EventRounds "10"]
+[EventCountry "CHN"]
+[EventCategory "21"]
+[SourceTitle "The Week in Chess 1168"]
+[Source "Mark Crowther"]
+[SourceDate "2017.03.27"]
+[SourceVersion "1"]
+[SourceVersionDate "2017.03.27"]
+[SourceQuality "2"]
+
+1. c4 Nf6 2. g3 e6 3. Bg2 d5 4. Nf3 Be7 5. O-O O-O 6. d4 dxc4 7. Qc2 a6 8. a4
+Bd7 9. Qxc4 Bc6 10. Bg5 Bd5 11. Qc2 Be4 12. Qc1 h6 13. Bxf6 Bxf6 14. Nbd2 Bxf3
+15. Nxf3 a5 16. Qc3 Nc6 17. Rad1 Nb4 18. Ne5 c6 19. e4 Rc8 20. Ng4 c5 21. Nxf6+
+Qxf6 22. e5 Qe7 23. d5 exd5 24. Bxd5 Rcd8 25. Bc4 Nc6 26. f4 Rxd1 27. Rxd1 Rd8
+28. Rd5 Rxd5 29. Bxd5 Nb4 30. Bb3 Nc6 31. Kf2 Qd7 32. Qc4 Nd4 33. Ba2 b6 34.
+Ke3 g5 35. fxg5 hxg5 36. Qf1 Nc6 37. Qd3 Qxd3+ 38. Kxd3 Nb4+ 39. Kc4 Nxa2 40.
+Kb5 Nb4 41. Kxb6 Nd3 42. Kxa5 Nxb2 43. h4 gxh4 44. gxh4 Kg7 45. h5 Kh6 46. Kb5
+c4 47. Kb4 c3 48. Kxc3 Nxa4+ 49. Kd4 Kxh5 50. Kd5 Nb6+ 51. Kc6 Kg5 0-1
+
+[Event "World Rapid 2017"]
+[Site "Riyadh KSA"]
+[Date "2017.12.28"]
+[Round "12.22"]
+[White "Sargissian, G."]
+[Black "Kryvoruchko, Y."]
+[Result "1-0"]
+[ECO "A14"]
+[WhiteElo "2672"]
+[BlackElo "2689"]
+[PlyCount "126"]
+[EventDate "2017.12.26"]
+[EventType "swiss (rapid)"]
+[EventRounds "15"]
+[EventCountry "SAU"]
+[SourceTitle "The Week in Chess 1208"]
+[Source "Mark Crowther"]
+[SourceDate "2018.01.01"]
+[SourceVersion "6"]
+[SourceVersionDate "2018.01.03"]
+[SourceQuality "2"]
+
+1. Nf3 Nf6 2. c4 e6 3. g3 d5 4. Bg2 Be7 5. O-O O-O 6. d4 dxc4 7. Qc2 a6 8. a4
+Bd7 9. Qxc4 Bc6 10. Bf4 Bd6 11. Qc1 Nbd7 12. Nc3 Nb6 13. Rd1 Nbd5 14. Bg5 h6
+15. Bxf6 Nxf6 16. Ne5 Bxg2 17. Kxg2 a5 18. e4 Bb4 19. Qe3 Qe7 20. Na2 Rfd8 21.
+Rac1 c6 22. Rd3 Nd7 23. Nf3 Nb8 24. Nxb4 axb4 25. b3 Nd7 26. Qe1 e5 27. Rcd1
+exd4 28. Nxd4 g6 29. Nf3 Nf6 30. Rxd8+ Rxd8 31. Rxd8+ Qxd8 32. Qxb4 Qd7 33. Ne5
+Qe6 34. Qd4 c5 35. Qxc5 Nxe4 36. Qd4 Nd6 37. Nf3 Nf5 38. Qd3 Qc6 39. a5 h5 40.
+h4 Nd6 41. b4 Nb5 42. Kh2 Nc7 43. Ng5 Nb5 44. Ne4 Kg7 45. Nc5 Nd6 46. Qd4+ Kg8
+47. Qe5 Qf3 48. Qf4 Qd5 49. Nd7 Qe6 50. Nc5 Qd5 51. Qe3 Qc4 52. Qd3 Qxd3 53.
+Nxd3 Kf8 54. Nc5 Ke7 55. Nxb7 Nb5 56. Nc5 Kd6 57. Kg2 Kd5 58. Nb7 Kc4 59. a6
+Kxb4 60. Nd6 Nc7 61. a7 f5 62. Ne8 Na8 63. Kf3 Kc5 1-0
+
+[Event "ch-HUN Rapid 2019"]
+[Site "Ajka HUN"]
+[Date "2019.07.20"]
+[Round "6.1"]
+[White "Almasi, Z."]
+[Black "Papp, Ga"]
+[Result "1-0"]
+[ECO "A14"]
+[WhiteElo "2687"]
+[BlackElo "2587"]
+[PlyCount "63"]
+[EventDate "2019.07.19"]
+[EventType "swiss (rapid)"]
+[EventRounds "13"]
+[EventCountry "HUN"]
+[SourceTitle "The Week in Chess 1158"]
+[Source "Mark Crowther"]
+[SourceDate "2017.01.16"]
+[SourceVersion "1"]
+[SourceVersionDate "2017.01.16"]
+[SourceQuality "2"]
+
+1. Nf3 Nf6 2. c4 e6 3. g3 d5 4. Bg2 Be7 5. O-O O-O 6. d4 dxc4 7. Qc2 a6 8. Qxc4
+b5 9. Qc2 Bb7 10. Bg5 Be4 11. Qc1 c6 12. Nbd2 Bxf3 13. Nxf3 h6 14. Bd2 Qb6 15.
+Qc2 Nbd7 16. b4 Rfc8 17. Rfc1 Nd5 18. a3 Qa7 19. e4 N5b6 20. Bf1 Bd8 21. Ra2
+Qb7 22. Qb3 Na4 23. Rac2 a5 24. d5 exd5 25. exd5 c5 26. bxc5 Ndxc5 27. Qxb5
+Qxd5 28. Bg2 Be7 29. Ne1 Rab8 30. Qxb8 Qxg2+ 31. Kxg2 Rxb8 32. Bxa5 1-0
+
+[Event "Champions Showdown Blitz"]
+[Site "Saint Louis USA"]
+[Date "2019.02.24"]
+[Round "22.1"]
+[White "Caruana, F."]
+[Black "Harikrishna, P."]
+[Result "1-0"]
+[ECO "E04"]
+[WhiteElo "2828"]
+[BlackElo "2726"]
+[PlyCount "75"]
+[EventDate "2019.02.23"]
+[EventType "match (blitz)"]
+[EventRounds "24"]
+[EventCountry "USA"]
+[SourceTitle "The Week in Chess 1268"]
+[Source "Mark Crowther"]
+[SourceDate "2019.02.25"]
+[SourceVersion "1"]
+[SourceVersionDate "2019.02.25"]
+[SourceQuality "2"]
+
+1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. g3 dxc4 5. Bg2 c5 6. O-O Nc6 7. Na3 cxd4 8.
+Nxc4 Bc5 9. b3 O-O 10. Bb2 d3 11. e3 Rb8 12. Rc1 b6 13. Nfe5 Nxe5 14. Nxe5 Bb7
+15. Qxd3 Qxd3 16. Nxd3 Ba6 17. Rfd1 Bxd3 18. Rxd3 Rfd8 19. Rcd1 Rxd3 20. Rxd3
+h5 21. Bf3 Be7 22. Bxf6 Bxf6 23. Rd7 a5 24. Bxh5 g6 25. Bf3 Rd8 26. Rb7 Rd2 27.
+a4 Bd8 28. Bc6 Kf8 29. Bb5 Rd6 30. h4 Bf6 31. Kf1 Bc3 32. g4 Bf6 33. h5 gxh5
+34. gxh5 Bg5 35. Ke2 Bf6 36. h6 Kg8 37. Bd3 Bd8 38. h7+ 1-0
+
+[Event "2nd Du Te Cup 2018"]
+[Site "Shenzhen CHN"]
+[Date "2018.11.08"]
+[Round "5.3"]
+[White "Ding Liren"]
+[Black "Wojtaszek, R."]
+[Result "1-0"]
+[ECO "A08"]
+[WhiteElo "2816"]
+[BlackElo "2749"]
+[PlyCount "128"]
+[EventDate "2018.11.04"]
+[EventType "tourn"]
+[EventRounds "10"]
+[EventCountry "CHN"]
+[EventCategory "21"]
+[SourceTitle "The Week in Chess 1253"]
+[Source "Mark Crowther"]
+[SourceDate "2018.11.12"]
+[SourceVersion "2"]
+[SourceVersionDate "2018.11.12"]
+[SourceQuality "2"]
+
+1. Nf3 d5 2. g3 c5 3. Bg2 Nc6 4. d4 Nf6 5. O-O e6 6. c4 dxc4 7. Qa4 Bd7 8. Qxc4
+cxd4 9. Nxd4 Rc8 10. Nc3 Nxd4 11. Qxd4 Bc5 12. Qh4 h6 13. Bxb7 Rb8 14. Ne4 Be7
+15. Ba6 O-O 16. Rd1 Nd5 17. Qh5 Bc6 18. Bc4 Qc8 19. b3 f5 20. Nd2 Bf6 21. Ba3
+Qe8 22. Qxe8 Rfxe8 23. Bxd5 Bxd5 24. Rac1 a5 25. Nc4 a4 26. bxa4 Rec8 27. Bd6
+Rb7 28. Ne3 Rxc1 29. Rxc1 Bxa2 30. a5 Bd4 31. Rc8+ Kh7 32. Nc2 Bd5 33. Nb4 Be4
+34. Rc4 Ba7 35. Rc7 Kg6 36. Kf1 Kf6 37. f3 Rxc7 38. Bxc7 Bb7 39. Nd3 Bd4 40. f4
+Kf7 41. Bb6 Bf6 42. Kf2 g5 43. Ke3 gxf4+ 44. gxf4 Be7 45. Kd4 Bd6 46. e3 Ke8
+47. Bc5 Bc7 48. Bb4 Bb8 49. h4 h5 50. Nf2 Kd7 51. Nh3 Kc6 52. Ng5 Ba7+ 53. Ke5
+Bxe3 54. Nxe6 Bc8 55. Ng7 Bf2 56. Nxf5 Kb5 57. Be7 Kxa5 58. Kf6 Kb6 59. Kg6 Kc6
+60. Ng7 Kd5 61. f5 Ke5 62. Bg5 Bc5 63. f6 Ba6 64. Nxh5 Kd5 1-0
+
+[Event "2nd Du Te Cup 2018"]
+[Site "Shenzhen CHN"]
+[Date "2018.11.14"]
+[Round "10.3"]
+[White "Giri, A."]
+[Black "Wojtaszek, R."]
+[Result "1-0"]
+[ECO "A07"]
+[WhiteElo "2780"]
+[BlackElo "2749"]
+[PlyCount "71"]
+[EventDate "2018.11.04"]
+[EventType "tourn"]
+[EventRounds "10"]
+[EventCountry "CHN"]
+[EventCategory "21"]
+[SourceTitle "The Week in Chess 1254"]
+[Source "Mark Crowther"]
+[SourceDate "2018.11.19"]
+[SourceVersion "2"]
+[SourceVersionDate "2018.11.26"]
+[SourceQuality "2"]
+
+1. Nf3 d5 2. g3 Nf6 3. Bg2 c5 4. O-O Nc6 5. d4 e6 6. c4 dxc4 7. dxc5 Qxd1 8.
+Rxd1 Bxc5 9. Nbd2 c3 10. bxc3 O-O 11. Nb3 Be7 12. c4 Bd7 13. Bb2 Rfd8 14. Nfd4
+Rab8 15. Nxc6 Bxc6 16. Rxd8+ Rxd8 17. Bxc6 bxc6 18. Bxf6 Bxf6 19. Rc1 g5 20. c5
+Kf8 21. Rc4 Ke8 22. Kg2 h5 23. h3 Be5 24. Ra4 Rd7 25. Na5 Rc7 26. Nc4 Bg7 27.
+Rb4 Ke7 28. e3 g4 29. hxg4 hxg4 30. a4 a5 31. Rb3 Ra7 32. Rb6 Kd7 33. Rb8 Ke7
+34. Rc8 Bc3 35. Rxc6 Bb4 36. Rc8 1-0
+
+[Event "34th ECC Open 2018"]
+[Site "Porto Carras GRE"]
+[Date "2018.10.18"]
+[Round "7.3"]
+[White "Mamedyarov, S."]
+[Black "Wojtaszek, R."]
+[Result "1/2-1/2"]
+[ECO "E04"]
+[WhiteElo "2820"]
+[BlackElo "2727"]
+[PlyCount "57"]
+[EventDate "2018.10.12"]
+[EventType "team"]
+[EventRounds "7"]
+[EventCountry "GRE"]
+[SourceTitle "The Week in Chess 1250"]
+[Source "Mark Crowther"]
+[SourceDate "2018.10.22"]
+[SourceVersion "2"]
+[SourceVersionDate "2018.10.26"]
+[SourceQuality "2"]
+[WhiteTeam "Odlar Yurdu"]
+[BlackTeam "AVE Novy Bor"]
+
+1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. g3 dxc4 5. Bg2 c5 6. O-O Nc6 7. Qa4 Bd7 8. dxc5
+Bxc5 9. Qxc4 Be7 10. Rd1 O-O 11. Nc3 Qa5 12. Bd2 Rac8 13. Rac1 Rfd8 14. Qb5
+Qxb5 15. Nxb5 Be8 16. Nc3 Nd5 17. Nxd5 Rxd5 18. Bc3 Rxd1+ 19. Rxd1 Rd8 20. Rxd8
+Bxd8 21. Nd4 Nxd4 22. Bxd4 b6 23. f4 f6 24. Kf2 Kf7 25. Bc3 Be7 26. Bd4 Bd8 27.
+Bc3 Be7 28. Bd4 Bd8 29. Bc3 1/2-1/2
+
+[Event "Levitov Chess Week Blitz"]
+[Site "Amsterdam NED"]
+[Date "2019.08.03"]
+[Round "1.1"]
+[White "Gelfand, B."]
+[Black "Giri, A."]
+[Result "1/2-1/2"]
+[ECO "E10"]
+[WhiteElo "2686"]
+[BlackElo "2779"]
+[PlyCount "97"]
+[EventDate "2019.08.03"]
+[EventType "tourn (blitz)"]
+[EventRounds "7"]
+[EventCountry "NED"]
+[EventCategory "20"]
+[SourceTitle "The Week in Chess 1291"]
+[Source "Mark Crowther"]
+[SourceDate "2019.08.05"]
+[SourceVersion "2"]
+[SourceVersionDate "2019.08.07"]
+[SourceQuality "2"]
+
+1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. g3 Bb4+ 5. Bd2 Be7 6. Bg2 O-O 7. O-O Nbd7 8.
+Qb3 c6 9. Bf4 a5 10. Rd1 h6 11. a3 Nh5 12. Bc1 Nhf6 13. Qc2 b5 14. c5 Ne4 15.
+Be3 f5 16. Ne5 Nxe5 17. dxe5 Bd7 18. Bd4 Be8 19. f3 Ng5 20. Nd2 Bg6 21. Qc3 f4
+22. e3 fxg3 23. hxg3 Qe8 24. f4 Ne4 25. Nxe4 Bxe4 26. Bxe4 dxe4 27. Qc2 Qg6 28.
+Kg2 Rfd8 29. b4 a4 30. Rh1 Rd5 31. Qe2 Rf8 32. Raf1 Bd8 33. Qh5 Qh7 34. g4 Rd7
+35. g5 Qf5 36. gxh6 g6 37. h7+ Kh8 38. Qxf5 gxf5 39. Rh6 Rxh7 40. Rfh1 Rg8+ 41.
+Kf2 Rgg7 42. Bc3 Kg8 43. Rxh7 Rxh7 44. Rxh7 Kxh7 45. Kg3 Kg6 46. Kh3 Kh5 47.
+Be1 Be7 48. Bf2 Bd8 49. Be1 1/2-1/2
+
+[Event "Cote d'Ivoire Rapid 2019"]
+[Site "Abidjan CIV"]
+[Date "2019.05.10"]
+[Round "7.4"]
+[White "Ding Liren"]
+[Black "Karjakin, Sergey"]
+[Result "1-0"]
+[ECO "E00"]
+[WhiteElo "2805"]
+[BlackElo "2752"]
+[PlyCount "63"]
+[EventDate "2019.05.08"]
+[EventType "tourn (rapid)"]
+[EventRounds "9"]
+[EventCountry "IVO"]
+[EventCategory "21"]
+[SourceTitle "The Week in Chess 1279"]
+[Source "Mark Crowther"]
+[SourceDate "2019.05.13"]
+[SourceVersion "1"]
+[SourceVersionDate "2019.05.13"]
+[SourceQuality "2"]
+
+1. d4 Nf6 2. c4 e6 3. g3 Bb4+ 4. Bd2 Be7 5. Bg2 d5 6. Nf3 O-O 7. O-O Nbd7 8.
+Qc2 c6 9. Rd1 b6 10. Bf4 Ba6 11. Nbd2 Nh5 12. Be3 Bd6 13. Rac1 Qe7 14. Bg5 f6
+15. Be3 Rfc8 16. Qa4 Bb7 17. cxd5 exd5 18. Ne1 g6 19. Nd3 Ng7 20. Bh3 Ne6 21.
+Nf3 a5 22. Bh6 Rc7 23. e3 Re8 24. Nf4 Nxf4 25. exf4 Qf7 26. Re1 Rcc8 27. Rxe8+
+Qxe8 28. Re1 Qd8 29. Be6+ Kh8 30. f5 Bb4 31. fxg6 hxg6 32. Qc2 1-0
+
+[Event "Cote d'Ivoire Blitz 2019"]
+[Site "Abidjan CIV"]
+[Date "2019.05.11"]
+[Round "8.5"]
+[White "Ding Liren"]
+[Black "Topalov, V."]
+[Result "1-0"]
+[ECO "E10"]
+[WhiteElo "2805"]
+[BlackElo "2740"]
+[PlyCount "107"]
+[EventDate "2019.05.11"]
+[EventType "tourn (blitz)"]
+[EventRounds "18"]
+[EventCountry "IVO"]
+[EventCategory "21"]
+[SourceTitle "The Week in Chess 1279"]
+[Source "Mark Crowther"]
+[SourceDate "2019.05.13"]
+[SourceVersion "1"]
+[SourceVersionDate "2019.05.13"]
+[SourceQuality "2"]
+
+1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. g3 Bb4+ 5. Bd2 Be7 6. Bg2 O-O 7. O-O Nbd7 8.
+Qc2 c6 9. Bf4 b6 10. cxd5 cxd5 11. Rc1 Ba6 12. Nc3 Nh5 13. Bd2 Nhf6 14. Bf4 Nh5
+15. Be5 Nhf6 16. e3 h6 17. Qd1 Nxe5 18. Nxe5 Bd6 19. f4 Bb7 20. Rc2 a6 21. Rac1
+Qe7 22. Na4 Qd8 23. Qd3 Ne4 24. Nc6 Bxc6 25. Rxc6 b5 26. Nc5 Nxc5 27. dxc5 Be7
+28. e4 dxe4 29. Qxd8 Rfxd8 30. Bxe4 Ra7 31. Rc2 g5 32. Rb6 Rd4 33. Rb7 Rxb7 34.
+Bxb7 Bd8 35. fxg5 hxg5 36. Bxa6 b4 37. Kf2 Kg7 38. Ke3 e5 39. Bd3 Rd5 40. c6
+Bb6+ 41. Ke2 Bc7 42. g4 Rd4 43. Rc4 Rxc4 44. Bxc4 e4 45. Ke3 Bxh2 46. Kxe4 Kf6
+47. Kd5 Ke7 48. Kc5 Bd6+ 49. Kb6 Kd8 50. Bxf7 Kc8 51. Be6+ Kb8 52. Bf5 Bc7+ 53.
+Kc5 Be5 54. b3 1-0
+
+[Event "3rd Du Te Cup 2019"]
+[Site "Shenzhen CHN"]
+[Date "2019.04.18"]
+[Round "2.3"]
+[White "Yu Yangyi"]
+[Black "Ding Liren"]
+[Result "1/2-1/2"]
+[ECO "E00"]
+[WhiteElo "2751"]
+[BlackElo "2809"]
+[PlyCount "63"]
+[EventDate "2019.04.17"]
+[EventType "tourn"]
+[EventRounds "10"]
+[EventCountry "CHN"]
+[EventCategory "21"]
+[SourceTitle "The Week in Chess 1276"]
+[Source "Mark Crowther"]
+[SourceDate "2019.04.22"]
+[SourceVersion "1"]
+[SourceVersionDate "2019.04.22"]
+[SourceQuality "2"]
+
+1. d4 Nf6 2. c4 e6 3. g3 Bb4+ 4. Bd2 Be7 5. Bg2 d5 6. Nf3 O-O 7. O-O c6 8. Qc2
+Nbd7 9. Bf4 b6 10. Rd1 Ba6 11. cxd5 cxd5 12. Ne5 Nxe5 13. dxe5 Ng4 14. h3 g5
+15. Bxg5 Nxe5 16. Bxe7 Qxe7 17. e4 dxe4 18. Qxe4 Qf6 19. Nc3 Rad8 20. Qa4 Bd3
+21. Qxa7 Nc4 22. Ne4 Bxe4 23. Bxe4 Nxb2 24. Rxd8 Rxd8 25. Rc1 Qd4 26. Qe7 Nd3
+27. Qg5+ Kf8 28. Qh6+ Ke8 29. Bxd3 Qxd3 30. Qg7 Qf5 31. g4 Qf4 32. Qh8+ 1/2-1/2
