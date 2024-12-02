@@ -398,7 +398,7 @@ mod tests {
 
     #[test]
     fn test_parse_pgn_file() {
-        let input = read_file("data/ex3.pgn").unwrap();
+        let input = read_file("data/standard/ex3.pgn").unwrap();
 
         let variants: Vec<StandardChess> = parse_pgn_file(&input).unwrap();
 

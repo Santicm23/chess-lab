@@ -157,7 +157,7 @@ impl VariantBuilder for StandardChess {
     /// use chess_lab::constants::{Variant, VariantBuilder};
     /// use chess_lab::variants::StandardChess;
     ///
-    /// let path = "data/ex1.pgn";
+    /// let path = "data/standard/ex1.pgn";
     /// let game = StandardChess::load(path).unwrap();
     /// ```
     ///
@@ -180,7 +180,7 @@ impl VariantBuilder for StandardChess {
     /// use chess_lab::constants::{Variant, VariantBuilder};
     /// use chess_lab::variants::StandardChess;
     ///
-    /// let path = "data/ex3.pgn";
+    /// let path = "data/standard/ex3.pgn";
     /// let games = StandardChess::load_all(path).unwrap();
     /// ```
     ///
@@ -310,7 +310,7 @@ impl Variant for StandardChess {
     /// use chess_lab::variants::StandardChess;
     ///
     /// let game = StandardChess::default();
-    /// let path = "data/ex.pgn";
+    /// let path = "data/standard/ex.pgn";
     ///
     /// game.save(path, true).unwrap();
     /// ```
@@ -376,14 +376,32 @@ impl Variant for StandardChess {
     /// # Returns
     /// A copy of the board of the game.
     ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::constants::Variant;
+    /// use chess_lab::variants::StandardChess;
+    ///
+    /// let game = StandardChess::default();
+    /// let board = game.get_board();
+    /// ```
+    ///
     fn get_board(&self) -> Board {
         self.game.board.clone()
     }
 
-    /// Returns the color of the player whose turn it is.
+    /// Returns whether it is white's turn to move.
     ///
     /// # Returns
-    /// The color of the player whose turn it is.
+    /// Whether it is white's turn to move.
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::constants::Variant;
+    /// use chess_lab::variants::StandardChess;
+    ///
+    /// let game = StandardChess::default();
+    /// let color = game.is_white_turn();
+    /// ```
     ///
     fn is_white_turn(&self) -> bool {
         self.game.is_white_turn
@@ -394,6 +412,15 @@ impl Variant for StandardChess {
     /// # Returns
     /// The halfmove clock of the game.
     ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::constants::Variant;
+    /// use chess_lab::variants::StandardChess;
+    ///
+    /// let game = StandardChess::default();
+    /// let halfmove_clock = game.get_halfmove_clock();
+    /// ```
+    ///
     fn get_halfmove_clock(&self) -> u32 {
         self.game.halfmove_clock
     }
@@ -403,6 +430,15 @@ impl Variant for StandardChess {
     /// # Returns
     /// The fullmove number of the game.
     ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::constants::Variant;
+    /// use chess_lab::variants::StandardChess;
+    ///
+    /// let game = StandardChess::default();
+    /// let fullmove_number = game.get_fullmove_number();
+    /// ```
+    ///
     fn get_fullmove_number(&self) -> u32 {
         self.game.fullmove_number
     }
@@ -411,6 +447,15 @@ impl Variant for StandardChess {
     ///
     /// # Returns
     /// The castling rights of the game.
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::constants::Variant;
+    /// use chess_lab::variants::StandardChess;
+    ///
+    /// let game = StandardChess::default();
+    /// let castling_rights = game.get_castling_rights();
+    /// ```
     ///
     fn get_castling_rights(&self) -> String {
         let mut castling_rights = String::new();
@@ -439,6 +484,15 @@ impl Variant for StandardChess {
     /// # Returns
     /// The en passant square of the game.
     ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::constants::Variant;
+    /// use chess_lab::variants::StandardChess;
+    ///
+    /// let game = StandardChess::default();
+    /// let en_passant = game.get_en_passant();
+    /// ```
+    ///
     fn get_en_passant(&self) -> Option<Position> {
         self.game.en_passant
     }
@@ -447,6 +501,15 @@ impl Variant for StandardChess {
     ///
     /// # Returns
     /// A copy of the starting FEN of the game.
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::constants::Variant;
+    /// use chess_lab::variants::StandardChess;
+    ///
+    /// let game = StandardChess::default();
+    /// let starting_fen = game.get_starting_fen();
+    /// ```
     ///
     fn get_starting_fen(&self) -> String {
         self.game.starting_fen.clone()
@@ -457,6 +520,15 @@ impl Variant for StandardChess {
     /// # Returns
     /// A copy of the history of the game.
     ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::constants::Variant;
+    /// use chess_lab::variants::StandardChess;
+    ///
+    /// let game = StandardChess::default();
+    /// let history = game.get_history();
+    /// ```
+    ///
     fn get_history(&self) -> PgnTree<Move> {
         self.game.history.clone()
     }
@@ -466,6 +538,15 @@ impl Variant for StandardChess {
     /// # Returns
     /// A copy of the previous positions of the game.
     ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::constants::Variant;
+    /// use chess_lab::variants::StandardChess;
+    ///
+    /// let game = StandardChess::default();
+    /// let prev_positions = game.get_prev_positions();
+    /// ```
+    ///
     fn get_prev_positions(&self) -> HashMap<String, u32> {
         self.game.prev_positions.clone()
     }
@@ -474,6 +555,15 @@ impl Variant for StandardChess {
     ///
     /// # Returns
     /// The status of the game.
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::constants::{Variant, GameStatus};
+    /// use chess_lab::variants::StandardChess;
+    ///
+    /// let game = StandardChess::default();
+    /// let status = game.get_status();
+    /// ```
     ///
     fn get_status(&self) -> GameStatus {
         self.game.status

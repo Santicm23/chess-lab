@@ -1,7 +1,9 @@
+use std::collections::HashMap;
+
 use rand::Rng;
 
 use crate::{
-    constants::{Color, GameStatus, Variant, VariantBuilder},
+    constants::{pgn::PgnTree, Color, GameStatus, Move, Position, Variant, VariantBuilder},
     errors::{FenError, MoveError, PgnError},
     logic::{Board, Game},
     utils::{
@@ -196,80 +198,367 @@ impl VariantBuilder for Chess960 {
 }
 
 impl Variant for Chess960 {
+    /// Moves a piece on the board
+    ///
+    /// # Arguments
+    /// * `move_str` - The move string that represents the move to be made
+    ///
+    /// # Returns
+    /// * `Ok(GameStatus)` - The status of the game after the move
+    /// * `Err(MoveError)` - An error that indicates that the move is invalid
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lab::constants::{Variant, VariantBuilder};
+    /// use chess_lab::variants::Chess960;
+    ///
+    /// let mut variant = Chess960::default();
+    /// variant.move_piece("e4").unwrap();
+    /// ```
+    ///
     fn move_piece(&mut self, move_str: &str) -> Result<GameStatus, MoveError> {
         self.game.move_piece(move_str)
     }
 
+    /// Undoes the last move made
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lab::constants::{Variant, VariantBuilder};
+    /// use chess_lab::variants::Chess960;
+    ///
+    /// let mut variant = Chess960::default();
+    /// variant.move_piece("e4").unwrap();
+    /// variant.undo();
+    /// ```
+    ///
     fn undo(&mut self) {
         self.game.undo()
     }
 
+    /// Redoes the last move that was undone
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lab::constants::{Variant, VariantBuilder};
+    /// use chess_lab::variants::Chess960;
+    ///
+    /// let mut variant = Chess960::default();
+    /// variant.move_piece("e4").unwrap();
+    /// variant.undo();
+    /// variant.redo();
+    /// ```
+    ///
     fn redo(&mut self) {
         self.game.redo()
     }
 
+    /// Returns the PGN string of the game
+    ///
+    /// # Returns
+    /// A string with the PGN of the game
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lab::constants::{Variant, VariantBuilder};
+    /// use chess_lab::variants::Chess960;
+    ///
+    /// let variant = Chess960::default();
+    /// let pgn = variant.pgn();
+    /// ```
+    ///
     fn pgn(&self) -> String {
         self.game.pgn()
     }
 
+    /// Returns the FEN string of the game
+    ///
+    /// # Returns
+    /// A string with the FEN of the game
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lab::constants::{Variant, VariantBuilder};
+    /// use chess_lab::variants::Chess960;
+    ///
+    /// let variant = Chess960::default();
+    /// let fen = variant.fen();
+    /// ```
+    ///
     fn fen(&self) -> String {
         self.game.fen()
     }
 
+    /// Saves the PGN string of the game to a file
+    ///
+    /// # Arguments
+    /// * `path` - The path to the file
+    /// * `overwrite` - A boolean that indicates if the file should be overwritten
+    ///
+    /// # Returns
+    /// * `Ok(())` - The PGN was saved successfully
+    /// * `Err(std::io::Error)` - An error that indicates that the PGN could not be saved
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lab::constants::{Variant, VariantBuilder};
+    /// use chess_lab::variants::Chess960;
+    ///
+    /// let variant = Chess960::default();
+    /// variant.save("data/chess960/ex.pgn", true).unwrap();
+    /// ```
+    ///
     fn save(&self, path: &str, overwrite: bool) -> Result<(), std::io::Error> {
         write_file(path, self.pgn().as_str(), !overwrite)?;
         Ok(())
     }
 
+    /// Resigns the game for a color
+    ///
+    /// # Arguments
+    /// * `color` - The color that resigns
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lab::constants::{Variant, VariantBuilder, Color};
+    /// use chess_lab::variants::Chess960;
+    ///
+    /// let mut variant = Chess960::default();
+    /// variant.resign(Color::White);
+    /// ```
+    ///
     fn resign(&mut self, color: Color) {
         self.game.resign(color)
     }
 
+    /// Sets the game as a draw
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lab::constants::{Variant, VariantBuilder};
+    /// use chess_lab::variants::Chess960;
+    ///
+    /// let mut variant = Chess960::default();
+    /// variant.draw();
+    /// ```
+    ///
     fn draw(&mut self) {
         self.game.set_draw_by_agreement()
     }
 
+    /// Sets the game lost in time for a color
+    ///
+    /// # Arguments
+    /// * `color` - The color that lost in time
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lab::constants::{Variant, VariantBuilder, Color};
+    /// use chess_lab::variants::Chess960;
+    ///
+    /// let mut variant = Chess960::default();
+    /// variant.set_lost_in_time(Color::White);
+    /// ```
+    ///
     fn set_lost_in_time(&mut self, color: Color) {
         self.game.set_lost_in_time(color)
     }
 
+    /// Returns the board of the game.
+    ///
+    /// # Returns
+    /// A copy of the board of the game.
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::constants::Variant;
+    /// use chess_lab::variants::Chess960;
+    ///
+    /// let game = Chess960::default();
+    /// let board = game.get_board();
+    /// ```
+    ///
     fn get_board(&self) -> Board {
-        todo!()
+        self.game.board.clone()
     }
 
+    /// Returns whether it is white's turn to move.
+    ///
+    /// # Returns
+    /// Whether it is white's turn to move.
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::constants::Variant;
+    /// use chess_lab::variants::Chess960;
+    ///
+    /// let game = Chess960::default();
+    /// let color = game.is_white_turn();
+    /// ```
+    ///
     fn is_white_turn(&self) -> bool {
-        todo!()
+        self.game.is_white_turn
     }
 
+    /// Returns the halfmove clock of the game.
+    ///
+    /// # Returns
+    /// The halfmove clock of the game.
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::constants::Variant;
+    /// use chess_lab::variants::Chess960;
+    ///
+    /// let game = Chess960::default();
+    /// let halfmove_clock = game.get_halfmove_clock();
+    /// ```
+    ///
     fn get_halfmove_clock(&self) -> u32 {
-        todo!()
+        self.game.halfmove_clock
     }
 
+    /// Returns the fullmove number of the game.
+    ///
+    /// # Returns
+    /// The fullmove number of the game.
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::constants::Variant;
+    /// use chess_lab::variants::Chess960;
+    ///
+    /// let game = Chess960::default();
+    /// let fullmove_number = game.get_fullmove_number();
+    /// ```
+    ///
     fn get_fullmove_number(&self) -> u32 {
-        todo!()
+        self.game.fullmove_number
     }
 
+    /// Returns the castling rights of the game.
+    ///
+    /// # Returns
+    /// The castling rights of the game.
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::constants::Variant;
+    /// use chess_lab::variants::Chess960;
+    ///
+    /// let game = Chess960::default();
+    /// let castling_rights = game.get_castling_rights();
+    /// ```
+    ///
     fn get_castling_rights(&self) -> String {
-        todo!()
+        let mut castling_rights = String::new();
+
+        if self.game.castling_rights == 0 {
+            castling_rights.push('-');
+        } else {
+            if self.game.castling_rights & 0b1000 != 0 {
+                castling_rights.push('K');
+            }
+            if self.game.castling_rights & 0b0100 != 0 {
+                castling_rights.push('Q');
+            }
+            if self.game.castling_rights & 0b0010 != 0 {
+                castling_rights.push('k');
+            }
+            if self.game.castling_rights & 0b0001 != 0 {
+                castling_rights.push('q');
+            }
+        }
+        castling_rights
     }
 
-    fn get_en_passant(&self) -> Option<crate::constants::Position> {
-        todo!()
+    /// Returns the en passant square of the game.
+    ///
+    /// # Returns
+    /// The en passant square of the game.
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::constants::Variant;
+    /// use chess_lab::variants::Chess960;
+    ///
+    /// let game = Chess960::default();
+    /// let en_passant = game.get_en_passant();
+    /// ```
+    ///
+    fn get_en_passant(&self) -> Option<Position> {
+        self.game.en_passant
     }
 
+    /// Returns the starting FEN of the game.
+    ///
+    /// # Returns
+    /// A copy of the starting FEN of the game.
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::constants::Variant;
+    /// use chess_lab::variants::Chess960;
+    ///
+    /// let game = Chess960::default();
+    /// let starting_fen = game.get_starting_fen();
+    /// ```
+    ///
     fn get_starting_fen(&self) -> String {
-        todo!()
+        self.game.starting_fen.clone()
     }
 
-    fn get_history(&self) -> crate::constants::pgn::PgnTree<crate::constants::Move> {
-        todo!()
+    /// Returns the history of the game.
+    ///
+    /// # Returns
+    /// A copy of the history of the game.
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::constants::Variant;
+    /// use chess_lab::variants::Chess960;
+    ///
+    /// let game = Chess960::default();
+    /// let history = game.get_history();
+    /// ```
+    ///
+    fn get_history(&self) -> PgnTree<Move> {
+        self.game.history.clone()
     }
 
-    fn get_prev_positions(&self) -> std::collections::HashMap<String, u32> {
-        todo!()
+    /// Returns the previous positions of the game.
+    ///
+    /// # Returns
+    /// A copy of the previous positions of the game.
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::constants::Variant;
+    /// use chess_lab::variants::Chess960;
+    ///
+    /// let game = Chess960::default();
+    /// let prev_positions = game.get_prev_positions();
+    /// ```
+    ///
+    fn get_prev_positions(&self) -> HashMap<String, u32> {
+        self.game.prev_positions.clone()
     }
 
+    /// Returns the status of the game.
+    ///
+    /// # Returns
+    /// The status of the game.
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::constants::{Variant, GameStatus};
+    /// use chess_lab::variants::Chess960;
+    ///
+    /// let game = Chess960::default();
+    /// let status = game.get_status();
+    /// ```
+    ///
     fn get_status(&self) -> GameStatus {
-        todo!()
+        self.game.status
     }
 }
