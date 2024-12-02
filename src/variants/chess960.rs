@@ -3,13 +3,11 @@ use std::collections::HashMap;
 use rand::Rng;
 
 use crate::{
-    constants::{pgn::PgnTree, Color, GameStatus, Move, Position, Variant, VariantBuilder},
+    core::{Color, GameStatus, Move, PgnTree, Position, Variant, VariantBuilder},
     errors::{FenError, MoveError, PgnError},
     logic::{Board, Game},
-    utils::{
-        os::{read_file, write_file},
-        pest::pgn_parser::{parse_pgn, parse_pgn_file},
-    },
+    parsing::pgn::{parse_pgn, parse_pgn_file},
+    utils::os::{read_file, write_file},
 };
 
 /// Chess960 variant

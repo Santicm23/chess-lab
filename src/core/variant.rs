@@ -5,7 +5,7 @@ use crate::{
     logic::{Board, Game},
 };
 
-use super::{pgn::PgnTree, Color, GameStatus, Move, Position};
+use super::{Color, GameStatus, Move, PgnTree, Position};
 
 /// A trait for a chess variant.
 ///

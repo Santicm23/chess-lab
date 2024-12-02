@@ -1,4 +1,4 @@
-use super::position::Position;
+use crate::core::Position;
 
 /// Check if the movement is diagonal
 ///

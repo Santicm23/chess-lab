@@ -1,6 +1,6 @@
 use thiserror::Error;
 
-use crate::constants::Position;
+use crate::core::Position;
 
 /// Error indicating that a specific position is already occupied.
 ///

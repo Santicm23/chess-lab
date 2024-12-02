@@ -1,5 +1,6 @@
-use crate::constants::Move;
 use thiserror::Error;
+
+use crate::core::Move;
 
 /// Errors that can occur when trying to move a piece
 ///

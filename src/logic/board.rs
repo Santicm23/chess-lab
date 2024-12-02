@@ -3,17 +3,13 @@ use std::fmt::Display;
 use regex::Regex;
 
 use crate::{
-    constants::{
-        movements::{diagonal_movement, linear_movement},
-        Color, PieceType, Position,
-    },
+    core::{piece_movement, Color, Piece, PieceType, Position},
     errors::{
         FenError, PositionBetweenError, PositionEmptyError, PositionOccupiedError,
         PositionOutOfRangeError, UnalignedPositionsError,
     },
+    utils::movements::{diagonal_movement, linear_movement},
 };
-
-use super::pieces::{piece_movement, Piece};
 
 /// A struct that represents a chess board
 /// The board is represented by bitboards of each piece (color and type)
@@ -529,8 +525,7 @@ impl Display for Board {
 #[cfg(test)]
 mod tests {
     use super::Board;
-    use crate::constants::{Color, PieceType, Position};
-    use crate::logic::pieces::Piece;
+    use crate::core::{Color, Piece, PieceType, Position};
 
     #[test]
     fn test_default() {

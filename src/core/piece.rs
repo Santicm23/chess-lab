@@ -1,14 +1,98 @@
 use std::fmt::{self, Display, Formatter};
 
 use crate::{
-    constants::{
-        movements::{
-            diagonal_movement, l_movement, linear_movement, max_movement, movement_direction,
-        },
-        Color, PieceType, Position,
-    },
+    core::{Color, Position},
     errors::PieceReprError,
+    utils::movements::{
+        diagonal_movement, l_movement, linear_movement, max_movement, movement_direction,
+    },
 };
+
+/// Represents the type of a chess piece
+///
+/// # Variants
+/// * `Pawn`: A pawn
+/// * `Knight`: A knight
+/// * `Bishop`: A bishop
+/// * `Rook`: A rook
+/// * `Queen`: A queen
+/// * `King`: A king
+///
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+pub enum PieceType {
+    Pawn,
+    Knight,
+    Bishop,
+    Rook,
+    Queen,
+    King,
+}
+
+impl PieceType {
+    /// Gets the piece type from a character
+    ///
+    /// # Arguments
+    /// * `c`: The character to convert (only valid uppercase characters)
+    ///
+    /// # Returns
+    /// The piece type if the character is valid, otherwise `None`
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lab::constants::PieceType;
+    ///
+    /// assert_eq!(PieceType::from_char('P'), Some(PieceType::Pawn));
+    /// assert_eq!(PieceType::from_char('N'), Some(PieceType::Knight));
+    /// assert_eq!(PieceType::from_char('B'), Some(PieceType::Bishop));
+    /// assert_eq!(PieceType::from_char('R'), Some(PieceType::Rook));
+    /// assert_eq!(PieceType::from_char('Q'), Some(PieceType::Queen));
+    /// assert_eq!(PieceType::from_char('K'), Some(PieceType::King));
+    ///
+    /// assert_eq!(PieceType::from_char('x'), None);
+    /// assert_eq!(PieceType::from_char('y'), None);
+    /// assert_eq!(PieceType::from_char('p'), None);
+    /// ```
+    ///
+    pub fn from_char(c: char) -> Option<PieceType> {
+        match c {
+            'P' => Some(PieceType::Pawn),
+            'N' => Some(PieceType::Knight),
+            'B' => Some(PieceType::Bishop),
+            'R' => Some(PieceType::Rook),
+            'Q' => Some(PieceType::Queen),
+            'K' => Some(PieceType::King),
+            _ => None,
+        }
+    }
+
+    /// Gets the character representation of the piece type
+    ///
+    /// # Returns
+    /// The character representation of the piece type
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lab::constants::PieceType;
+    ///
+    /// assert_eq!(PieceType::Pawn.to_char(), 'P');
+    /// assert_eq!(PieceType::Knight.to_char(), 'N');
+    /// assert_eq!(PieceType::Bishop.to_char(), 'B');
+    /// assert_eq!(PieceType::Rook.to_char(), 'R');
+    /// assert_eq!(PieceType::Queen.to_char(), 'Q');
+    /// assert_eq!(PieceType::King.to_char(), 'K');
+    /// ```
+    ///
+    pub fn to_char(&self) -> char {
+        match self {
+            PieceType::Pawn => 'P',
+            PieceType::Knight => 'N',
+            PieceType::Bishop => 'B',
+            PieceType::Rook => 'R',
+            PieceType::Queen => 'Q',
+            PieceType::King => 'K',
+        }
+    }
+}
 
 /// Represents a piece on the board with a color and a piece type
 ///
@@ -264,11 +348,12 @@ pub fn piece_movement(piece: &Piece, start_pos: &Position, end_pos: &Position) -
 
 #[cfg(test)]
 mod tests {
+    use crate::core::{Color, PieceType, Position};
+
     use super::{
         bishop_movement, king_movement, knight_movement, pawn_movement, queen_movement,
         rook_movement, Piece,
     };
-    use crate::constants::{Color, PieceType, Position};
 
     #[test]
     fn test_pawn_movement() {

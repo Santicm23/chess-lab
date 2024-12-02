@@ -4,13 +4,13 @@ use pest::{iterators::Pair, Parser};
 use pest_derive::Parser;
 
 use crate::{
-    constants::{Variant, VariantBuilder},
+    core::{Variant, VariantBuilder},
     errors::PgnError,
     logic::Game,
 };
 
 #[derive(Parser)]
-#[grammar = "./src/common/utils/pest/pgn.pest"]
+#[grammar = "./src/parsing/pgn/pgn.pest"]
 struct PGNParser;
 
 /// Parse a PGN file into a vector of Game structs
@@ -352,7 +352,7 @@ fn parse_full_move(game: &mut Game, full_move: Pair<Rule>) {
 
 #[cfg(test)]
 mod tests {
-    use crate::{constants::Variant, utils::os::read_file, StandardChess};
+    use crate::{core::Variant, utils::os::read_file, variants::StandardChess};
 
     use super::{parse_pgn, parse_pgn_file};
 

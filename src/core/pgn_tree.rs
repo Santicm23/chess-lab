@@ -5,9 +5,10 @@ use std::{
     rc::{Rc, Weak},
 };
 
-use crate::errors::PgnMetadataError;
-
-use super::{GameStatus, MoveInfo, Position};
+use crate::{
+    core::{GameStatus, MoveInfo, Position},
+    errors::PgnMetadataError,
+};
 
 #[derive(Debug, Clone)]
 pub(crate) enum OptionPgnMetadata {
@@ -1223,9 +1224,9 @@ impl<T: PartialEq + Clone + Display + Debug> DoubleEndedIterator for PgnTree<T> 
 mod tests {
     use std::collections::HashMap;
 
-    use crate::constants::pgn::PgnTree;
-    use crate::constants::{Color, GameStatus, Move, MoveType, PieceType, Position, WinReason};
-    use crate::logic::Piece;
+    use crate::core::{
+        Color, GameStatus, Move, MoveType, PgnTree, Piece, PieceType, Position, WinReason,
+    };
 
     #[test]
     fn test_add_move() {

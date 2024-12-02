@@ -1,17 +1,13 @@
-use std::{
-    collections::HashMap,
-    fmt::{Display, Formatter},
-};
+use std::{collections::HashMap, fmt};
 
 use regex::Regex;
 
 use crate::{
-    constants::{
-        pgn::PgnTree, CastleType, Color, DrawReason, GameStatus, Move, MoveType, PieceType,
-        Position, WinReason,
+    core::{
+        piece_movement, CastleType, Color, DrawReason, GameStatus, Move, MoveType, PgnTree, Piece,
+        PieceType, Position, WinReason,
     },
     errors::{FenError, MoveError},
-    logic::pieces::{piece_movement, Piece},
 };
 
 use super::board::Board;
@@ -1319,7 +1315,7 @@ impl Game {
     }
 }
 
-impl Display for Game {
+impl fmt::Display for Game {
     /// Convert the game to a FEN string
     ///
     /// # Returns
@@ -1333,14 +1329,15 @@ impl Display for Game {
     /// assert_eq!(game.fen(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     /// ```
     ///
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.fen())
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::constants::{Color, MoveType, PieceType, Position};
+
+    use crate::core::{Color, MoveType, PieceType, Position};
 
     use super::Game;
 
