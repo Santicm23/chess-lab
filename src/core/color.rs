@@ -18,7 +18,7 @@ impl Color {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::constants::Color;
+    /// use chess_lab::core::Color;
     ///
     /// assert_eq!(Color::White.opposite(), Color::Black);
     /// assert_eq!(Color::Black.opposite(), Color::White);

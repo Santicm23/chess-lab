@@ -42,8 +42,7 @@ impl MoveInfoError {
     /// # Example
     ///
     /// ```
-    /// use chess_lab::constants::{Color, PieceType, Position, Move, MoveType};
-    /// use chess_lab::logic::Piece;
+    /// use chess_lab::core::{Color, PieceType, Position, Move, MoveType, Piece};
     /// use chess_lab::errors::MoveInfoError;
     ///
     /// let piece = Piece {

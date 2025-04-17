@@ -39,7 +39,7 @@ impl PieceType {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::constants::PieceType;
+    /// use chess_lab::core::PieceType;
     ///
     /// assert_eq!(PieceType::from_char('P'), Some(PieceType::Pawn));
     /// assert_eq!(PieceType::from_char('N'), Some(PieceType::Knight));
@@ -72,7 +72,7 @@ impl PieceType {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::constants::PieceType;
+    /// use chess_lab::core::PieceType;
     ///
     /// assert_eq!(PieceType::Pawn.to_char(), 'P');
     /// assert_eq!(PieceType::Knight.to_char(), 'N');
@@ -98,8 +98,7 @@ impl PieceType {
 ///
 /// # Examples
 /// ```
-/// use chess_lab::logic::Piece;
-/// use chess_lab::constants::{Color, PieceType};
+/// use chess_lab::core::{Color, PieceType, Piece};
 ///
 /// let piece = Piece::new(Color::White, PieceType::Pawn);
 ///
@@ -126,8 +125,7 @@ impl Piece {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::logic::Piece;
-    /// use chess_lab::constants::{Color, PieceType};
+    /// use chess_lab::core::{Color, PieceType, Piece};
     ///
     /// let piece = Piece::new(Color::White, PieceType::Pawn);
     ///
@@ -149,8 +147,7 @@ impl Piece {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::logic::Piece;
-    /// use chess_lab::constants::{Color, PieceType};
+    /// use chess_lab::core::{Color, PieceType, Piece};
     ///
     /// let piece = Piece::from_fen('P').unwrap();
     ///
@@ -186,8 +183,7 @@ impl Display for Piece {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::logic::Piece;
-    /// use chess_lab::constants::{Color, PieceType};
+    /// use chess_lab::core::{Color, PieceType, Piece};
     ///
     /// let piece = Piece::new(Color::White, PieceType::Pawn);
     ///
@@ -325,8 +321,7 @@ fn king_movement(start_pos: &Position, end_pos: &Position) -> bool {
 ///
 /// # Examples
 /// ```
-/// use chess_lab::logic::{Piece, piece_movement};
-/// use chess_lab::constants::{Color, PieceType, Position};
+/// use chess_lab::core::{Color, PieceType, Position, Piece, piece_movement};
 ///
 /// let piece = Piece::new(Color::White, PieceType::Pawn);
 /// let start_pos = Position::new(0, 1).unwrap();

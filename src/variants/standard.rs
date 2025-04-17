@@ -53,7 +53,7 @@ impl Default for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Variant;
+    /// use chess_lab::core::Variant;
     /// use chess_lab::variants::StandardChess;
     ///
     /// let game = StandardChess::default();
@@ -83,7 +83,7 @@ impl VariantBuilder for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::{Variant, VariantBuilder};
+    /// use chess_lab::core::{Variant, VariantBuilder};
     /// use chess_lab::logic::Game;
     /// use chess_lab::variants::StandardChess;
     ///
@@ -105,7 +105,7 @@ impl VariantBuilder for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::{Variant, VariantBuilder};
+    /// use chess_lab::core::{Variant, VariantBuilder};
     /// use chess_lab::variants::StandardChess;
     ///
     /// let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
@@ -129,7 +129,7 @@ impl VariantBuilder for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::{Variant, VariantBuilder};
+    /// use chess_lab::core::{Variant, VariantBuilder};
     /// use chess_lab::variants::StandardChess;
     ///
     /// let pgn = "1. e4 e5 2. Nf3 Nc6 3. Bb5 a6";
@@ -152,7 +152,7 @@ impl VariantBuilder for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::{Variant, VariantBuilder};
+    /// use chess_lab::core::{Variant, VariantBuilder};
     /// use chess_lab::variants::StandardChess;
     ///
     /// let path = "data/standard/ex1.pgn";
@@ -175,7 +175,7 @@ impl VariantBuilder for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::{Variant, VariantBuilder};
+    /// use chess_lab::core::{Variant, VariantBuilder};
     /// use chess_lab::variants::StandardChess;
     ///
     /// let path = "data/standard/ex3.pgn";
@@ -200,7 +200,7 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::{Variant, GameStatus};
+    /// use chess_lab::core::{Variant, GameStatus};
     /// use chess_lab::variants::StandardChess;
     ///
     /// let mut game = StandardChess::default();
@@ -217,7 +217,7 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Variant;
+    /// use chess_lab::core::Variant;
     /// use chess_lab::variants::StandardChess;
     ///
     /// let mut game = StandardChess::default();
@@ -235,7 +235,7 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Variant;
+    /// use chess_lab::core::Variant;
     /// use chess_lab::variants::StandardChess;
     ///
     /// let mut game = StandardChess::default();
@@ -257,7 +257,7 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Variant;
+    /// use chess_lab::core::Variant;
     /// use chess_lab::variants::StandardChess;
     ///
     /// let mut game = StandardChess::default();
@@ -279,7 +279,7 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Variant;
+    /// use chess_lab::core::Variant;
     /// use chess_lab::variants::StandardChess;
     ///
     /// let game = StandardChess::default();
@@ -304,7 +304,7 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Variant;
+    /// use chess_lab::core::Variant;
     /// use chess_lab::variants::StandardChess;
     ///
     /// let game = StandardChess::default();
@@ -325,7 +325,7 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::{Variant, Color};
+    /// use chess_lab::core::{Variant, Color};
     /// use chess_lab::variants::StandardChess;
     ///
     /// let mut game = StandardChess::default();
@@ -340,7 +340,7 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Variant;
+    /// use chess_lab::core::Variant;
     /// use chess_lab::variants::StandardChess;
     ///
     /// let mut game = StandardChess::default();
@@ -358,7 +358,7 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::{Variant, Color};
+    /// use chess_lab::core::{Variant, Color};
     /// use chess_lab::variants::StandardChess;
     ///
     /// let mut game = StandardChess::default();
@@ -376,7 +376,7 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Variant;
+    /// use chess_lab::core::Variant;
     /// use chess_lab::variants::StandardChess;
     ///
     /// let game = StandardChess::default();
@@ -394,7 +394,7 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Variant;
+    /// use chess_lab::core::Variant;
     /// use chess_lab::variants::StandardChess;
     ///
     /// let game = StandardChess::default();
@@ -412,7 +412,7 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Variant;
+    /// use chess_lab::core::Variant;
     /// use chess_lab::variants::StandardChess;
     ///
     /// let game = StandardChess::default();
@@ -430,7 +430,7 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Variant;
+    /// use chess_lab::core::Variant;
     /// use chess_lab::variants::StandardChess;
     ///
     /// let game = StandardChess::default();
@@ -448,7 +448,7 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Variant;
+    /// use chess_lab::core::Variant;
     /// use chess_lab::variants::StandardChess;
     ///
     /// let game = StandardChess::default();
@@ -484,7 +484,7 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Variant;
+    /// use chess_lab::core::Variant;
     /// use chess_lab::variants::StandardChess;
     ///
     /// let game = StandardChess::default();
@@ -502,7 +502,7 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Variant;
+    /// use chess_lab::core::Variant;
     /// use chess_lab::variants::StandardChess;
     ///
     /// let game = StandardChess::default();
@@ -520,7 +520,7 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Variant;
+    /// use chess_lab::core::Variant;
     /// use chess_lab::variants::StandardChess;
     ///
     /// let game = StandardChess::default();
@@ -538,7 +538,7 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Variant;
+    /// use chess_lab::core::Variant;
     /// use chess_lab::variants::StandardChess;
     ///
     /// let game = StandardChess::default();
@@ -556,7 +556,7 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::{Variant, GameStatus};
+    /// use chess_lab::core::{Variant, GameStatus};
     /// use chess_lab::variants::StandardChess;
     ///
     /// let game = StandardChess::default();

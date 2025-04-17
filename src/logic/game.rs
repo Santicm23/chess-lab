@@ -982,7 +982,7 @@ impl Game {
     /// # Example
     /// ```
     /// use chess_lab::logic::{Game};
-    /// use chess_lab::constants::{Color, GameStatus, WinReason};
+    /// use chess_lab::core::{Color, GameStatus, WinReason};
     ///
     /// let mut game = Game::default();
     /// game.resign(Color::White);
@@ -1005,7 +1005,7 @@ impl Game {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::constants::{Color, GameStatus, WinReason};
+    /// use chess_lab::core::{Color, GameStatus, WinReason};
     /// use chess_lab::logic::Game;
     ///
     /// let mut game = Game::default();
@@ -1026,7 +1026,7 @@ impl Game {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::constants::{GameStatus, DrawReason};
+    /// use chess_lab::core::{GameStatus, DrawReason};
     /// use chess_lab::logic::Game;
     ///
     /// let mut game = Game::default();

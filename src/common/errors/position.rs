@@ -24,7 +24,7 @@ impl PositionOccupiedError {
     ///
     /// ```
     /// use chess_lab::errors::PositionOccupiedError;
-    /// use chess_lab::constants::Position;
+    /// use chess_lab::core::Position;
     ///
     /// let position = Position::from_string("a1").unwrap();
     /// let error = PositionOccupiedError::new(position);
@@ -57,7 +57,7 @@ impl PositionEmptyError {
     ///
     /// ```
     /// use chess_lab::errors::PositionEmptyError;
-    /// use chess_lab::constants::Position;
+    /// use chess_lab::core::Position;
     ///
     /// let position = Position::from_string("a1").unwrap();
     /// let error = PositionEmptyError::new(position);
@@ -160,7 +160,7 @@ impl UnalignedPositionsError {
     ///
     /// ```
     /// use chess_lab::errors::UnalignedPositionsError;
-    /// use chess_lab::constants::Position;
+    /// use chess_lab::core::Position;
     ///
     /// let position1 = Position::from_string("a1").unwrap();
     /// let position2 = Position::from_string("b3").unwrap();

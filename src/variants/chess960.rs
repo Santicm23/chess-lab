@@ -88,7 +88,7 @@ impl VariantBuilder for Chess960 {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::constants::VariantBuilder;
+    /// use chess_lab::core::VariantBuilder;
     /// use chess_lab::variants::Chess960;
     ///
     /// let name = Chess960::name();
@@ -108,7 +108,7 @@ impl VariantBuilder for Chess960 {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::constants::VariantBuilder;
+    /// use chess_lab::core::VariantBuilder;
     /// use chess_lab::logic::Game;
     /// use chess_lab::variants::Chess960;
     ///
@@ -131,7 +131,7 @@ impl VariantBuilder for Chess960 {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::constants::VariantBuilder;
+    /// use chess_lab::core::VariantBuilder;
     /// use chess_lab::variants::Chess960;
     ///
     /// let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
@@ -207,7 +207,7 @@ impl Variant for Chess960 {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::constants::{Variant, VariantBuilder};
+    /// use chess_lab::core::{Variant, VariantBuilder};
     /// use chess_lab::variants::Chess960;
     ///
     /// let mut variant = Chess960::default();
@@ -222,7 +222,7 @@ impl Variant for Chess960 {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::constants::{Variant, VariantBuilder};
+    /// use chess_lab::core::{Variant, VariantBuilder};
     /// use chess_lab::variants::Chess960;
     ///
     /// let mut variant = Chess960::default();
@@ -238,7 +238,7 @@ impl Variant for Chess960 {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::constants::{Variant, VariantBuilder};
+    /// use chess_lab::core::{Variant, VariantBuilder};
     /// use chess_lab::variants::Chess960;
     ///
     /// let mut variant = Chess960::default();
@@ -258,7 +258,7 @@ impl Variant for Chess960 {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::constants::{Variant, VariantBuilder};
+    /// use chess_lab::core::{Variant, VariantBuilder};
     /// use chess_lab::variants::Chess960;
     ///
     /// let variant = Chess960::default();
@@ -276,7 +276,7 @@ impl Variant for Chess960 {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::constants::{Variant, VariantBuilder};
+    /// use chess_lab::core::{Variant, VariantBuilder};
     /// use chess_lab::variants::Chess960;
     ///
     /// let variant = Chess960::default();
@@ -299,7 +299,7 @@ impl Variant for Chess960 {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::constants::{Variant, VariantBuilder};
+    /// use chess_lab::core::{Variant, VariantBuilder};
     /// use chess_lab::variants::Chess960;
     ///
     /// let variant = Chess960::default();
@@ -318,7 +318,7 @@ impl Variant for Chess960 {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::constants::{Variant, VariantBuilder, Color};
+    /// use chess_lab::core::{Variant, VariantBuilder, Color};
     /// use chess_lab::variants::Chess960;
     ///
     /// let mut variant = Chess960::default();
@@ -333,7 +333,7 @@ impl Variant for Chess960 {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::constants::{Variant, VariantBuilder};
+    /// use chess_lab::core::{Variant, VariantBuilder};
     /// use chess_lab::variants::Chess960;
     ///
     /// let mut variant = Chess960::default();
@@ -351,7 +351,7 @@ impl Variant for Chess960 {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::constants::{Variant, VariantBuilder, Color};
+    /// use chess_lab::core::{Variant, VariantBuilder, Color};
     /// use chess_lab::variants::Chess960;
     ///
     /// let mut variant = Chess960::default();
@@ -369,7 +369,7 @@ impl Variant for Chess960 {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Variant;
+    /// use chess_lab::core::Variant;
     /// use chess_lab::variants::Chess960;
     ///
     /// let game = Chess960::default();
@@ -387,7 +387,7 @@ impl Variant for Chess960 {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Variant;
+    /// use chess_lab::core::Variant;
     /// use chess_lab::variants::Chess960;
     ///
     /// let game = Chess960::default();
@@ -405,7 +405,7 @@ impl Variant for Chess960 {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Variant;
+    /// use chess_lab::core::Variant;
     /// use chess_lab::variants::Chess960;
     ///
     /// let game = Chess960::default();
@@ -423,7 +423,7 @@ impl Variant for Chess960 {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Variant;
+    /// use chess_lab::core::Variant;
     /// use chess_lab::variants::Chess960;
     ///
     /// let game = Chess960::default();
@@ -441,7 +441,7 @@ impl Variant for Chess960 {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Variant;
+    /// use chess_lab::core::Variant;
     /// use chess_lab::variants::Chess960;
     ///
     /// let game = Chess960::default();
@@ -477,7 +477,7 @@ impl Variant for Chess960 {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Variant;
+    /// use chess_lab::core::Variant;
     /// use chess_lab::variants::Chess960;
     ///
     /// let game = Chess960::default();
@@ -495,7 +495,7 @@ impl Variant for Chess960 {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Variant;
+    /// use chess_lab::core::Variant;
     /// use chess_lab::variants::Chess960;
     ///
     /// let game = Chess960::default();
@@ -513,7 +513,7 @@ impl Variant for Chess960 {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Variant;
+    /// use chess_lab::core::Variant;
     /// use chess_lab::variants::Chess960;
     ///
     /// let game = Chess960::default();
@@ -531,7 +531,7 @@ impl Variant for Chess960 {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Variant;
+    /// use chess_lab::core::Variant;
     /// use chess_lab::variants::Chess960;
     ///
     /// let game = Chess960::default();
@@ -549,7 +549,7 @@ impl Variant for Chess960 {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::{Variant, GameStatus};
+    /// use chess_lab::core::{Variant, GameStatus};
     /// use chess_lab::variants::Chess960;
     ///
     /// let game = Chess960::default();

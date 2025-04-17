@@ -85,8 +85,7 @@ impl Move {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::constants::{Color, PieceType, Position, Move, MoveType};
-    /// use chess_lab::logic::Piece;
+    /// use chess_lab::core::{Color, PieceType, Piece, Position, Move, MoveType};
     ///
     /// let piece = Piece {
     ///     color: Color::White,
@@ -272,7 +271,7 @@ impl MoveInfo {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::constants::{GameStatus, MoveInfo};
+    /// use chess_lab::core::{GameStatus, MoveInfo};
     /// use std::collections::HashMap;
     ///
     /// let move_info = MoveInfo::new(0, 1, None, 0, GameStatus::InProgress, HashMap::new());

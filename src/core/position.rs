@@ -7,7 +7,7 @@ use crate::errors::{PositionInvalidError, PositionOutOfRangeError};
 ///
 /// # Examples
 /// ```
-/// use chess_lab::constants::Position;
+/// use chess_lab::core::Position;
 ///
 /// let pos = Position::new(0, 0).unwrap();
 ///
@@ -38,7 +38,7 @@ impl Position {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Position;
+    /// use chess_lab::core::Position;
     ///
     /// let pos = Position::new(0, 0).unwrap();
     ///
@@ -64,7 +64,7 @@ impl Position {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Position;
+    /// use chess_lab::core::Position;
     ///
     /// let pos = Position::from_string("a1").unwrap();
     ///
@@ -89,7 +89,7 @@ impl Position {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Position;
+    /// use chess_lab::core::Position;
     ///
     /// let pos = Position::new(0, 0).unwrap();
     ///
@@ -110,7 +110,7 @@ impl Position {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Position;
+    /// use chess_lab::core::Position;
     ///
     /// let positions = Position::from_bitboard(0x0000000000000001);
     ///
@@ -139,7 +139,7 @@ impl Position {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Position;
+    /// use chess_lab::core::Position;
     ///
     /// let pos1 = Position::new(0, 0).unwrap();
     /// let pos2 = Position::new(1, 1).unwrap();
@@ -171,7 +171,7 @@ impl ops::Add<(i8, i8)> for &Position {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Position;
+    /// use chess_lab::core::Position;
     ///
     /// let pos = Position::new(0, 0).unwrap();
     /// let new_pos = &pos + (1, 1);
@@ -202,7 +202,7 @@ impl ops::Sub<&Position> for &Position {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Position;
+    /// use chess_lab::core::Position;
     ///
     /// let pos1 = Position::new(0, 0).unwrap();
     /// let pos2 = Position::new(1, 1).unwrap();
@@ -233,7 +233,7 @@ impl ops::Sub<(i8, i8)> for &Position {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Position;
+    /// use chess_lab::core::Position;
     ///
     /// let pos = Position::new(1, 1).unwrap();
     /// let new_pos = &pos - (1, 1);
@@ -258,7 +258,7 @@ impl Display for Position {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::constants::Position;
+    /// use chess_lab::core::Position;
     ///
     /// let pos = Position::new(0, 0).unwrap();
     ///
