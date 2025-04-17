@@ -154,7 +154,13 @@ impl VariantBuilder for Chess960 {
     /// * `Err(PgnError)` - An error that indicates that the PGN string is invalid
     ///
     /// # Example
-    /// TODO
+    /// ```
+    /// use chess_lab::core::VariantBuilder;
+    /// use chess_lab::variants::Chess960;
+    ///
+    /// let pgn = "1. e4 e5 2. Nf3 Nc6";
+    /// let variant = Chess960::from_pgn(pgn).unwrap();
+    /// ```
     ///
     fn from_pgn(pgn: &str) -> Result<Chess960, PgnError> {
         parse_pgn(pgn)
@@ -170,7 +176,13 @@ impl VariantBuilder for Chess960 {
     /// * `Err(PgnError)` - An error that indicates that the PGN file is invalid
     ///
     /// # Example
-    /// TODO
+    /// ```
+    /// use chess_lab::core::VariantBuilder;
+    /// use chess_lab::variants::Chess960;
+    ///
+    /// let path = "data/standard/ex.pgn"; // TODO: Change to the chess960 file
+    /// let variant = Chess960::load(path).unwrap();
+    /// ```
     ///
     fn load(path: &str) -> Result<Chess960, PgnError> {
         let pgn = read_file(path)?;
@@ -187,7 +199,13 @@ impl VariantBuilder for Chess960 {
     /// * `Err(PgnError)` - An error that indicates that the PGN file is invalid
     ///
     /// # Example
-    /// TODO
+    /// ```
+    /// use chess_lab::core::VariantBuilder;
+    /// use chess_lab::variants::Chess960;
+    ///
+    /// let path = "data/standard/ex3.pgn"; // TODO: Change to the chess960 file
+    /// let variants = Chess960::load_all(path).unwrap();
+    /// ```
     ///
     fn load_all(path: &str) -> Result<Vec<Chess960>, PgnError> {
         let pgn = read_file(path)?;
@@ -560,3 +578,5 @@ impl Variant for Chess960 {
         self.game.status
     }
 }
+
+// TODO: add unit tests

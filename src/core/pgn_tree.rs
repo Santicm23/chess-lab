@@ -324,7 +324,6 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
             let metadata = OptionPgnMetadata::from_string(key, value)
                 .ok_or(PgnMetadataError::new(format!("[{} \"{}\"]", key, value)))?;
             self.option_metadata.push(metadata);
-            // Return an error if the key is not supported
         }
         Ok(())
     }
