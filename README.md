@@ -4,6 +4,9 @@
 This is a Chess library with multiple variants and FEN/PGN support that provides a simple API to interact with the game.
 It also includes the feature to save multiple lines of a game and to load them back.
 
+## Project documentation
+https://deepwiki.com/Santicm23/chess-lab
+
 ## Features
 - [x] Playable Chess game
 - [x] FEN/PGN support
