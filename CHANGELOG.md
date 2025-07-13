@@ -12,7 +12,7 @@ We follow the [Semantic Versioning 2.0.0](http://semver.org/) format.
     - Piece: representing a piece with its color and type
     - Board: containing the pieces in their corresponding position, supporting FEN (without considering additional game information in it) and giving some useful methods to check wether a position is attacked by a given color
     - Game: this is the main structure that contains and uses all the other structures, with FEN support, PGN support (only can read move by move for the moment), undo and redo methods, different lines and game over validations
-- All public methods include doc strings within examples to make it simplier to use
+- All public methods include doc strings within examples to make it simpler to use
 
 ### Deprecated
 - Nothing.
