@@ -7,12 +7,12 @@ use std::{
 
 use crate::{
     core::{GameStatus, MoveInfo, Position},
-    errors::PgnMetadataError,
+    errors::PGNMetadataError,
 };
 
 /// An enum representing optional PGN metadata
 #[derive(Debug, Clone)]
-pub(crate) enum OptionPgnMetadata {
+pub(crate) enum OptionPGNMetadata {
     // Game metadata
     /// The time control of the game
     TimeControl(String),
@@ -87,98 +87,99 @@ pub(crate) enum OptionPgnMetadata {
     /// The play count
     PlyCount(u32),
 }
-impl OptionPgnMetadata {
-    /// Create a new [OptionPgnMetadata] from a key and a value.
+
+impl OptionPGNMetadata {
+    /// Create a new [OptionPGNMetadata] from a key and a value.
     ///
     /// # Arguments
     /// * `key` - The key of the metadata.
     /// * `value` - The value of the metadata.
     ///
     /// # Returns
-    /// An [OptionPgnMetadata] if the key is valid, otherwise None.
+    /// An [OptionPGNMetadata] if the key is valid, otherwise None.
     ///
-    pub fn from_string(key: &str, value: &str) -> Option<OptionPgnMetadata> {
+    pub fn from_string(key: &str, value: &str) -> Option<OptionPGNMetadata> {
         match key {
-            "TimeControl" => Some(OptionPgnMetadata::TimeControl(value.to_string())),
-            "Termination" => Some(OptionPgnMetadata::Termination(value.to_string())),
-            "WhiteElo" => value.parse().ok().map(OptionPgnMetadata::WhiteElo),
-            "BlackElo" => value.parse().ok().map(OptionPgnMetadata::BlackElo),
-            "WhiteTitle" => Some(OptionPgnMetadata::WhiteTitle(value.to_string())),
-            "BlackTitle" => Some(OptionPgnMetadata::BlackTitle(value.to_string())),
-            "WhiteUSCF" => Some(OptionPgnMetadata::WhiteUSCF(value.to_string())),
-            "BlackUSCF" => Some(OptionPgnMetadata::BlackUSCF(value.to_string())),
-            "WhiteNA" => Some(OptionPgnMetadata::WhiteNA(value.to_string())),
-            "BlackNA" => Some(OptionPgnMetadata::BlackNA(value.to_string())),
-            "WhiteType" => Some(OptionPgnMetadata::WhiteType(value.to_string())),
-            "BlackType" => Some(OptionPgnMetadata::BlackType(value.to_string())),
-            "EventDate" => Some(OptionPgnMetadata::EventDate(value.to_string())),
-            "EventSponsor" => Some(OptionPgnMetadata::EventSponsor(value.to_string())),
-            "Section" => Some(OptionPgnMetadata::Section(value.to_string())),
-            "Stage" => Some(OptionPgnMetadata::Stage(value.to_string())),
-            "Board" => Some(OptionPgnMetadata::Board(value.to_string())),
-            "Opening" => Some(OptionPgnMetadata::Opening(value.to_string())),
-            "Variation" => Some(OptionPgnMetadata::Variation(value.to_string())),
-            "SubVariation" => Some(OptionPgnMetadata::SubVariation(value.to_string())),
-            "ECO" => Some(OptionPgnMetadata::ECO(value.to_string())),
-            "NIC" => Some(OptionPgnMetadata::NIC(value.to_string())),
-            "Time" => Some(OptionPgnMetadata::Time(value.to_string())),
-            "UTCDate" => Some(OptionPgnMetadata::UTCDate(value.to_string())),
-            "UTCTime" => Some(OptionPgnMetadata::UTCTime(value.to_string())),
-            "SetUp" => Some(OptionPgnMetadata::SetUp(value.to_string())),
-            "FEN" => Some(OptionPgnMetadata::FEN(value.to_string())),
-            "Annotator" => Some(OptionPgnMetadata::Annotator(value.to_string())),
-            "Mode" => Some(OptionPgnMetadata::Mode(value.to_string())),
-            "PlyCount" => value.parse().ok().map(OptionPgnMetadata::PlyCount),
+            "TimeControl" => Some(OptionPGNMetadata::TimeControl(value.to_string())),
+            "Termination" => Some(OptionPGNMetadata::Termination(value.to_string())),
+            "WhiteElo" => value.parse().ok().map(OptionPGNMetadata::WhiteElo),
+            "BlackElo" => value.parse().ok().map(OptionPGNMetadata::BlackElo),
+            "WhiteTitle" => Some(OptionPGNMetadata::WhiteTitle(value.to_string())),
+            "BlackTitle" => Some(OptionPGNMetadata::BlackTitle(value.to_string())),
+            "WhiteUSCF" => Some(OptionPGNMetadata::WhiteUSCF(value.to_string())),
+            "BlackUSCF" => Some(OptionPGNMetadata::BlackUSCF(value.to_string())),
+            "WhiteNA" => Some(OptionPGNMetadata::WhiteNA(value.to_string())),
+            "BlackNA" => Some(OptionPGNMetadata::BlackNA(value.to_string())),
+            "WhiteType" => Some(OptionPGNMetadata::WhiteType(value.to_string())),
+            "BlackType" => Some(OptionPGNMetadata::BlackType(value.to_string())),
+            "EventDate" => Some(OptionPGNMetadata::EventDate(value.to_string())),
+            "EventSponsor" => Some(OptionPGNMetadata::EventSponsor(value.to_string())),
+            "Section" => Some(OptionPGNMetadata::Section(value.to_string())),
+            "Stage" => Some(OptionPGNMetadata::Stage(value.to_string())),
+            "Board" => Some(OptionPGNMetadata::Board(value.to_string())),
+            "Opening" => Some(OptionPGNMetadata::Opening(value.to_string())),
+            "Variation" => Some(OptionPGNMetadata::Variation(value.to_string())),
+            "SubVariation" => Some(OptionPGNMetadata::SubVariation(value.to_string())),
+            "ECO" => Some(OptionPGNMetadata::ECO(value.to_string())),
+            "NIC" => Some(OptionPGNMetadata::NIC(value.to_string())),
+            "Time" => Some(OptionPGNMetadata::Time(value.to_string())),
+            "UTCDate" => Some(OptionPGNMetadata::UTCDate(value.to_string())),
+            "UTCTime" => Some(OptionPGNMetadata::UTCTime(value.to_string())),
+            "SetUp" => Some(OptionPGNMetadata::SetUp(value.to_string())),
+            "FEN" => Some(OptionPGNMetadata::FEN(value.to_string())),
+            "Annotator" => Some(OptionPGNMetadata::Annotator(value.to_string())),
+            "Mode" => Some(OptionPGNMetadata::Mode(value.to_string())),
+            "PlyCount" => value.parse().ok().map(OptionPGNMetadata::PlyCount),
             _ => None,
         }
     }
 }
 
-impl Display for OptionPgnMetadata {
+impl Display for OptionPGNMetadata {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            OptionPgnMetadata::TimeControl(time_control) => {
+            OptionPGNMetadata::TimeControl(time_control) => {
                 write!(f, "[TimeControl \"{}\"]", time_control)
             }
-            OptionPgnMetadata::Termination(termination) => {
+            OptionPGNMetadata::Termination(termination) => {
                 write!(f, "[Termination \"{}\"]", termination)
             }
-            OptionPgnMetadata::WhiteElo(white_elo) => write!(f, "[WhiteElo \"{}\"]", white_elo),
-            OptionPgnMetadata::BlackElo(black_elo) => write!(f, "[BlackElo \"{}\"]", black_elo),
-            OptionPgnMetadata::WhiteTitle(white_title) => {
+            OptionPGNMetadata::WhiteElo(white_elo) => write!(f, "[WhiteElo \"{}\"]", white_elo),
+            OptionPGNMetadata::BlackElo(black_elo) => write!(f, "[BlackElo \"{}\"]", black_elo),
+            OptionPGNMetadata::WhiteTitle(white_title) => {
                 write!(f, "[WhiteTitle \"{}\"]", white_title)
             }
-            OptionPgnMetadata::BlackTitle(black_title) => {
+            OptionPGNMetadata::BlackTitle(black_title) => {
                 write!(f, "[BlackTitle \"{}\"]", black_title)
             }
-            OptionPgnMetadata::WhiteUSCF(white_uscf) => write!(f, "[WhiteUSCF \"{}\"]", white_uscf),
-            OptionPgnMetadata::BlackUSCF(black_uscf) => write!(f, "[BlackUSCF \"{}\"]", black_uscf),
-            OptionPgnMetadata::WhiteNA(white_na) => write!(f, "[WhiteNA \"{}\"]", white_na),
-            OptionPgnMetadata::BlackNA(black_na) => write!(f, "[BlackNA \"{}\"]", black_na),
-            OptionPgnMetadata::WhiteType(white_type) => write!(f, "[WhiteType \"{}\"]", white_type),
-            OptionPgnMetadata::BlackType(black_type) => write!(f, "[BlackType \"{}\"]", black_type),
-            OptionPgnMetadata::EventDate(event_date) => write!(f, "[EventDate \"{}\"]", event_date),
-            OptionPgnMetadata::EventSponsor(event_sponsor) => {
+            OptionPGNMetadata::WhiteUSCF(white_uscf) => write!(f, "[WhiteUSCF \"{}\"]", white_uscf),
+            OptionPGNMetadata::BlackUSCF(black_uscf) => write!(f, "[BlackUSCF \"{}\"]", black_uscf),
+            OptionPGNMetadata::WhiteNA(white_na) => write!(f, "[WhiteNA \"{}\"]", white_na),
+            OptionPGNMetadata::BlackNA(black_na) => write!(f, "[BlackNA \"{}\"]", black_na),
+            OptionPGNMetadata::WhiteType(white_type) => write!(f, "[WhiteType \"{}\"]", white_type),
+            OptionPGNMetadata::BlackType(black_type) => write!(f, "[BlackType \"{}\"]", black_type),
+            OptionPGNMetadata::EventDate(event_date) => write!(f, "[EventDate \"{}\"]", event_date),
+            OptionPGNMetadata::EventSponsor(event_sponsor) => {
                 write!(f, "[EventSponsor \"{}\"]", event_sponsor)
             }
-            OptionPgnMetadata::Section(section) => write!(f, "[Section \"{}\"]", section),
-            OptionPgnMetadata::Stage(stage) => write!(f, "[Stage \"{}\"]", stage),
-            OptionPgnMetadata::Board(board) => write!(f, "[Board \"{}\"]", board),
-            OptionPgnMetadata::Opening(opening) => write!(f, "[Opening \"{}\"]", opening),
-            OptionPgnMetadata::Variation(variation) => write!(f, "[Variation \"{}\"]", variation),
-            OptionPgnMetadata::SubVariation(sub_variation) => {
+            OptionPGNMetadata::Section(section) => write!(f, "[Section \"{}\"]", section),
+            OptionPGNMetadata::Stage(stage) => write!(f, "[Stage \"{}\"]", stage),
+            OptionPGNMetadata::Board(board) => write!(f, "[Board \"{}\"]", board),
+            OptionPGNMetadata::Opening(opening) => write!(f, "[Opening \"{}\"]", opening),
+            OptionPGNMetadata::Variation(variation) => write!(f, "[Variation \"{}\"]", variation),
+            OptionPGNMetadata::SubVariation(sub_variation) => {
                 write!(f, "[SubVariation \"{}\"]", sub_variation)
             }
-            OptionPgnMetadata::ECO(eco) => write!(f, "[ECO \"{}\"]", eco),
-            OptionPgnMetadata::NIC(nic) => write!(f, "[NIC \"{}\"]", nic),
-            OptionPgnMetadata::Time(time) => write!(f, "[Time \"{}\"]", time),
-            OptionPgnMetadata::UTCDate(utc_date) => write!(f, "[UTCDate \"{}\"]", utc_date),
-            OptionPgnMetadata::UTCTime(utc_time) => write!(f, "[UTCTime \"{}\"]", utc_time),
-            OptionPgnMetadata::SetUp(set_up) => write!(f, "[SetUp \"{}\"]", set_up),
-            OptionPgnMetadata::FEN(fen) => write!(f, "[FEN \"{}\"]", fen),
-            OptionPgnMetadata::Annotator(annotator) => write!(f, "[Annotator \"{}\"]", annotator),
-            OptionPgnMetadata::Mode(mode) => write!(f, "[Mode \"{}\"]", mode),
-            OptionPgnMetadata::PlyCount(ply_count) => write!(f, "[PlyCount \"{}\"]", ply_count),
+            OptionPGNMetadata::ECO(eco) => write!(f, "[ECO \"{}\"]", eco),
+            OptionPGNMetadata::NIC(nic) => write!(f, "[NIC \"{}\"]", nic),
+            OptionPGNMetadata::Time(time) => write!(f, "[Time \"{}\"]", time),
+            OptionPGNMetadata::UTCDate(utc_date) => write!(f, "[UTCDate \"{}\"]", utc_date),
+            OptionPGNMetadata::UTCTime(utc_time) => write!(f, "[UTCTime \"{}\"]", utc_time),
+            OptionPGNMetadata::SetUp(set_up) => write!(f, "[SetUp \"{}\"]", set_up),
+            OptionPGNMetadata::FEN(fen) => write!(f, "[FEN \"{}\"]", fen),
+            OptionPGNMetadata::Annotator(annotator) => write!(f, "[Annotator \"{}\"]", annotator),
+            OptionPGNMetadata::Mode(mode) => write!(f, "[Mode \"{}\"]", mode),
+            OptionPGNMetadata::PlyCount(ply_count) => write!(f, "[PlyCount \"{}\"]", ply_count),
         }
     }
 }
@@ -229,7 +230,7 @@ impl<T: PartialEq + Clone + Display + Debug> PartialEq for PgnLine<T> {
 /// The current line is the move node that is currently being checked
 ///
 #[derive(Debug, Clone)]
-pub struct PgnTree<T: PartialEq + Clone + Display + Debug> {
+pub struct PGNTree<T: PartialEq + Clone + Display + Debug> {
     /// The event name
     pub event: String,
     /// The site name
@@ -247,28 +248,28 @@ pub struct PgnTree<T: PartialEq + Clone + Display + Debug> {
     /// The variant of the game
     pub variant: Option<String>,
     /// The list of other metadata
-    pub(crate) option_metadata: Vec<OptionPgnMetadata>,
+    pub(crate) option_metadata: Vec<OptionPGNMetadata>,
     /// The list of lines
     lines: Vec<Rc<RefCell<PgnLine<T>>>>,
     /// The current line
     current_line: Option<Rc<RefCell<PgnLine<T>>>>,
 }
 
-impl<T: PartialEq + Clone + Display + Debug> Default for PgnTree<T> {
-    /// Creates a new PgnTree with no metadata and an empty list of lines
+impl<T: PartialEq + Clone + Display + Debug> Default for PGNTree<T> {
+    /// Creates a new [PGNTree] with no metadata and an empty list of lines
     ///
     /// # Returns
-    /// A an empty [PgnTree]
+    /// A an empty [PGNTree]
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{PgnTree, Move};
+    /// use chess_lab::core::{PGNTree, Move};
     ///
-    /// let tree: PgnTree<Move> = PgnTree::default();
+    /// let tree: PGNTree<Move> = PGNTree::default();
     /// ```
     ///
-    fn default() -> PgnTree<T> {
-        PgnTree {
+    fn default() -> PGNTree<T> {
+        PGNTree {
             event: "".to_string(),
             site: "".to_string(),
             date: "".to_string(),
@@ -284,8 +285,8 @@ impl<T: PartialEq + Clone + Display + Debug> Default for PgnTree<T> {
     }
 }
 
-impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
-    /// Creates a new PgnTree with the provided metadata and an empty list of lines
+impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
+    /// Creates a new [PGNTree] with the provided metadata and an empty list of lines
     ///
     /// # Arguments
     /// * `event`: The event name
@@ -301,13 +302,13 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     /// * `time_control`: The time control of the game
     ///
     /// # Returns
-    /// A new [PgnTree]
+    /// A new [PGNTree]
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{PgnTree, Move};
+    /// use chess_lab::core::{PGNTree, Move};
     ///
-    /// let tree: PgnTree<Move> = PgnTree::new(
+    /// let tree: PGNTree<Move> = PGNTree::new(
     ///    "Event".to_string(),
     ///    "Site".to_string(),
     ///    "Date".to_string(),
@@ -328,8 +329,8 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
         black: String,
         result: String,
         variant: Option<String>,
-    ) -> PgnTree<T> {
-        PgnTree {
+    ) -> PGNTree<T> {
+        PGNTree {
             event,
             site,
             date,
@@ -351,20 +352,20 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     /// * `value`: The metadata value
     ///
     /// # Returns
-    /// A Result<(), PgnMetadataError>
+    /// A Result<(), PGNMetadataError>
     /// * `Ok(())`: If the metadata was added successfully
-    /// * `Err(PgnMetadataError)`: If the metadata key is invalid
+    /// * `Err(PGNMetadataError)`: If the metadata key is invalid
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{PgnTree, Move};
+    /// use chess_lab::core::{PGNTree, Move};
     ///
-    /// let mut tree: PgnTree<Move> = PgnTree::default();
+    /// let mut tree: PGNTree<Move> = PGNTree::default();
     /// tree.add_metadata("Event", "My Event").unwrap();
     /// assert_eq!(tree.event, "My Event");
     /// ```
     ///
-    pub fn add_metadata(&mut self, key: &str, value: &str) -> Result<(), PgnMetadataError> {
+    pub fn add_metadata(&mut self, key: &str, value: &str) -> Result<(), PGNMetadataError> {
         if key == "Event" {
             self.event = value.to_string();
         } else if key == "Site" {
@@ -380,8 +381,8 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
         } else if key == "Result" {
             self.result = value.to_string();
         } else {
-            let metadata = OptionPgnMetadata::from_string(key, value)
-                .ok_or(PgnMetadataError::new(format!("[{} \"{}\"]", key, value)))?;
+            let metadata = OptionPGNMetadata::from_string(key, value)
+                .ok_or(PGNMetadataError::new(format!("[{} \"{}\"]", key, value)))?;
             self.option_metadata.push(metadata);
         }
         Ok(())
@@ -400,10 +401,10 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{PgnTree, Piece, Move, MoveType, PieceType, Color, Position, GameStatus};
+    /// use chess_lab::core::{PGNTree, Piece, Move, MoveType, PieceType, Color, Position, GameStatus};
     /// use std::collections::HashMap;
     ///
-    /// let mut pgn_tree: PgnTree<Move> = PgnTree::default();
+    /// let mut pgn_tree: PGNTree<Move> = PGNTree::default();
     /// let mov = Move::new(
     ///     Piece::new(Color::Black, PieceType::Pawn),
     ///     Position::from_string("e2").unwrap(),
@@ -498,10 +499,10 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{PgnTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use std::collections::HashMap;
     ///
-    /// let mut tree = PgnTree::default();
+    /// let mut tree = PGNTree::default();
     ///
     /// tree.add_move(Move::new(
     ///     Piece::new(Color::Black, PieceType::Pawn),
@@ -559,10 +560,10 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{PgnTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use std::collections::HashMap;
     ///
-    /// let mut tree = PgnTree::default();
+    /// let mut tree = PGNTree::default();
     /// let mov = Move::new(
     ///     Piece::new(Color::Black, PieceType::Pawn),
     ///     Position::from_string("e2").unwrap(),
@@ -594,10 +595,10 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{PgnTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus, MoveInfo};
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus, MoveInfo};
     /// use std::collections::HashMap;
     ///
-    /// let mut tree = PgnTree::default();
+    /// let mut tree = PGNTree::default();
     /// let mov = Move::new(
     ///     Piece::new(Color::Black, PieceType::Pawn),
     ///     Position::from_string("e2").unwrap(),
@@ -637,10 +638,10 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{PgnTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use std::collections::HashMap;
     ///
-    /// let mut pgn_tree = PgnTree::default();
+    /// let mut pgn_tree = PGNTree::default();
     /// let mov1 = Move::new(
     ///     Piece::new(Color::Black, PieceType::Pawn),
     ///     Position::from_string("e2").unwrap(),
@@ -691,10 +692,10 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{PgnTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use std::collections::HashMap;
     ///
-    /// let mut pgn_tree = PgnTree::default();
+    /// let mut pgn_tree = PGNTree::default();
     /// let mov1 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
     ///     Position::from_string("e2").unwrap(),
@@ -758,10 +759,10 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::core::{PgnTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use std::collections::HashMap;
     ///
-    /// let mut pgn_tree = PgnTree::default();
+    /// let mut pgn_tree = PGNTree::default();
     /// let mov1 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
     ///     Position::from_string("e4").unwrap(),
@@ -821,10 +822,10 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{PgnTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use std::collections::HashMap;
     ///
-    /// let mut pgn_tree = PgnTree::default();
+    /// let mut pgn_tree = PGNTree::default();
     /// let mov1 = Move::new(
     ///     Piece::new(Color::Black, PieceType::Pawn),
     ///     Position::from_string("e2").unwrap(),
@@ -885,10 +886,10 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{PgnTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use std::collections::HashMap;
     ///
-    /// let mut pgn_tree = PgnTree::default();
+    /// let mut pgn_tree = PGNTree::default();
     /// let mov1 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
     ///     Position::from_string("e2").unwrap(),
@@ -923,10 +924,10 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{PgnTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use std::collections::HashMap;
     ///
-    /// let mut pgn_tree = PgnTree::default();
+    /// let mut pgn_tree = PGNTree::default();
     /// let mov1 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
     ///     Position::from_string("e2").unwrap(),
@@ -957,10 +958,10 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{PgnTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use std::collections::HashMap;
     ///
-    /// let mut pgn_tree = PgnTree::default();
+    /// let mut pgn_tree = PGNTree::default();
     /// let mov1 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
     ///     Position::from_string("e2").unwrap(),
@@ -1012,9 +1013,9 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{PgnTree, Move, GameStatus, WinReason};
+    /// use chess_lab::core::{PGNTree, Move, GameStatus, WinReason};
     ///
-    /// let mut pgn_tree: PgnTree<Move> = PgnTree::default();
+    /// let mut pgn_tree: PGNTree<Move> = PGNTree::default();
     ///
     /// pgn_tree.game_over(GameStatus::WhiteWins(WinReason::Checkmate));
     ///
@@ -1156,7 +1157,7 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     }
 }
 
-impl<T: PartialEq + Clone + Display + Debug> Iterator for PgnTree<T> {
+impl<T: PartialEq + Clone + Display + Debug> Iterator for PGNTree<T> {
     type Item = T;
 
     /// Returns the next move
@@ -1166,10 +1167,10 @@ impl<T: PartialEq + Clone + Display + Debug> Iterator for PgnTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{PgnTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use std::collections::HashMap;
     ///
-    /// let mut pgn_tree = PgnTree::default();
+    /// let mut pgn_tree = PGNTree::default();
     /// let mov1 = Move::new(
     ///     Piece::new(Color::Black, PieceType::Pawn),
     ///     Position::from_string("e2").unwrap(),
@@ -1211,7 +1212,7 @@ impl<T: PartialEq + Clone + Display + Debug> Iterator for PgnTree<T> {
     }
 }
 
-impl<T: PartialEq + Clone + Display + Debug> DoubleEndedIterator for PgnTree<T> {
+impl<T: PartialEq + Clone + Display + Debug> DoubleEndedIterator for PGNTree<T> {
     /// Returns the previous move
     ///
     /// # Returns
@@ -1219,10 +1220,10 @@ impl<T: PartialEq + Clone + Display + Debug> DoubleEndedIterator for PgnTree<T> 
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{PgnTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
     /// use std::collections::HashMap;
     ///
-    /// let mut pgn_tree = PgnTree::default();
+    /// let mut pgn_tree = PGNTree::default();
     /// let mov1 = Move::new(
     ///     Piece::new(Color::Black, PieceType::Pawn),
     ///     Position::from_string("e2").unwrap(),
@@ -1268,12 +1269,12 @@ mod tests {
     use std::collections::HashMap;
 
     use crate::core::{
-        Color, GameStatus, Move, MoveType, PgnTree, Piece, PieceType, Position, WinReason,
+        Color, GameStatus, Move, MoveType, PGNTree, Piece, PieceType, Position, WinReason,
     };
 
     #[test]
     fn test_add_move() {
-        let mut pgn_tree = PgnTree::default();
+        let mut pgn_tree = PGNTree::default();
         let mov = Move::new(
             Piece::new(Color::Black, PieceType::Pawn),
             Position::from_string("e2").unwrap(),
@@ -1305,7 +1306,7 @@ mod tests {
 
     #[test]
     fn test_rm_move() {
-        let mut pgn_tree = PgnTree::default();
+        let mut pgn_tree = PGNTree::default();
         let mov = Move::new(
             Piece::new(Color::Black, PieceType::Pawn),
             Position::from_string("e2").unwrap(),
@@ -1337,7 +1338,7 @@ mod tests {
 
     #[test]
     fn test_prev_move() {
-        let mut pgn_tree = PgnTree::default();
+        let mut pgn_tree = PGNTree::default();
         let mov1 = Move::new(
             Piece::new(Color::Black, PieceType::Pawn),
             Position::from_string("e2").unwrap(),
@@ -1394,7 +1395,7 @@ mod tests {
 
     #[test]
     fn test_next_move() {
-        let mut pgn_tree = PgnTree::default();
+        let mut pgn_tree = PGNTree::default();
         let mov1 = Move::new(
             Piece::new(Color::Black, PieceType::Pawn),
             Position::from_string("e2").unwrap(),
@@ -1451,7 +1452,7 @@ mod tests {
 
     #[test]
     fn test_all_next_moves() {
-        let mut pgn_tree = PgnTree::default();
+        let mut pgn_tree = PGNTree::default();
         let mov1 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
             Position::from_string("e4").unwrap(),
@@ -1510,7 +1511,7 @@ mod tests {
 
     #[test]
     fn test_pgn_header() {
-        let mut tree: PgnTree<Move> = PgnTree::default();
+        let mut tree: PGNTree<Move> = PGNTree::default();
         tree.event = "Event".to_string();
         tree.site = "Site".to_string();
         tree.date = "Date".to_string();
@@ -1524,7 +1525,7 @@ mod tests {
 
     #[test]
     fn test_next_variant() {
-        let mut pgn_tree = PgnTree::default();
+        let mut pgn_tree = PGNTree::default();
         let mov1 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
             Position::from_string("e2").unwrap(),
@@ -1584,7 +1585,7 @@ mod tests {
 
     #[test]
     fn test_pgn() {
-        let mut pgn_tree = PgnTree::default();
+        let mut pgn_tree = PGNTree::default();
         let mov1 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
             Position::from_string("e2").unwrap(),
@@ -1639,7 +1640,7 @@ mod tests {
 
     #[test]
     fn test_has_prev_move() {
-        let mut pgn_tree = PgnTree::default();
+        let mut pgn_tree = PGNTree::default();
         let mov1 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
             Position::from_string("e2").unwrap(),
@@ -1672,7 +1673,7 @@ mod tests {
 
     #[test]
     fn test_has_next_move() {
-        let mut pgn_tree = PgnTree::default();
+        let mut pgn_tree = PGNTree::default();
         let mov1 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
             Position::from_string("e2").unwrap(),
@@ -1732,7 +1733,7 @@ mod tests {
 
     #[test]
     fn test_game_over() {
-        let mut pgn_tree: PgnTree<Move> = PgnTree::default();
+        let mut pgn_tree: PGNTree<Move> = PGNTree::default();
 
         pgn_tree.game_over(GameStatus::WhiteWins(WinReason::Checkmate));
 

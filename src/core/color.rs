@@ -9,10 +9,10 @@ pub enum Color {
 }
 
 impl Color {
-    /// Gets the opposite color
+    /// Gets the opposite [color](Color)
     ///
     /// # Returns
-    /// The color opposite to the current one
+    /// The [color](Color) opposite to the current one
     ///
     /// # Example
     /// ```

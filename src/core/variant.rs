@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::{
-    errors::{FenError, MoveError, PgnError},
+    errors::{FenError, MoveError, PGNError},
     logic::{Board, Game},
 };
 
@@ -181,7 +181,7 @@ pub trait VariantBuilder: Sized + Default {
     /// * `Ok(Self)` - A new instance of the variant.
     /// * `Err(PgnError)` - An error occurred while parsing the PGN string.
     ///
-    fn from_pgn(pgn: &str) -> Result<Self, PgnError>;
+    fn from_pgn(pgn: &str) -> Result<Self, PGNError>;
 
     /// Loads the game from a file.
     ///
@@ -192,7 +192,7 @@ pub trait VariantBuilder: Sized + Default {
     /// * `Ok(Self)` - The game was loaded successfully.
     /// * `Err(PgnError)` - An error occurred while loading the game.
     ///
-    fn load(path: &str) -> Result<Self, PgnError>;
+    fn load(path: &str) -> Result<Self, PGNError>;
 
     /// Loads multiple games from a file.
     ///
@@ -203,5 +203,5 @@ pub trait VariantBuilder: Sized + Default {
     /// * `Ok(Vec<Self>)` - The games were loaded successfully.
     /// * `Err(PgnError)` - An error occurred while loading the games.
     ///
-    fn load_all(path: &str) -> Result<Vec<Self>, PgnError>;
+    fn load_all(path: &str) -> Result<Vec<Self>, PGNError>;
 }

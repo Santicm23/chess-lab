@@ -5,7 +5,7 @@ use pest_derive::Parser;
 
 use crate::{
     core::{Variant, VariantBuilder},
-    errors::PgnError,
+    errors::PGNError,
     logic::Game,
 };
 
@@ -13,20 +13,20 @@ use crate::{
 #[grammar = "./src/parsing/pgn/pgn.pest"]
 struct PGNParser;
 
-/// Parse a PGN file into a vector of Game structs
+/// Parse a multiple games PGN string into a vector of [Game] structs
 ///
 /// # Arguments
-/// * `input` - A string slice that holds the PGN file to be parsed
+/// * `input` - A string slice that holds the PGN string to be parsed
 ///
 /// # Returns
-/// * `Ok(Vec<Game>)` - A vector of Game structs with the parsed PGNs
-/// * `Err(PgnError)` - An error with the reason why the PGN file could not be parsed
+/// * `Ok(Vec<Game>)` - A vector of [Game] structs with the parsed PGNs
+/// * `Err(PGNError)` - A [PgnError] with the reason why the PGN string could not be parsed
 ///
-pub fn parse_pgn_file<T: Variant + VariantBuilder>(input: &str) -> Result<Vec<T>, PgnError> {
+pub fn parse_multiple_pgn<T: Variant + VariantBuilder>(input: &str) -> Result<Vec<T>, PGNError> {
     let pair = PGNParser::parse(Rule::pgn_file, input)
         .expect("Failed to parse PGN")
         .next()
-        .ok_or(PgnError::InvalidPgn(input.to_string()))?;
+        .ok_or(PGNError::InvalidPgn(input.to_string()))?;
 
     let mut games = Vec::new();
 
@@ -41,7 +41,7 @@ pub fn parse_pgn_file<T: Variant + VariantBuilder>(input: &str) -> Result<Vec<T>
 
     for game in games.iter() {
         if &game.get_variant() != T::name() {
-            return Err(PgnError::InvalidVariant(game.get_variant()));
+            return Err(PGNError::InvalidVariant(game.get_variant()));
         }
         let variant = T::new(game.clone());
         variants.push(variant);
@@ -59,16 +59,16 @@ pub fn parse_pgn_file<T: Variant + VariantBuilder>(input: &str) -> Result<Vec<T>
 /// * `Ok(Game)` - A Game struct with the parsed PGN
 /// * `Err(PgnError)` - An error with the reason why the PGN could not be parsed
 ///
-pub fn parse_pgn<T: Variant + VariantBuilder>(input: &str) -> Result<T, PgnError> {
+pub fn parse_pgn<T: Variant + VariantBuilder>(input: &str) -> Result<T, PGNError> {
     let pair = PGNParser::parse(Rule::pgn, input)
         .expect("Failed to parse PGN")
         .next()
-        .ok_or(PgnError::InvalidPgn(input.to_string()))?;
+        .ok_or(PGNError::InvalidPgn(input.to_string()))?;
 
     let game = parse_single_pgn(pair)?;
 
     if &game.get_variant() != T::name() {
-        return Err(PgnError::InvalidVariant(game.get_variant()));
+        return Err(PGNError::InvalidVariant(game.get_variant()));
     }
 
     Ok(T::new(game))
@@ -107,7 +107,7 @@ fn parse_sequence(game: &mut Game, sequence: Pair<Rule>) {
 /// * `Ok(Game)` - A Game struct with the parsed PGN
 /// * `Err(PgnError)` - An error with the reason why the PGN could not be parsed
 ///
-fn parse_single_pgn(pgn: Pair<Rule>) -> Result<Game, PgnError> {
+fn parse_single_pgn(pgn: Pair<Rule>) -> Result<Game, PGNError> {
     let mut game = Game::default();
 
     let mut metadata = HashMap::new();
@@ -354,7 +354,7 @@ fn parse_full_move(game: &mut Game, full_move: Pair<Rule>) {
 mod tests {
     use crate::{core::Variant, utils::os::read_file, variants::StandardChess};
 
-    use super::{parse_pgn, parse_pgn_file};
+    use super::{parse_multiple_pgn, parse_pgn};
 
     #[test]
     fn test_parse_pgn() {
@@ -400,7 +400,7 @@ mod tests {
     fn test_parse_pgn_file() {
         let input = read_file("data/standard/ex3.pgn").unwrap();
 
-        let variants: Vec<StandardChess> = parse_pgn_file(&input).unwrap();
+        let variants: Vec<StandardChess> = parse_multiple_pgn(&input).unwrap();
 
         assert_eq!(variants.len(), 20);
 

@@ -39,7 +39,7 @@ impl PieceReprError {
     /// Creates a new [PieceReprError] with the given piece representation
     ///
     /// # Arguments
-    /// * `piece_repr` - The piece representation that caused the error
+    /// * `piece_repr` - The char representation of a piece that caused the error
     ///
     /// # Example
     /// ```

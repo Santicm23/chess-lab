@@ -5,7 +5,7 @@ use super::FenError;
 /// An error that occurs when parsing a PGN string.
 ///
 #[derive(Debug, Error)]
-pub enum PgnError {
+pub enum PGNError {
     /// The FEN string is invalid
     #[error("Invalid FEN: {0}")]
     InvalidFen(#[from] FenError),
@@ -17,7 +17,7 @@ pub enum PgnError {
     NoSuchFile(#[from] std::io::Error),
     /// The metadata is invalid
     #[error("Invalid or not supported metadata: {0}")]
-    InvalidMetadata(#[from] PgnMetadataError),
+    InvalidMetadata(#[from] PGNMetadataError),
     /// The variant does not exists
     #[error("Invalid or not variant provided: {0}")]
     InvalidVariant(String),
@@ -30,11 +30,11 @@ pub enum PgnError {
 ///
 #[derive(Debug, Error)]
 #[error("Invalid or not supported metadata: {metadata}")]
-pub struct PgnMetadataError {
+pub struct PGNMetadataError {
     pub metadata: String,
 }
 
-impl PgnMetadataError {
+impl PGNMetadataError {
     /// Creates a new [PgnMetadataError] with the given metadata.
     ///
     /// # Arguments
@@ -49,6 +49,6 @@ impl PgnMetadataError {
     /// ```
     ///
     pub fn new(metadata: String) -> Self {
-        PgnMetadataError { metadata }
+        PGNMetadataError { metadata }
     }
 }

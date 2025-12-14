@@ -59,7 +59,7 @@ pub struct Move {
 }
 
 impl Move {
-    /// Creates a new move
+    /// Creates a new [move](Move)
     ///
     /// # Arguments
     /// * `piece`: The piece that is moving

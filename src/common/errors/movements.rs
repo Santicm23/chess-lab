@@ -2,7 +2,7 @@ use thiserror::Error;
 
 use crate::core::Move;
 
-/// Errors that can occur when trying to move a piece
+/// Errors that can occur when trying to [move](Move) a piece
 ///
 #[derive(Debug, Error, PartialEq)]
 pub enum MoveError {
@@ -17,7 +17,7 @@ pub enum MoveError {
     Ambiguous(String),
 }
 
-/// Errors that can occur when trying to move a piece
+/// Errors that can occur when trying to [move](Move) a piece
 ///
 #[derive(Debug, Error)]
 #[error("Error moving piece: {error}")]
@@ -29,7 +29,7 @@ pub struct MoveInfoError {
 }
 
 impl MoveInfoError {
-    /// Creates a new [MoveInfoError] with the given error message and move.
+    /// Creates a new [MoveInfoError] with the given error message and [move](Move)
     ///
     /// # Arguments
     /// * `error` - The error message

@@ -3,10 +3,10 @@ use std::collections::HashMap;
 use rand::Rng;
 
 use crate::{
-    core::{Color, GameStatus, Move, PgnTree, Position, Variant, VariantBuilder},
-    errors::{FenError, MoveError, PgnError},
+    core::{Color, GameStatus, Move, PGNTree, Position, Variant, VariantBuilder},
+    errors::{FenError, MoveError, PGNError},
     logic::{Board, Game},
-    parsing::pgn::{parse_pgn, parse_pgn_file},
+    parsing::pgn::{parse_multiple_pgn, parse_pgn},
     utils::os::{read_file, write_file},
 };
 
@@ -161,7 +161,7 @@ impl VariantBuilder for Chess960 {
     /// let variant = Chess960::from_pgn(pgn).unwrap();
     /// ```
     ///
-    fn from_pgn(pgn: &str) -> Result<Chess960, PgnError> {
+    fn from_pgn(pgn: &str) -> Result<Chess960, PGNError> {
         parse_pgn(pgn)
     }
 
@@ -183,7 +183,7 @@ impl VariantBuilder for Chess960 {
     /// let variant = Chess960::load(path).unwrap();
     /// ```
     ///
-    fn load(path: &str) -> Result<Chess960, PgnError> {
+    fn load(path: &str) -> Result<Chess960, PGNError> {
         let pgn = read_file(path)?;
         Chess960::from_pgn(&pgn)
     }
@@ -206,9 +206,9 @@ impl VariantBuilder for Chess960 {
     /// let variants = Chess960::load_all(path).unwrap();
     /// ```
     ///
-    fn load_all(path: &str) -> Result<Vec<Chess960>, PgnError> {
+    fn load_all(path: &str) -> Result<Vec<Chess960>, PGNError> {
         let pgn = read_file(path)?;
-        parse_pgn_file(&pgn)
+        parse_multiple_pgn(&pgn)
     }
 }
 
@@ -537,7 +537,7 @@ impl Variant for Chess960 {
     /// let history = game.get_history();
     /// ```
     ///
-    fn get_history(&self) -> PgnTree<Move> {
+    fn get_history(&self) -> PGNTree<Move> {
         self.game.history.clone()
     }
 

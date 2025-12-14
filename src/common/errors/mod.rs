@@ -1,4 +1,5 @@
-//! TODO add documentation
+//! Module containing error types and handling mechanisms used on the chess-lab library
+//!
 
 mod fen;
 mod movements;
