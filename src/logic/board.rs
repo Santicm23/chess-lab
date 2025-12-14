@@ -384,7 +384,7 @@ impl Board {
     pub fn move_piece(&mut self, from: &Position, to: &Position) -> Result<(), PositionEmptyError> {
         let piece = self.delete_piece(from)?;
 
-        self.delete_piece(to)?;
+        self.delete_piece(to).ok();
 
         self.set_piece(piece, to).unwrap(); // safe unwrap
         Ok(())

@@ -11,7 +11,7 @@ use std::{
 /// * `append` - Whether to append the content to the file or overwrite it
 ///
 /// # Returns
-/// A `Result<(), std::io::Error>`
+/// A `Result<(), std::io::Error>` object
 /// * `Ok(())` if the file was written successfully
 /// * `Err(std::io::Error)` if there was an error writing the file
 ///
@@ -48,7 +48,7 @@ pub fn write_file(file_name: &str, content: &str, append: bool) -> Result<(), st
 /// * `file_name` - The name of the file to read from
 ///
 /// # Returns
-/// A `Result<String, std::io::Error>`
+/// A `Result<String, std::io::Error>` object
 /// * `Ok(String)` with the content of the file
 /// * `Err(std::io::Error)` if there was an error reading the file
 ///
@@ -57,4 +57,27 @@ pub fn read_file(file_name: &str) -> Result<String, std::io::Error> {
     let mut content = String::new();
     file.read_to_string(&mut content)?;
     Ok(content)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{read_file, write_file};
+    use std::fs;
+
+    #[test]
+    fn test_write_and_read_file() {
+        let file_name = "test_file.txt";
+        let content = "Hello, Chess Lab!";
+
+        // Write to the file
+        write_file(file_name, content, false).expect("Failed to write to file");
+
+        // Read from the file
+        let read_content = read_file(file_name).expect("Failed to read from file");
+
+        assert_eq!(content, read_content);
+
+        // Clean up
+        fs::remove_file(file_name).expect("Failed to delete test file");
+    }
 }

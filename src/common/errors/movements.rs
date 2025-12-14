@@ -4,7 +4,6 @@ use crate::core::Move;
 
 /// Errors that can occur when trying to move a piece
 ///
-/// TODO add example
 #[derive(Debug, Error, PartialEq)]
 pub enum MoveError {
     /// The move is invalid
@@ -20,7 +19,6 @@ pub enum MoveError {
 
 /// Errors that can occur when trying to move a piece
 ///
-/// TODO add example
 #[derive(Debug, Error)]
 #[error("Error moving piece: {error}")]
 pub struct MoveInfoError {
@@ -70,7 +68,7 @@ impl MoveInfoError {
     /// let error = MoveInfoError::new("Invalid move".to_string(), mov);
     /// ```
     ///
-    pub fn new(error: String, mov: Move) -> MoveInfoError {
+    pub fn new(error: String, mov: Move) -> Self {
         MoveInfoError { error, mov }
     }
 }

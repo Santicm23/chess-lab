@@ -4,7 +4,6 @@ use crate::core::Position;
 
 /// Error indicating that a specific [position](Position) is already occupied
 ///
-/// TODO add example
 #[derive(Debug, Error)]
 #[error("Position {position} is already occupied")]
 pub struct PositionOccupiedError {
@@ -13,7 +12,7 @@ pub struct PositionOccupiedError {
 }
 
 impl PositionOccupiedError {
-    /// Creates a new `PositionOccupiedError` with the given [position](Position)
+    /// Creates a new [PositionOccupiedError] with the given [position](Position)
     ///
     /// # Arguments
     /// * `position` - The [position](Position) that is occupied
@@ -27,14 +26,13 @@ impl PositionOccupiedError {
     /// let error = PositionOccupiedError::new(position);
     /// ```
     ///
-    pub fn new(position: Position) -> PositionOccupiedError {
+    pub fn new(position: Position) -> Self {
         PositionOccupiedError { position }
     }
 }
 
 /// Error indicating that a specific position is empty
 ///
-/// TODO add example
 #[derive(Debug, Error)]
 #[error("Position {position} is empty")]
 pub struct PositionEmptyError {
@@ -43,7 +41,7 @@ pub struct PositionEmptyError {
 }
 
 impl PositionEmptyError {
-    /// Creates a new `PositionEmptyError` with the given [position](Position)
+    /// Creates a new [PositionEmptyError] with the given [position](Position)
     ///
     /// # Arguments
     /// * `position` - The [position](Position) that is empty
@@ -57,14 +55,13 @@ impl PositionEmptyError {
     /// let error = PositionEmptyError::new(position);
     /// ```
     ///
-    pub fn new(position: Position) -> PositionEmptyError {
+    pub fn new(position: Position) -> Self {
         PositionEmptyError { position }
     }
 }
 
 /// Error indicating that a [position](Position) is out of the allowed range
 ///
-/// TODO add example
 #[derive(Debug, PartialEq, Error)]
 #[error("Position ({col}, {row}) is out of range")]
 pub struct PositionOutOfRangeError {
@@ -75,7 +72,7 @@ pub struct PositionOutOfRangeError {
 }
 
 impl PositionOutOfRangeError {
-    /// Creates a new `PositionOutOfRangeError` with the given column and row
+    /// Creates a new [PositionOutOfRangeError] with the given column and row
     ///
     /// # Arguments
     /// * `col` - The column index that is out of range
@@ -90,14 +87,13 @@ impl PositionOutOfRangeError {
     /// let error = PositionOutOfRangeError::new(col, row);
     /// ```
     ///
-    pub fn new(col: u8, row: u8) -> PositionOutOfRangeError {
+    pub fn new(col: u8, row: u8) -> Self {
         PositionOutOfRangeError { col, row }
     }
 }
 
 /// Error indicating that a [position](Position) is invalid
 ///
-/// TODO add example
 #[derive(Debug, PartialEq, Error)]
 #[error("Invalid position: {position_str}")]
 pub struct PositionInvalidError {
@@ -106,7 +102,7 @@ pub struct PositionInvalidError {
 }
 
 impl PositionInvalidError {
-    /// Creates a new `PositionInvalidError` with the given message
+    /// Creates a new [PositionInvalidError] with the given message
     ///
     /// # Arguments
     /// * `message` - The message that describes the error
@@ -118,14 +114,13 @@ impl PositionInvalidError {
     /// let error = PositionInvalidError::new("Invalid position".to_string());
     /// ```
     ///
-    pub fn new(position_str: String) -> PositionInvalidError {
+    pub fn new(position_str: String) -> Self {
         PositionInvalidError { position_str }
     }
 }
 
 /// Error indicating that two [positions](Position) are not aligned
 ///
-/// TODO add example
 #[derive(Debug, PartialEq, Error)]
 #[error("Positions {position1} and {position2} are not aligned")]
 pub struct UnalignedPositionsError {
@@ -136,7 +131,7 @@ pub struct UnalignedPositionsError {
 }
 
 impl UnalignedPositionsError {
-    /// Creates a new `UnalignedPositionsError` with the given positions
+    /// Creates a new [UnalignedPositionsError] with the given positions
     ///
     /// # Arguments
     /// * `position1` - The first position that is not aligned
@@ -152,7 +147,7 @@ impl UnalignedPositionsError {
     /// let error = UnalignedPositionsError::new(position1, position2);
     /// ```
     ///
-    pub fn new(position1: Position, position2: Position) -> UnalignedPositionsError {
+    pub fn new(position1: Position, position2: Position) -> Self {
         UnalignedPositionsError {
             position1,
             position2,
@@ -162,7 +157,6 @@ impl UnalignedPositionsError {
 
 /// Error type to handle errors on `piece_between` function
 ///
-/// TODO add example
 #[derive(Debug, PartialEq, Error)]
 pub enum PositionBetweenError {
     /// Indicates that the position is outside the allowed range

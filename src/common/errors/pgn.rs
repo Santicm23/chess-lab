@@ -4,7 +4,6 @@ use super::FenError;
 
 /// An error that occurs when parsing a PGN string.
 ///
-/// TODO add example
 #[derive(Debug, Error)]
 pub enum PgnError {
     /// The FEN string is invalid
@@ -29,7 +28,6 @@ pub enum PgnError {
 /// # Attributes
 /// * `metadata` - The metadata that caused the error.
 ///
-/// TODO add example
 #[derive(Debug, Error)]
 #[error("Invalid or not supported metadata: {metadata}")]
 pub struct PgnMetadataError {
