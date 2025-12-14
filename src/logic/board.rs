@@ -16,17 +16,29 @@ use crate::{
 ///
 #[derive(Debug, Clone)]
 pub struct Board {
+    /// Bitboard of white pawns
     wpawns: u64,
+    /// Bitboard of black pawns
     bpawns: u64,
+    /// Bitboard of white knights
     wknights: u64,
+    /// Bitboard of black knights
     bknights: u64,
+    /// Bitboard of white bishops
     wbishops: u64,
+    /// Bitboard of black bishops
     bbishops: u64,
+    /// Bitboard of white rooks
     wrooks: u64,
+    /// Bitboard of black rooks
     brooks: u64,
+    /// Bitboard of white queens
     wqueens: u64,
+    /// Bitboard of black queens
     bqueens: u64,
+    /// Bitboard of white kings
     wkings: u64,
+    /// Bitboard of black kings
     bkings: u64,
 }
 
@@ -100,7 +112,7 @@ impl Board {
     /// * `Err(FenError)`: If the FEN string is invalid
     ///
     pub fn from_fen(fen: &str) -> Result<Board, FenError> {
-        let re = Regex::new(r"^([1-8PpNnBbRrQqKk]{1,8}/){7}[1-8PpNnBbRrQqKk]{1,8}$").unwrap();
+        let re = Regex::new(r"^([1-8PpNnBbRrQqKk]{1,8}/){7}[1-8PpNnBbRrQqKk]{1,8}$").unwrap(); // safe unwrap
 
         if !re.is_match(fen) {
             return Err(FenError::new(fen.to_string()));
@@ -115,6 +127,7 @@ impl Board {
 
             let mut col = 0;
             for c in rank.chars() {
+                // TODO refactor this to use match
                 if c.is_digit(10) {
                     col += c.to_digit(10).unwrap() as u8;
                     continue;
@@ -371,12 +384,9 @@ impl Board {
     pub fn move_piece(&mut self, from: &Position, to: &Position) -> Result<(), PositionEmptyError> {
         let piece = self.delete_piece(from)?;
 
-        match self.delete_piece(to) {
-            Ok(_) => (),
-            Err(_) => (),
-        }
+        self.delete_piece(to)?;
 
-        self.set_piece(piece, to).unwrap();
+        self.set_piece(piece, to).unwrap(); // safe unwrap
         Ok(())
     }
 
@@ -393,6 +403,7 @@ impl Board {
         let pieces = self.find_all(color);
         for piece in pieces {
             if self.can_capture(&piece, &pos).unwrap() {
+                // safe unwrap (depends on find_all method)
                 return true;
             }
         }
@@ -419,11 +430,16 @@ impl Board {
         let piece = self
             .get_piece(start_pos)
             .ok_or(PositionEmptyError::new(start_pos.clone()))?;
-        let captured_piece = self.get_piece(end_pos);
 
-        if captured_piece.is_some() && piece.color == captured_piece.unwrap().color {
-            return Ok(false);
+        match self.get_piece(end_pos) {
+            None => (),
+            Some(captured_piece) => {
+                if captured_piece.color == piece.color {
+                    return Ok(false);
+                }
+            }
         }
+
         if piece_movement(&piece, start_pos, end_pos) {
             if piece.piece_type == PieceType::Pawn && start_pos.col == end_pos.col {
                 return Ok(false);
@@ -432,7 +448,7 @@ impl Board {
                 PieceType::Pawn => Ok(diagonal_movement(start_pos, end_pos)),
                 PieceType::Knight | PieceType::King => Ok(true),
                 PieceType::Bishop | PieceType::Rook | PieceType::Queen => {
-                    Ok(!self.piece_between(start_pos, end_pos).unwrap())
+                    Ok(!self.piece_between(start_pos, end_pos).unwrap()) // safe unwrap (depends on piece_movement)
                 }
             };
         }
@@ -498,8 +514,9 @@ impl Display for Board {
         for row in (0..8).rev() {
             let mut empty = 0;
             for col in 0..8 {
-                let pos = Position::new(col, row).unwrap();
+                let pos = Position::new(col, row).unwrap(); // safe unwrap
                 let piece = self.get_piece(&pos);
+                // TODO refactor this to use match
                 if piece.is_none() {
                     empty += 1;
                     continue;

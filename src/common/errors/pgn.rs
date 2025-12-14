@@ -4,23 +4,23 @@ use super::FenError;
 
 /// An error that occurs when parsing a PGN string.
 ///
-/// # Variants
-/// * `InvalidFen`: The FEN string is invalid
-/// * `InvalidPgn`: The PGN string is invalid
-/// * `NoSuchFile`: The file does not exist
-/// * `InvalidMetadata`: The metadata is invalid
-///
+/// TODO add example
 #[derive(Debug, Error)]
 pub enum PgnError {
+    /// The FEN string is invalid
     #[error("Invalid FEN: {0}")]
     InvalidFen(#[from] FenError),
+    /// The PGN string is invalid
     #[error("Invalid PGN: {0}")]
     InvalidPgn(String),
+    /// The file does not exist
     #[error("No such file or directory: {0}")]
     NoSuchFile(#[from] std::io::Error),
+    /// The metadata is invalid
     #[error("Invalid or not supported metadata: {0}")]
     InvalidMetadata(#[from] PgnMetadataError),
-    #[error("Invalid or not variant: {0}")]
+    /// The variant does not exists
+    #[error("Invalid or not variant provided: {0}")]
     InvalidVariant(String),
 }
 
@@ -29,6 +29,7 @@ pub enum PgnError {
 /// # Attributes
 /// * `metadata` - The metadata that caused the error.
 ///
+/// TODO add example
 #[derive(Debug, Error)]
 #[error("Invalid or not supported metadata: {metadata}")]
 pub struct PgnMetadataError {
@@ -36,7 +37,7 @@ pub struct PgnMetadataError {
 }
 
 impl PgnMetadataError {
-    /// Creates a new `PgnMetadataError` with the given metadata.
+    /// Creates a new [PgnMetadataError] with the given metadata.
     ///
     /// # Arguments
     /// * `metadata` - The metadata that caused the error.

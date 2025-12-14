@@ -2,26 +2,23 @@ use thiserror::Error;
 
 use crate::core::Position;
 
-/// Error indicating that a specific position is already occupied.
+/// Error indicating that a specific [position](Position) is already occupied
 ///
-/// # Attributes
-/// * `position` - the position that is already occupied.
-///
+/// TODO add example
 #[derive(Debug, Error)]
 #[error("Position {position} is already occupied")]
 pub struct PositionOccupiedError {
+    /// The position that is already occupied
     pub position: Position,
 }
 
 impl PositionOccupiedError {
-    /// Creates a new `PositionOccupiedError` with the given position.
+    /// Creates a new `PositionOccupiedError` with the given [position](Position)
     ///
     /// # Arguments
-    ///
-    /// * `position` - The position that is occupied.
+    /// * `position` - The [position](Position) that is occupied
     ///
     /// # Example
-    ///
     /// ```
     /// use chess_lab::errors::PositionOccupiedError;
     /// use chess_lab::core::Position;
@@ -35,26 +32,23 @@ impl PositionOccupiedError {
     }
 }
 
-/// Error indicating that a specific position is empty.
+/// Error indicating that a specific position is empty
 ///
-/// # Attributes
-/// * `position` - the position that is empty.
-///
+/// TODO add example
 #[derive(Debug, Error)]
 #[error("Position {position} is empty")]
 pub struct PositionEmptyError {
+    /// The position that is empty
     pub position: Position,
 }
 
 impl PositionEmptyError {
-    /// Creates a new `PositionEmptyError` with the given position.
+    /// Creates a new `PositionEmptyError` with the given [position](Position)
     ///
     /// # Arguments
-    ///
-    /// * `position` - The position that is empty.
+    /// * `position` - The [position](Position) that is empty
     ///
     /// # Example
-    ///
     /// ```
     /// use chess_lab::errors::PositionEmptyError;
     /// use chess_lab::core::Position;
@@ -68,29 +62,26 @@ impl PositionEmptyError {
     }
 }
 
-/// Error indicating that a position is out of the allowed range.
+/// Error indicating that a [position](Position) is out of the allowed range
 ///
-/// # Attributes
-/// * `col` - the column index that is out of range.
-/// * `row` - the row index that is out of range.
-///
+/// TODO add example
 #[derive(Debug, PartialEq, Error)]
 #[error("Position ({col}, {row}) is out of range")]
 pub struct PositionOutOfRangeError {
+    /// The column index that is out of range
     pub col: u8,
+    /// The row index that is out of range
     pub row: u8,
 }
 
 impl PositionOutOfRangeError {
-    /// Creates a new `PositionOutOfRangeError` with the given column and row.
+    /// Creates a new `PositionOutOfRangeError` with the given column and row
     ///
     /// # Arguments
-    ///
-    /// * `col` - The column index that is out of range.
-    /// * `row` - The row index that is out of range.
+    /// * `col` - The column index that is out of range
+    /// * `row` - The row index that is out of range
     ///
     /// # Example
-    ///
     /// ```
     /// use chess_lab::errors::PositionOutOfRangeError;
     ///
@@ -104,26 +95,23 @@ impl PositionOutOfRangeError {
     }
 }
 
-/// Error indicating that a position is invalid.
+/// Error indicating that a [position](Position) is invalid
 ///
-/// # Attributes
-/// * `position_str` - the string representation of the position that is invalid.
-///
+/// TODO add example
 #[derive(Debug, PartialEq, Error)]
 #[error("Invalid position: {position_str}")]
 pub struct PositionInvalidError {
+    /// The string representation of the [position](Position) that is invali
     pub position_str: String,
 }
 
 impl PositionInvalidError {
-    /// Creates a new `PositionInvalidError` with the given message.
+    /// Creates a new `PositionInvalidError` with the given message
     ///
     /// # Arguments
-    ///
-    /// * `message` - The message that describes the error.
+    /// * `message` - The message that describes the error
     ///
     /// # Example
-    ///
     /// ```
     /// use chess_lab::errors::PositionInvalidError;
     ///
@@ -135,29 +123,26 @@ impl PositionInvalidError {
     }
 }
 
-/// Error indicating that two positions are not aligned.
+/// Error indicating that two [positions](Position) are not aligned
 ///
-/// # Attributes
-/// * `position1` - the first position that is not aligned.
-/// * `position2` - the second position that is not aligned.
-///
+/// TODO add example
 #[derive(Debug, PartialEq, Error)]
 #[error("Positions {position1} and {position2} are not aligned")]
 pub struct UnalignedPositionsError {
+    /// The first position that is not aligned
     pub position1: Position,
+    /// The second position that is not aligned
     pub position2: Position,
 }
 
 impl UnalignedPositionsError {
-    /// Creates a new `UnalignedPositionsError` with the given positions.
+    /// Creates a new `UnalignedPositionsError` with the given positions
     ///
     /// # Arguments
-    ///
-    /// * `position1` - The first position that is not aligned.
-    /// * `position2` - The second position that is not aligned.
+    /// * `position1` - The first position that is not aligned
+    /// * `position2` - The second position that is not aligned
     ///
     /// # Example
-    ///
     /// ```
     /// use chess_lab::errors::UnalignedPositionsError;
     /// use chess_lab::core::Position;
@@ -177,14 +162,13 @@ impl UnalignedPositionsError {
 
 /// Error type to handle errors on `piece_between` function
 ///
-/// This enum encapsulates different kinds of invalid position errors, including:
-/// - `OutOfRange`: Indicates that the position is outside the allowed range.
-/// - `Unaligned`: Indicates that two positions are not aligned and they should be.
-///
+/// TODO add example
 #[derive(Debug, PartialEq, Error)]
 pub enum PositionBetweenError {
+    /// Indicates that the position is outside the allowed range
     #[error(transparent)]
     OutOfRange(#[from] PositionOutOfRangeError),
+    /// Indicates that two positions are not aligned and they should be
     #[error(transparent)]
     Unaligned(#[from] UnalignedPositionsError),
 }

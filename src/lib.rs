@@ -1,3 +1,6 @@
+//! # Chess Lab
+//! TODO add description here
+
 mod common;
 pub mod core;
 pub mod logic;

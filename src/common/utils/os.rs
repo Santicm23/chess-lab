@@ -11,6 +11,7 @@ use std::{
 /// * `append` - Whether to append the content to the file or overwrite it
 ///
 /// # Returns
+/// A `Result<(), std::io::Error>`
 /// * `Ok(())` if the file was written successfully
 /// * `Err(std::io::Error)` if there was an error writing the file
 ///
@@ -47,6 +48,7 @@ pub fn write_file(file_name: &str, content: &str, append: bool) -> Result<(), st
 /// * `file_name` - The name of the file to read from
 ///
 /// # Returns
+/// A `Result<String, std::io::Error>`
 /// * `Ok(String)` with the content of the file
 /// * `Err(std::io::Error)` if there was an error reading the file
 ///

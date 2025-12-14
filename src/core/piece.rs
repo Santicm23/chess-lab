@@ -10,32 +10,30 @@ use crate::{
 
 /// Represents the type of a chess piece
 ///
-/// # Variants
-/// * `Pawn`: A pawn
-/// * `Knight`: A knight
-/// * `Bishop`: A bishop
-/// * `Rook`: A rook
-/// * `Queen`: A queen
-/// * `King`: A king
-///
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum PieceType {
+    /// A pawn
     Pawn,
+    /// A knight
     Knight,
+    /// A bishop
     Bishop,
+    /// A rook
     Rook,
+    /// A queen
     Queen,
+    /// A king
     King,
 }
 
 impl PieceType {
-    /// Gets the piece type from a character
+    /// Gets the [piece type](PieceType) from a character
     ///
     /// # Arguments
-    /// * `c`: The character to convert (only valid uppercase characters)
+    /// * `c`: The character to convert
     ///
     /// # Returns
-    /// The piece type if the character is valid, otherwise `None`
+    /// The [piece type](PieceType) if the character is valid, otherwise `None`
     ///
     /// # Example
     /// ```
@@ -48,27 +46,27 @@ impl PieceType {
     /// assert_eq!(PieceType::from_char('Q'), Some(PieceType::Queen));
     /// assert_eq!(PieceType::from_char('K'), Some(PieceType::King));
     ///
-    /// assert_eq!(PieceType::from_char('x'), None);
+    /// assert_eq!(PieceType::from_char('X'), None);
     /// assert_eq!(PieceType::from_char('y'), None);
-    /// assert_eq!(PieceType::from_char('p'), None);
+    /// assert_eq!(PieceType::from_char('p'), Some(PieceType::Pawn));
     /// ```
     ///
     pub fn from_char(c: char) -> Option<PieceType> {
         match c {
-            'P' => Some(PieceType::Pawn),
-            'N' => Some(PieceType::Knight),
-            'B' => Some(PieceType::Bishop),
-            'R' => Some(PieceType::Rook),
-            'Q' => Some(PieceType::Queen),
-            'K' => Some(PieceType::King),
+            'P' | 'p' => Some(PieceType::Pawn),
+            'N' | 'n' => Some(PieceType::Knight),
+            'B' | 'b' => Some(PieceType::Bishop),
+            'R' | 'r' => Some(PieceType::Rook),
+            'Q' | 'q' => Some(PieceType::Queen),
+            'K' | 'k' => Some(PieceType::King),
             _ => None,
         }
     }
 
-    /// Gets the character representation of the piece type
+    /// Gets the character representation of the [piece type](PieceType)
     ///
     /// # Returns
-    /// The character representation of the piece type
+    /// The character representation of the [piece type](PieceType) (uppercase)
     ///
     /// # Example
     /// ```
@@ -109,7 +107,9 @@ impl PieceType {
 ///
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Piece {
+    /// The color of the piece
     pub color: Color,
+    /// The type of the piece
     pub piece_type: PieceType,
 }
 

@@ -6,62 +6,55 @@ use super::{GameStatus, Piece, PieceType, Position};
 
 /// Represents the type of a move
 ///
-/// # Variants
-/// * `Normal`: A normal move
-///     - `capture`: Whether the move is a capture
-///     - `promotion`: The piece type to promote to
-/// * `Castle`: A castle move
-///     - `side`: The side of the board to castle on
-/// * `EnPassant`: An en passant move
-///    - The move is an en passant
-///
 #[derive(Debug, Clone, PartialEq)]
 pub enum MoveType {
+    /// A normal move
     Normal {
+        /// Whether the move is a capture
         capture: bool,
+        /// The piece type to promote to
         promotion: Option<PieceType>,
     },
+    /// A castle move
     Castle {
+        /// The side of the board to castle on
         side: CastleType,
     },
+    /// An en passant move
     EnPassant,
 }
 
 /// Represents the side of the board to castle on
 ///
-/// # Variants
-/// * `KingSide`: The king side
-/// * `QueenSide`: The queen side
-///
 #[derive(Debug, Clone, PartialEq)]
 pub enum CastleType {
+    /// The king side
     KingSide,
+    /// The queen side
     QueenSide,
 }
 
 /// Represents a move in a chess game
 ///
-/// # Attributes
-/// * `piece`: The piece that is moving
-/// * `from`: The position the piece is moving from
-/// * `to`: The position the piece is moving to
-/// * `move_type`: The type of the move
-/// * `captured_piece`: The piece that is captured, if any
-/// * `rook_from`: The position of the rook, if the move is a castle
-/// * `ambiguity`: A tuple of booleans representing the ambiguity of the move
-/// * `check`: Whether the move puts the opponent in check
-/// * `checkmate`: Whether the move puts the opponent in checkmate
-///
 #[derive(Debug, Clone, PartialEq)]
 pub struct Move {
+    /// The piece that is moving
     pub piece: Piece,
+    /// The position the piece is moving from
     pub from: Position,
+    /// The position the piece is moving to
     pub to: Position,
+    /// The type of the move
     pub move_type: MoveType,
+    /// The piece that is captured, if any
     pub captured_piece: Option<PieceType>,
+    /// The position of the rook, if the move is a castle
     pub rook_from: Option<Position>,
+    /// A tuple of booleans representing the ambiguity of the move
     pub ambiguity: (bool, bool),
+    /// Whether the move puts the opponent in check
     pub check: bool,
+    /// Whether the move puts the opponent in checkmate
     pub checkmate: bool,
 }
 
@@ -80,6 +73,7 @@ impl Move {
     /// * `checkmate`: Whether the move puts the opponent in checkmate
     ///
     /// # Returns
+    /// A `Result<Move, MoveInfoError>`
     /// * `Ok(Move)`: The move if it is valid
     /// * `Err(MoveInfoError)`: The error if the move is invalid
     ///
@@ -242,20 +236,19 @@ impl fmt::Display for Move {
 
 /// Represents the information of a move
 ///
-/// # Attributes
-/// * `halfmove_clock`: The number of halfmoves since the last capture or pawn move
-/// * `fullmove_number`: The number of fullmoves
-/// * `en_passant`: The en passant target square
-/// * `castling_rights`: The castling rights
-/// * `game_status`: The status of the game
-///
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct MoveInfo {
+    /// The number of halfmoves since the last capture or pawn move
     pub halfmove_clock: u32,
+    /// The number of fullmoves
     pub fullmove_number: u32,
+    /// The en passant target square
     pub en_passant: Option<Position>,
+    /// The castling rights
     pub castling_rights: u8,
+    /// The status of the game
     pub game_status: GameStatus,
+    /// A map of previous positions and their occurrence counts
     pub prev_positions: HashMap<String, u32>,
 }
 

@@ -2,38 +2,31 @@ use std::fmt;
 
 /// Represents the status of a chess game
 ///
-/// # Variants
-/// * `InProgress`: The game is in progress
-/// * `Draw`: The game is a draw
-///     - `reason`: The reason for the draw
-/// * `WhiteWins`: White wins the game
-///     - `reason`: The reason for the win
-/// * `BlackWins`: Black wins the game
-///     - `reason`: The reason for the win
-///
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum GameStatus {
+    /// The game is still ongoing
     InProgress,
+    /// The game has ended in a draw
     Draw(DrawReason),
+    /// White has won the game
     WhiteWins(WinReason),
+    /// Black has won the game
     BlackWins(WinReason),
 }
 
 /// Represents the reason for a draw
 ///
-/// # Variants
-/// * `Stalemate`: The game is a stalemate
-/// * `InsufficientMaterial`: The game is a draw due to insufficient material
-/// * `ThreefoldRepetition`: The game is a draw due to threefold repetition
-/// * `FiftyMoveRule`: The game is a draw due to the fifty move rule
-/// * `Agreement`: The game is a draw due to agreement
-///
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum DrawReason {
+    /// The game is a stalemate
     Stalemate,
+    /// The game is a draw due to insufficient material
     InsufficientMaterial,
+    /// The game is a draw due to threefold repetition
     ThreefoldRepetition,
+    /// The game is a draw due to the fifty move rule
     FiftyMoveRule,
+    /// The game is a draw due to agreement
     Agreement,
 }
 
@@ -51,15 +44,13 @@ impl fmt::Display for DrawReason {
 
 /// Represents the reason for a win
 ///
-/// # Variants
-/// * `Checkmate`: The game is a win due to checkmate
-/// * `Resignation`: The game is a win due to resignation
-/// * `Time`: The game is a win due to time
-///
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum WinReason {
+    /// The game is a win due to checkmate
     Checkmate,
+    /// The game is a win due to resignation
     Resignation,
+    /// The game is a win due to time
     Time,
 }
 

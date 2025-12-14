@@ -21,7 +21,9 @@ use crate::errors::{PositionInvalidError, PositionOutOfRangeError};
 ///
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Position {
+    /// The column of the position (between 0 and 7)
     pub col: u8,
+    /// The row of the position (between 0 and 7)
     pub row: u8,
 }
 

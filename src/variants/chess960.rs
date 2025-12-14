@@ -10,8 +10,6 @@ use crate::{
     utils::os::{read_file, write_file},
 };
 
-/// Chess960 variant
-///
 /// Chess960 is a variant of chess that uses the same rules as standard chess, but the starting position of the pieces is randomized.
 ///
 /// # Attributes
@@ -19,6 +17,7 @@ use crate::{
 ///
 #[derive(Debug, Clone)]
 pub struct Chess960 {
+    /// The game struct that contains the current state of the game
     game: Game,
 }
 

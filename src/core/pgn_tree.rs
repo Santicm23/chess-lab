@@ -10,61 +10,92 @@ use crate::{
     errors::PgnMetadataError,
 };
 
+/// An enum representing optional PGN metadata
 #[derive(Debug, Clone)]
 pub(crate) enum OptionPgnMetadata {
     // Game metadata
+    /// The time control of the game
     TimeControl(String),
+    /// The termination of the game
     Termination(String),
 
     // Player metadata
+    /// The white player's ELO
     WhiteElo(u32),
+    /// The black player's ELO
     BlackElo(u32),
+    /// The white player's title
     WhiteTitle(String),
+    /// The black player's title
     BlackTitle(String),
+    /// The white player's USCF rating
     WhiteUSCF(String),
+    /// The black player's USCF rating
     BlackUSCF(String),
+    /// The white player's national association
     WhiteNA(String),
+    /// The black player's national association
     BlackNA(String),
+    /// The white player's type
     WhiteType(String),
+    /// The black player's type
     BlackType(String),
 
     // Event metadata
+    /// The event date
     EventDate(String),
+    /// The event sponsor
     EventSponsor(String),
+    /// The section of the event
     Section(String),
+    /// The stage of the event
     Stage(String),
+    /// The board number
     Board(String),
 
     // Opening metadata
+    /// The opening name
     Opening(String),
+    /// The variation name
     Variation(String),
+    /// The sub-variation name
     SubVariation(String),
+    /// The ECO code
     ECO(String),
+    /// The NIC code
     NIC(String),
 
     // Time and date metadata
+    /// The time
     Time(String),
+    /// The UTC date
     UTCDate(String),
+    /// The UTC time
     UTCTime(String),
 
     // Starting position metadata
+    /// The setup flag
     SetUp(String),
+    /// The FEN string
     FEN(String),
 
     // Other metadata
+    /// The annotator name
     Annotator(String),
+    /// The mode
     Mode(String),
+    /// The play count
     PlyCount(u32),
 }
 impl OptionPgnMetadata {
-    /// Create a new OptionPgnMetadata from a key and a value.
+    /// Create a new [OptionPgnMetadata] from a key and a value.
     ///
     /// # Arguments
     /// * `key` - The key of the metadata.
     /// * `value` - The value of the metadata.
     ///
     /// # Returns
-    /// An OptionPgnMetadata if the key is valid, otherwise None.
+    /// An [OptionPgnMetadata] if the key is valid, otherwise None.
     ///
     pub fn from_string(key: &str, value: &str) -> Option<OptionPgnMetadata> {
         match key {
@@ -158,14 +189,23 @@ impl Display for OptionPgnMetadata {
 ///
 #[derive(Debug, Clone)]
 struct PgnLine<T: PartialEq + Clone + Display + Debug> {
+    /// The list of child nodes
     lines: Vec<Rc<RefCell<PgnLine<T>>>>,
+    /// The parent node
     parent: Option<Weak<RefCell<PgnLine<T>>>>,
+    /// The halfmove clock
     halfmove_clock: u32,
+    /// The fullmove number
     fullmove_number: u32,
+    /// The en passant position
     en_passant: Option<Position>,
+    /// The castling rights
     castling_rights: u8,
+    /// The game status
     game_status: GameStatus,
+    /// The previous positions
     prev_positions: HashMap<String, u32>,
+    /// The move itself
     mov: T,
 }
 
@@ -177,7 +217,7 @@ impl<T: PartialEq + Clone + Display + Debug> PartialEq for PgnLine<T> {
     /// * `other`: The other PgnLine struct
     ///
     /// # Returns
-    /// A boolean indicating if the two PgnLine structs are equal
+    /// A `bool` indicating if the two PgnLine structs are equal
     ///
     fn eq(&self, other: &Self) -> bool {
         self.mov == other.mov
@@ -188,30 +228,29 @@ impl<T: PartialEq + Clone + Display + Debug> PartialEq for PgnLine<T> {
 /// It contains the game metadata and a list of lines
 /// The current line is the move node that is currently being checked
 ///
-/// # Attributes
-/// * `event`: The event name
-/// * `site`: The site name
-/// * `date`: The date of the game
-/// * `round`: The round number
-/// * `white`: The white player name
-/// * `black`: The black player name
-/// * `result`: The result of the game
-/// * `option_metadata`: The list of other metadata
-/// * `lines`: The list of lines
-/// * `current_line`: The current line
-///
 #[derive(Debug, Clone)]
 pub struct PgnTree<T: PartialEq + Clone + Display + Debug> {
+    /// The event name
     pub event: String,
+    /// The site name
     pub site: String,
+    /// The date of the game
     pub date: String,
+    /// The round number
     pub round: String,
+    /// The white player name
     pub white: String,
+    /// The black player name
     pub black: String,
+    /// The result of the game
     pub result: String,
+    /// The variant of the game
     pub variant: Option<String>,
+    /// The list of other metadata
     pub(crate) option_metadata: Vec<OptionPgnMetadata>,
+    /// The list of lines
     lines: Vec<Rc<RefCell<PgnLine<T>>>>,
+    /// The current line
     current_line: Option<Rc<RefCell<PgnLine<T>>>>,
 }
 
@@ -219,7 +258,7 @@ impl<T: PartialEq + Clone + Display + Debug> Default for PgnTree<T> {
     /// Creates a new PgnTree with no metadata and an empty list of lines
     ///
     /// # Returns
-    /// A new PgnTree
+    /// A an empty [PgnTree]
     ///
     /// # Examples
     /// ```
@@ -262,7 +301,7 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
     /// * `time_control`: The time control of the game
     ///
     /// # Returns
-    /// A new PgnTree
+    /// A new [PgnTree]
     ///
     /// # Examples
     /// ```
@@ -305,6 +344,26 @@ impl<T: PartialEq + Clone + Display + Debug> PgnTree<T> {
         }
     }
 
+    /// Adds metadata to the PGN tree
+    ///
+    /// # Arguments
+    /// * `key`: The metadata key
+    /// * `value`: The metadata value
+    ///
+    /// # Returns
+    /// A Result<(), PgnMetadataError>
+    /// * `Ok(())`: If the metadata was added successfully
+    /// * `Err(PgnMetadataError)`: If the metadata key is invalid
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::core::{PgnTree, Move};
+    ///
+    /// let mut tree: PgnTree<Move> = PgnTree::default();
+    /// tree.add_metadata("Event", "My Event").unwrap();
+    /// assert_eq!(tree.event, "My Event");
+    /// ```
+    ///
     pub fn add_metadata(&mut self, key: &str, value: &str) -> Result<(), PgnMetadataError> {
         if key == "Event" {
             self.event = value.to_string();

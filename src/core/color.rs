@@ -1,12 +1,10 @@
 /// Represents the color of a chess piece
 ///
-/// # Variants
-/// * `White`: The white color
-/// * `Black`: The black color
-///
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Color {
+    /// The white color
     White,
+    /// The black color
     Black,
 }
 

@@ -3,11 +3,11 @@ use crate::core::Position;
 /// Check if the movement is diagonal
 ///
 /// # Arguments
-/// * `start_pos`: The starting position
-/// * `end_pos`: The ending position
+/// * `start_pos`: The starting [position](Position)
+/// * `end_pos`: The ending [position](Position)
 ///
 /// # Returns
-/// * Whether the movement is diagonal
+/// Whether the movement is diagonal, `bool`
 ///
 pub fn diagonal_movement(start_pos: &Position, end_pos: &Position) -> bool {
     let diff = end_pos - start_pos;
@@ -17,25 +17,25 @@ pub fn diagonal_movement(start_pos: &Position, end_pos: &Position) -> bool {
 /// Check if the movement is linear
 ///
 /// # Arguments
-/// * `start_pos`: The starting position
-/// * `end_pos`: The ending position
+/// * `start_pos`: The starting [position](Position)
+/// * `end_pos`: The ending [position](Position)
 ///
 /// # Returns
-/// * Whether the movement is linear
+/// Whether the movement is linear, `bool`
 ///
 pub fn linear_movement(start_pos: &Position, end_pos: &Position) -> bool {
     let diff = end_pos - start_pos;
     (diff.0 == 0 || diff.1 == 0) && diff != (0, 0)
 }
 
-/// Check if the movement is an L
+/// Check if the movement forms an L
 ///
 /// # Arguments
-/// * `start_pos`: The starting position
-/// * `end_pos`: The ending position
+/// * `start_pos`: The starting [position](Position)
+/// * `end_pos`: The ending [position](Position)
 ///
 /// # Returns
-/// * Whether the movement is an L
+/// Whether the movement forms an L, `bool`
 ///
 pub fn l_movement(start_pos: &Position, end_pos: &Position) -> bool {
     let diff = end_pos - start_pos;
@@ -45,11 +45,11 @@ pub fn l_movement(start_pos: &Position, end_pos: &Position) -> bool {
 /// Check if the movement is of a certain length
 ///
 /// # Arguments
-/// * `start_pos`: The starting position
-/// * `end_pos`: The ending position
+/// * `start_pos`: The starting [position](Position)
+/// * `end_pos`: The ending [position](Position)
 ///
 /// # Returns
-/// * Whether the movement is of a certain length
+/// Whether the movement is of a certain length, `bool`
 ///
 pub fn max_movement(start_pos: &Position, end_pos: &Position, max: i8) -> bool {
     let diff = end_pos - start_pos;
@@ -59,11 +59,11 @@ pub fn max_movement(start_pos: &Position, end_pos: &Position, max: i8) -> bool {
 /// Check if the movement is in a certain direction
 ///
 /// # Arguments
-/// * `start_pos`: The starting position
-/// * `end_pos`: The ending position
+/// * `start_pos`: The starting [position](Position)
+/// * `end_pos`: The ending [position](Position)
 ///
 /// # Returns
-/// * Whether the movement is in a certain direction
+/// Whether the movement is in a certain direction, `bool`
 ///
 pub fn movement_direction(start_pos: &Position, end_pos: &Position, direction: (i8, i8)) -> bool {
     let diff = end_pos - start_pos;
