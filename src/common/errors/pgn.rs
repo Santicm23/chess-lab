@@ -42,7 +42,7 @@ impl PGNMetadataError {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::errors::PgnMetadataError;
+    /// use chess_lab::errors::PGNMetadataError;
     ///
     /// let metadata = String::from("Invalid metadata");
     /// let error = PgnMetadataError::new(metadata);
