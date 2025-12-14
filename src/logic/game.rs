@@ -4,7 +4,7 @@ use regex::Regex;
 
 use crate::{
     core::{
-        piece_movement, CastleType, Color, DrawReason, GameStatus, Move, MoveType, PgnTree, Piece,
+        piece_movement, CastleType, Color, DrawReason, GameStatus, Move, MoveType, PGNTree, Piece,
         PieceType, Position, WinReason,
     },
     errors::{FenError, MoveError},
@@ -36,7 +36,7 @@ pub struct Game {
     pub en_passant: Option<Position>,
     pub castling_rights: u8,
     pub starting_fen: String,
-    pub history: PgnTree<Move>,
+    pub history: PGNTree<Move>,
     pub prev_positions: HashMap<String, u32>,
     pub status: GameStatus,
 }
@@ -68,7 +68,7 @@ impl Default for Game {
             halfmove_clock: 0,
             fullmove_number: 1,
             starting_fen: fen,
-            history: PgnTree::default(),
+            history: PGNTree::default(),
             capture_king: false,
             prev_positions: map,
             status: GameStatus::InProgress,

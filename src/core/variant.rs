@@ -5,7 +5,7 @@ use crate::{
     logic::{Board, Game},
 };
 
-use super::{Color, GameStatus, Move, PgnTree, Position};
+use super::{Color, GameStatus, Move, PGNTree, Position};
 
 /// A trait for a chess variant.
 ///
@@ -129,7 +129,7 @@ pub trait Variant {
     /// # Returns
     /// A cloned PGN tree object that stores the moves of the game.
     ///
-    fn get_history(&self) -> PgnTree<Move>;
+    fn get_history(&self) -> PGNTree<Move>;
 
     /// Returns the previous positions of the game.
     ///
