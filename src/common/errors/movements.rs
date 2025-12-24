@@ -4,6 +4,7 @@ use crate::core::Move;
 
 /// Errors that can occur when trying to [move](Move) a piece
 ///
+#[non_exhaustive]
 #[derive(Debug, Error, PartialEq)]
 pub enum MoveError {
     /// The move is invalid

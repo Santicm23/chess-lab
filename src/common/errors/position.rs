@@ -157,6 +157,7 @@ impl UnalignedPositionsError {
 
 /// Error type to handle errors on `piece_between` function
 ///
+#[non_exhaustive]
 #[derive(Debug, PartialEq, Error)]
 pub enum PositionBetweenError {
     /// Indicates that the position is outside the allowed range

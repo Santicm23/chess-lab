@@ -4,6 +4,7 @@ use super::FenError;
 
 /// An error that occurs when parsing a PGN string.
 ///
+#[non_exhaustive]
 #[derive(Debug, Error)]
 pub enum PGNError {
     /// The FEN string is invalid
