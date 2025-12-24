@@ -35,7 +35,7 @@ pub struct PGNMetadataError {
 }
 
 impl PGNMetadataError {
-    /// Creates a new [PgnMetadataError] with the given metadata.
+    /// Creates a new [PGNMetadataError] with the given metadata.
     ///
     /// # Arguments
     /// * `metadata` - The metadata that caused the error.
@@ -45,7 +45,7 @@ impl PGNMetadataError {
     /// use chess_lab::errors::PGNMetadataError;
     ///
     /// let metadata = String::from("Invalid metadata");
-    /// let error = PgnMetadataError::new(metadata);
+    /// let error = PGNMetadataError::new(metadata);
     /// ```
     ///
     pub fn new(metadata: String) -> Self {

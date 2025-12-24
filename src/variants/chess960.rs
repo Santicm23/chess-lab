@@ -179,7 +179,7 @@ impl VariantBuilder for Chess960 {
     /// use chess_lab::core::VariantBuilder;
     /// use chess_lab::variants::Chess960;
     ///
-    /// let path = "data/standard/ex.pgn"; // TODO: Change to the chess960 file
+    /// let path = "data/chess960/ex.pgn"; // TODO: Change to the chess960 file
     /// let variant = Chess960::load(path).unwrap();
     /// ```
     ///

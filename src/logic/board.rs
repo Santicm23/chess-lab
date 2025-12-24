@@ -127,22 +127,24 @@ impl Board {
 
             let mut col = 0;
             for c in rank.chars() {
-                // TODO refactor this to use match
-                if c.is_digit(10) {
-                    col += c.to_digit(10).unwrap() as u8;
-                    continue;
+                match c {
+                    '1'..='8' => {
+                        col += c.to_digit(10).unwrap() as u8;
+                    }
+                    _ => {
+                        let piece = Piece::from_fen(c).unwrap();
+
+                        board
+                            .set_piece(
+                                piece,
+                                &Position::new(col, row)
+                                    .map_err(|_| FenError::new(fen.to_string()))?,
+                            )
+                            .unwrap();
+
+                        col += 1;
+                    }
                 }
-
-                let piece = Piece::from_fen(c).unwrap();
-
-                board
-                    .set_piece(
-                        piece,
-                        &Position::new(col, row).map_err(|_| FenError::new(fen.to_string()))?,
-                    )
-                    .unwrap();
-
-                col += 1;
             }
         }
         Ok(board)
@@ -184,43 +186,26 @@ impl Board {
     ///
     pub fn get_piece(&self, pos: &Position) -> Option<Piece> {
         let bit = pos.to_bitboard();
-        if self.wpawns & bit != 0 {
-            return Some(Piece::new(Color::White, PieceType::Pawn));
+
+        let piece_data = [
+            (self.wpawns, Color::White, PieceType::Pawn),
+            (self.bpawns, Color::Black, PieceType::Pawn),
+            (self.wknights, Color::White, PieceType::Knight),
+            (self.bknights, Color::Black, PieceType::Knight),
+            (self.wbishops, Color::White, PieceType::Bishop),
+            (self.bbishops, Color::Black, PieceType::Bishop),
+            (self.wrooks, Color::White, PieceType::Rook),
+            (self.brooks, Color::Black, PieceType::Rook),
+            (self.wqueens, Color::White, PieceType::Queen),
+            (self.bqueens, Color::Black, PieceType::Queen),
+            (self.wkings, Color::White, PieceType::King),
+            (self.bkings, Color::Black, PieceType::King),
+        ];
+
+        match piece_data.iter().find(|(board, _, _)| *board & bit != 0) {
+            Some((_, color, piece_type)) => Some(Piece::new(*color, *piece_type)),
+            None => None,
         }
-        if self.bpawns & bit != 0 {
-            return Some(Piece::new(Color::Black, PieceType::Pawn));
-        }
-        if self.wknights & bit != 0 {
-            return Some(Piece::new(Color::White, PieceType::Knight));
-        }
-        if self.bknights & bit != 0 {
-            return Some(Piece::new(Color::Black, PieceType::Knight));
-        }
-        if self.wbishops & bit != 0 {
-            return Some(Piece::new(Color::White, PieceType::Bishop));
-        }
-        if self.bbishops & bit != 0 {
-            return Some(Piece::new(Color::Black, PieceType::Bishop));
-        }
-        if self.wrooks & bit != 0 {
-            return Some(Piece::new(Color::White, PieceType::Rook));
-        }
-        if self.brooks & bit != 0 {
-            return Some(Piece::new(Color::Black, PieceType::Rook));
-        }
-        if self.wqueens & bit != 0 {
-            return Some(Piece::new(Color::White, PieceType::Queen));
-        }
-        if self.bqueens & bit != 0 {
-            return Some(Piece::new(Color::Black, PieceType::Queen));
-        }
-        if self.wkings & bit != 0 {
-            return Some(Piece::new(Color::White, PieceType::King));
-        }
-        if self.bkings & bit != 0 {
-            return Some(Piece::new(Color::Black, PieceType::King));
-        }
-        None
     }
 
     /// Sets a piece at a position
@@ -516,17 +501,18 @@ impl Display for Board {
             for col in 0..8 {
                 let pos = Position::new(col, row).unwrap(); // safe unwrap
                 let piece = self.get_piece(&pos);
-                // TODO refactor this to use match
-                if piece.is_none() {
-                    empty += 1;
-                    continue;
+                match piece {
+                    None => {
+                        empty += 1;
+                    }
+                    Some(piece) => {
+                        if empty > 0 {
+                            board.push_str(&empty.to_string());
+                            empty = 0;
+                        }
+                        board.push_str(&piece.to_string());
+                    }
                 }
-                if empty > 0 {
-                    board.push_str(&empty.to_string());
-                    empty = 0;
-                }
-                let piece = piece.unwrap();
-                board.push_str(&piece.to_string());
             }
             if empty > 0 {
                 board.push_str(&empty.to_string());

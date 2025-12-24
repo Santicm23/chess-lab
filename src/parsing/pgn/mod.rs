@@ -133,7 +133,9 @@ fn parse_single_pgn(pgn: Pair<Rule>) -> Result<Game, PGNError> {
             }
             Rule::sequence => {
                 metadata.iter().for_each(|(key, value)| {
-                    game.history.add_metadata(key, value).ok(); // TODO log warning if key is not supported
+                    if let Err(e) = game.history.add_metadata(key, value) {
+                        eprintln!("Warning: {}", e);
+                    }
                 });
                 parse_sequence(&mut game, record);
             }
