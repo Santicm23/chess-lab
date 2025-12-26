@@ -192,7 +192,7 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// # use chess_lab::core::GameStatus;
+    /// # use chess_lab::core::{Variant, GameStatus};
     /// # use chess_lab::variants::StandardChess;
     /// let mut game = StandardChess::default();
     /// let status = game.move_piece("e4");
