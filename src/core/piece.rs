@@ -142,6 +142,7 @@ impl Piece {
     /// * `char`: The FEN character representing the piece
     ///
     /// # Returns
+    /// A `Result<Piece, PieceReprError>` object
     /// * `Ok(Piece)`: The new piece
     /// * `Err(PieceReprError)`: If the FEN character is invalid
     ///

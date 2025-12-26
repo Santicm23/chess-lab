@@ -96,9 +96,8 @@ impl VariantBuilder for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{Variant, VariantBuilder};
-    /// use chess_lab::variants::StandardChess;
-    ///
+    /// # use chess_lab::core::VariantBuilder;
+    /// # use chess_lab::variants::StandardChess;
     /// let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     /// let game = StandardChess::from_fen(fen).unwrap();
     /// ```
@@ -115,14 +114,14 @@ impl VariantBuilder for StandardChess {
     /// * `pgn` - A PGN string
     ///
     /// # Returns
+    /// A `Result<StandardChess, PGNError>` object
     /// * `Ok(StandardChess)` - A new instance of the [StandardChess] [Variant]
     /// * `Err(PgnError)` - An error occurred while parsing the PGN string
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{Variant, VariantBuilder};
-    /// use chess_lab::variants::StandardChess;
-    ///
+    /// # use chess_lab::core::VariantBuilder;
+    /// # use chess_lab::variants::StandardChess;
     /// let pgn = "1. e4 e5 2. Nf3 Nc6 3. Bb5 a6";
     ///
     /// let game = StandardChess::from_pgn(pgn).unwrap();
@@ -138,13 +137,14 @@ impl VariantBuilder for StandardChess {
     /// * `path` - The path to the file
     ///
     /// # Returns
+    /// A `Result<StandardChess, PGNError>` object
     /// * `Ok(StandardChess)` - The [Game] was loaded successfully
     /// * `Err(PgnError)` - An error occurred while loading the [Game]
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{Variant, VariantBuilder};
-    /// use chess_lab::variants::StandardChess;
+    /// # use chess_lab::core::VariantBuilder;
+    /// # use chess_lab::variants::StandardChess;
     ///
     /// let path = "data/standard/ex1.pgn";
     /// let game = StandardChess::load(path).unwrap();
@@ -161,14 +161,14 @@ impl VariantBuilder for StandardChess {
     /// * `path` - The path to the file
     ///
     /// # Returns
+    /// A `Result<Vec<StandardChess>, PGNError>` object
     /// * `Ok(Vec<StandardChess>)` - The games were loaded successfully
     /// * `Err(PgnError)` - An error occurred while loading the games
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{Variant, VariantBuilder};
-    /// use chess_lab::variants::StandardChess;
-    ///
+    /// # use chess_lab::core::VariantBuilder;
+    /// # use chess_lab::variants::StandardChess;
     /// let path = "data/standard/ex3.pgn";
     /// let games = StandardChess::load_all(path).unwrap();
     /// ```
@@ -186,14 +186,14 @@ impl Variant for StandardChess {
     /// * `move_str` - A move string in algebraic notation.
     ///
     /// # Returns
+    /// A `Result<GameStatus, MoveError>` object
     /// * `Ok(GameStatus)` - The status of the game after the move.
     /// * `Err(MoveError)` - An error occurred while moving the piece.
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{Variant, GameStatus};
-    /// use chess_lab::variants::StandardChess;
-    ///
+    /// # use chess_lab::core::GameStatus;
+    /// # use chess_lab::variants::StandardChess;
     /// let mut game = StandardChess::default();
     /// let status = game.move_piece("e4");
     ///
@@ -208,8 +208,8 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::Variant;
-    /// use chess_lab::variants::StandardChess;
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::StandardChess;
     ///
     /// let mut game = StandardChess::default();
     /// game.move_piece("e4").unwrap();
@@ -226,9 +226,8 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::Variant;
-    /// use chess_lab::variants::StandardChess;
-    ///
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::StandardChess;
     /// let mut game = StandardChess::default();
     /// game.move_piece("e4").unwrap();
     /// game.undo();
@@ -248,9 +247,8 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::Variant;
-    /// use chess_lab::variants::StandardChess;
-    ///
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::StandardChess;
     /// let mut game = StandardChess::default();
     /// game.move_piece("e4").unwrap();
     /// game.move_piece("e5").unwrap();
@@ -270,9 +268,8 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::Variant;
-    /// use chess_lab::variants::StandardChess;
-    ///
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::StandardChess;
     /// let game = StandardChess::default();
     /// let fen = game.fen();
     ///
@@ -290,14 +287,14 @@ impl Variant for StandardChess {
     /// * `overwrite` - Whether to overwrite the file if it already exists
     ///
     /// # Returns
+    /// A `Result<(), std::io::Error>` object
     /// * `Ok(())` - The game was saved successfully
     /// * `Err(std::io::Error)` - An error occurred while saving the game
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::Variant;
-    /// use chess_lab::variants::StandardChess;
-    ///
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::StandardChess;
     /// let game = StandardChess::default();
     /// let path = "data/standard/ex.pgn";
     ///
@@ -316,9 +313,9 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{Variant, Color};
-    /// use chess_lab::variants::StandardChess;
-    ///
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::StandardChess;
+    /// use chess_lab::core::Color;
     /// let mut game = StandardChess::default();
     /// game.resign(Color::White);
     /// ```
@@ -331,9 +328,8 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::Variant;
-    /// use chess_lab::variants::StandardChess;
-    ///
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::StandardChess;
     /// let mut game = StandardChess::default();
     /// game.draw();
     /// ```
@@ -349,8 +345,9 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{Variant, Color};
-    /// use chess_lab::variants::StandardChess;
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::StandardChess;
+    /// use chess_lab::core::Color;
     ///
     /// let mut game = StandardChess::default();
     /// game.set_lost_in_time(Color::Black);
@@ -367,9 +364,8 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::Variant;
-    /// use chess_lab::variants::StandardChess;
-    ///
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::StandardChess;
     /// let game = StandardChess::default();
     /// let board = game.get_board();
     /// ```
@@ -385,9 +381,8 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::Variant;
-    /// use chess_lab::variants::StandardChess;
-    ///
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::StandardChess;
     /// let game = StandardChess::default();
     /// let color = game.is_white_turn();
     /// ```
@@ -403,8 +398,8 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::Variant;
-    /// use chess_lab::variants::StandardChess;
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::StandardChess;
     ///
     /// let game = StandardChess::default();
     /// let halfmove_clock = game.get_halfmove_clock();
@@ -439,8 +434,8 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::Variant;
-    /// use chess_lab::variants::StandardChess;
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::StandardChess;
     ///
     /// let game = StandardChess::default();
     /// let castling_rights = game.get_castling_rights();
@@ -475,8 +470,8 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::Variant;
-    /// use chess_lab::variants::StandardChess;
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::StandardChess;
     ///
     /// let game = StandardChess::default();
     /// let en_passant = game.get_en_passant();
@@ -493,8 +488,8 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::Variant;
-    /// use chess_lab::variants::StandardChess;
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::StandardChess;
     ///
     /// let game = StandardChess::default();
     /// let starting_fen = game.get_starting_fen();
@@ -511,8 +506,8 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::Variant;
-    /// use chess_lab::variants::StandardChess;
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::StandardChess;
     ///
     /// let game = StandardChess::default();
     /// let history = game.get_history();
@@ -529,8 +524,8 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::Variant;
-    /// use chess_lab::variants::StandardChess;
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::StandardChess;
     ///
     /// let game = StandardChess::default();
     /// let prev_positions = game.get_prev_positions();
@@ -547,8 +542,8 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{Variant, GameStatus};
-    /// use chess_lab::variants::StandardChess;
+    /// # use chess_lab::core::{Variant, GameStatus};
+    /// # use chess_lab::variants::StandardChess;
     ///
     /// let game = StandardChess::default();
     /// let status = game.get_status();

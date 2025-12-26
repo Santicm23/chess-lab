@@ -18,6 +18,7 @@ pub trait Variant {
     /// * `move_str` - A move string in algebraic notation.
     ///
     /// # Returns
+    /// A `Result<GameStatus, MoveError>` object
     /// * `Ok(GameStatus)` - The status of the game after the move.
     /// * `Err(MoveError)` - An error occurred while moving the piece.
     ///
@@ -52,6 +53,7 @@ pub trait Variant {
     /// * `overwrite` - Whether to overwrite the file if it already exists.
     ///
     /// # Returns
+    /// A `Result<(), std::io::Error>` object
     /// * `Ok(())` - The game was saved successfully.
     /// * `Err(std::io::Error)` - An error occurred while saving the game.
     ///
@@ -167,6 +169,7 @@ pub trait VariantBuilder: Sized + Default {
     /// * `fen` - A FEN string.
     ///
     /// # Returns
+    /// A `Result<Self, FenError>` object
     /// * `Ok(Self)` - A new instance of the variant.
     /// * `Err(FenError)` - An error occurred while parsing the FEN string.
     ///
@@ -178,6 +181,7 @@ pub trait VariantBuilder: Sized + Default {
     /// * `pgn` - A PGN string.
     ///
     /// # Returns
+    /// A `Result<Self, PgnError>` object
     /// * `Ok(Self)` - A new instance of the variant.
     /// * `Err(PgnError)` - An error occurred while parsing the PGN string.
     ///
@@ -189,6 +193,7 @@ pub trait VariantBuilder: Sized + Default {
     /// * `path` - The path to the file.
     ///
     /// # Returns
+    /// A `Result<Self, PgnError>` object
     /// * `Ok(Self)` - The game was loaded successfully.
     /// * `Err(PgnError)` - An error occurred while loading the game.
     ///
@@ -200,10 +205,9 @@ pub trait VariantBuilder: Sized + Default {
     /// * `path` - The path to the file.
     ///
     /// # Returns
+    /// A `Result<Vec<Self>, PgnError>` object
     /// * `Ok(Vec<Self>)` - The games were loaded successfully.
     /// * `Err(PgnError)` - An error occurred while loading the games.
     ///
     fn load_all(path: &str) -> Result<Vec<Self>, PGNError>;
 }
-
-// TODO fix Result return types docs

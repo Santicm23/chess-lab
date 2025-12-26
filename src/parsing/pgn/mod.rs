@@ -19,6 +19,7 @@ struct PGNParser;
 /// * `input` - A string slice that holds the PGN string to be parsed
 ///
 /// # Returns
+/// A `Result<Vec<T>, PGNError>` object
 /// * `Ok(Vec<Game>)` - A vector of [Game] structs with the parsed PGNs
 /// * `Err(PGNError)` - A [PGNError] with the reason why the PGN string could not be parsed
 ///
@@ -56,6 +57,7 @@ pub fn parse_multiple_pgn<T: Variant + VariantBuilder>(input: &str) -> Result<Ve
 /// * `input` - A string slice that holds the PGN to be parsed
 ///
 /// # Returns
+/// A `Result<T, PGNError>` object
 /// * `Ok(Game)` - A Game struct with the parsed PGN
 /// * `Err(PgnError)` - An error with the reason why the PGN could not be parsed
 ///
@@ -104,6 +106,7 @@ fn parse_sequence(game: &mut Game, sequence: Pair<Rule>) {
 /// * `pgn` - A Pair<Rule> that holds the PGN to be parsed
 ///
 /// # Returns
+/// A `Result<Game, PGNError>` object
 /// * `Ok(Game)` - A Game struct with the parsed PGN
 /// * `Err(PgnError)` - An error with the reason why the PGN could not be parsed
 ///

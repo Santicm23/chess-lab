@@ -124,6 +124,7 @@ impl VariantBuilder for Chess960 {
     /// * `fen` - The FEN string that represents the game state
     ///
     /// # Returns
+    /// A `Result<Chess960, FenError>` object
     /// * `Ok(Chess960)` - A [Chess960] struct with the game state
     /// * `Err(FenError)` - An error that indicates that the FEN string is invalid
     ///
@@ -147,6 +148,7 @@ impl VariantBuilder for Chess960 {
     /// * `pgn` - The PGN string that represents the game state
     ///
     /// # Returns
+    /// A `Result<Chess960, PgnError>` object
     /// * `Ok(Chess960)` - A [Chess960] struct with the game state
     /// * `Err(PgnError)` - An error that indicates that the PGN string is invalid
     ///
@@ -168,6 +170,7 @@ impl VariantBuilder for Chess960 {
     /// * `path` - The path to the PGN file
     ///
     /// # Returns
+    /// A `Result<Chess960, PgnError>` object
     /// * `Ok(Chess960)` - A Chess960 struct with the game state
     /// * `Err(PgnError)` - An error that indicates that the PGN file is invalid
     ///
@@ -190,6 +193,7 @@ impl VariantBuilder for Chess960 {
     /// * `path` - The path to the PGN file
     ///
     /// # Returns
+    /// A `Result<Vec<Chess960>, PgnError>` object
     /// * `Ok(Vec<Chess960>)` - A vector with all the Chess960 structs with the game state
     /// * `Err(PgnError)` - An error that indicates that the PGN file is invalid
     ///
@@ -214,6 +218,7 @@ impl Variant for Chess960 {
     /// * `move_str` - The move string that represents the move to be made
     ///
     /// # Returns
+    /// A `Result<GameStatus, MoveError>` object
     /// * `Ok(GameStatus)` - The status of the game after the move
     /// * `Err(MoveError)` - An error that indicates that the move is invalid
     ///
@@ -302,6 +307,7 @@ impl Variant for Chess960 {
     /// * `overwrite` - A boolean that indicates if the file should be overwritten
     ///
     /// # Returns
+    /// A `Result<(), std::io::Error>` object
     /// * `Ok(())` - The PGN was saved successfully
     /// * `Err(std::io::Error)` - An error that indicates that the PGN could not be saved
     ///
