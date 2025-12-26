@@ -1,4 +1,4 @@
-//! Module containing error types and handling mechanisms used on the chess-lab library
+//! Module containing error types and handling mechanisms
 //!
 
 mod fen;

@@ -2,7 +2,7 @@ use thiserror::Error;
 
 use super::FenError;
 
-/// An error that occurs when parsing a PGN string.
+/// An error that occurs when parsing a PGN string
 ///
 #[non_exhaustive]
 #[derive(Debug, Error)]
@@ -24,10 +24,10 @@ pub enum PGNError {
     InvalidVariant(String),
 }
 
-/// An error that occurs when parsing PGN metadata.
+/// An error that occurs when parsing PGN metadata
 ///
 /// # Attributes
-/// * `metadata` - The metadata that caused the error.
+/// * `metadata` - The metadata that caused the error
 ///
 #[derive(Debug, Error)]
 #[error("Invalid or not supported metadata: {metadata}")]
@@ -36,20 +36,20 @@ pub struct PGNMetadataError {
 }
 
 impl PGNMetadataError {
-    /// Creates a new [PGNMetadataError] with the given metadata.
+    /// Creates a new [PGNMetadataError] with the given metadata
     ///
     /// # Arguments
-    /// * `metadata` - The metadata that caused the error.
+    /// * `metadata` - The metadata that caused the error
     ///
     /// # Example
     /// ```
-    /// use chess_lab::errors::PGNMetadataError;
-    ///
-    /// let metadata = String::from("Invalid metadata");
-    /// let error = PGNMetadataError::new(metadata);
+    /// # use chess_lab::errors::PGNMetadataError;
+    /// let error = PGNMetadataError::new("Invalid metadata".to_string());
     /// ```
     ///
     pub fn new(metadata: String) -> Self {
         PGNMetadataError { metadata }
     }
 }
+
+// TODO add tests for PGN errors

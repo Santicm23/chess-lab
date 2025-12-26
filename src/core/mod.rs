@@ -1,3 +1,6 @@
+//! Module containing core chess logic and data structures
+//!
+
 mod chess_move;
 mod color;
 mod game_status;

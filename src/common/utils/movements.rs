@@ -3,8 +3,8 @@ use crate::core::Position;
 /// Check if the movement is diagonal
 ///
 /// # Arguments
-/// * `start_pos`: The starting [position](Position)
-/// * `end_pos`: The ending [position](Position)
+/// * `start_pos`: The starting [Position]
+/// * `end_pos`: The ending [Position]
 ///
 /// # Returns
 /// Whether the movement is diagonal, `bool`
@@ -17,8 +17,8 @@ pub fn diagonal_movement(start_pos: &Position, end_pos: &Position) -> bool {
 /// Check if the movement is linear
 ///
 /// # Arguments
-/// * `start_pos`: The starting [position](Position)
-/// * `end_pos`: The ending [position](Position)
+/// * `start_pos`: The starting [Position]
+/// * `end_pos`: The ending [Position]
 ///
 /// # Returns
 /// Whether the movement is linear, `bool`
@@ -31,8 +31,8 @@ pub fn linear_movement(start_pos: &Position, end_pos: &Position) -> bool {
 /// Check if the movement forms an L
 ///
 /// # Arguments
-/// * `start_pos`: The starting [position](Position)
-/// * `end_pos`: The ending [position](Position)
+/// * `start_pos`: The starting [Position]
+/// * `end_pos`: The ending [Position]
 ///
 /// # Returns
 /// Whether the movement forms an L, `bool`
@@ -45,8 +45,8 @@ pub fn l_movement(start_pos: &Position, end_pos: &Position) -> bool {
 /// Check if the movement is of a certain length
 ///
 /// # Arguments
-/// * `start_pos`: The starting [position](Position)
-/// * `end_pos`: The ending [position](Position)
+/// * `start_pos`: The starting [Position]
+/// * `end_pos`: The ending [Position]
 ///
 /// # Returns
 /// Whether the movement is of a certain length, `bool`
@@ -59,8 +59,8 @@ pub fn max_movement(start_pos: &Position, end_pos: &Position, max: i8) -> bool {
 /// Check if the movement is in a certain direction
 ///
 /// # Arguments
-/// * `start_pos`: The starting [position](Position)
-/// * `end_pos`: The ending [position](Position)
+/// * `start_pos`: The starting [Position]
+/// * `end_pos`: The ending [Position]
 ///
 /// # Returns
 /// Whether the movement is in a certain direction, `bool`
@@ -79,9 +79,7 @@ pub fn movement_direction(start_pos: &Position, end_pos: &Position, direction: (
 
 #[cfg(test)]
 mod tests {
-    use super::{
-        diagonal_movement, l_movement, linear_movement, max_movement, movement_direction, Position,
-    };
+    use super::*;
 
     #[test]
     fn test_diagonal_movement() {
@@ -117,4 +115,6 @@ mod tests {
         let end_pos = Position::new(2, 0).unwrap();
         assert!(movement_direction(&start_pos, &end_pos, (1, -1)));
     }
+
+    // TODO test non-matching cases
 }

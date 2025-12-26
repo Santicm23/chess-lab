@@ -4,13 +4,13 @@ use std::fmt;
 ///
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum GameStatus {
-    /// The game is still ongoing
+    /// The [Game](crate::logic::Game) is still ongoing
     InProgress,
-    /// The game has ended in a draw
+    /// The [Game](crate::logic::Game) has ended in a draw
     Draw(DrawReason),
-    /// White has won the game
+    /// White has won the [Game](crate::logic::Game)
     WhiteWins(WinReason),
-    /// Black has won the game
+    /// Black has won the [Game](crate::logic::Game)
     BlackWins(WinReason),
 }
 
@@ -18,15 +18,15 @@ pub enum GameStatus {
 ///
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum DrawReason {
-    /// The game is a stalemate
+    /// The [Game](crate::logic::Game) is a stalemate
     Stalemate,
-    /// The game is a draw due to insufficient material
+    /// The [Game](crate::logic::Game) is a draw due to insufficient material
     InsufficientMaterial,
-    /// The game is a draw due to threefold repetition
+    /// The [Game](crate::logic::Game) is a draw due to threefold repetition
     ThreefoldRepetition,
-    /// The game is a draw due to the fifty move rule
+    /// The [Game](crate::logic::Game) is a draw due to the fifty move rule
     FiftyMoveRule,
-    /// The game is a draw due to agreement
+    /// The [Game](crate::logic::Game) is a draw due to agreement
     Agreement,
 }
 
@@ -42,15 +42,15 @@ impl fmt::Display for DrawReason {
     }
 }
 
-/// Represents the reason for a win
+/// Represents winning reasons
 ///
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum WinReason {
-    /// The game is a win due to checkmate
+    /// The [Game](crate::logic::Game) was won due to checkmate
     Checkmate,
-    /// The game is a win due to resignation
+    /// The [Game](crate::logic::Game) was won due to resignation
     Resignation,
-    /// The game is a win due to time
+    /// The [Game](crate::logic::Game) was won due to time
     Time,
 }
 
@@ -63,3 +63,5 @@ impl fmt::Display for WinReason {
         }
     }
 }
+
+// TODO add tests for GameStatus, DrawReason, and WinReason

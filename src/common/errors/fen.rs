@@ -17,8 +17,7 @@ impl FenError {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::errors::FenError;
-    ///
+    /// # use chess_lab::errors::FenError;
     /// let error = FenError::new("invalid_fen".to_string());
     /// ```
     ///
@@ -36,15 +35,14 @@ pub struct PieceReprError {
 }
 
 impl PieceReprError {
-    /// Creates a new [PieceReprError] with the given piece representation
+    /// Creates a new [PieceReprError] with the given [Piece](crate::core::Piece) representation
     ///
     /// # Arguments
-    /// * `piece_repr` - The char representation of a piece that caused the error
+    /// * `piece_repr` - The char representation of a [Piece](crate::core::Piece) that caused the error
     ///
     /// # Example
     /// ```
-    /// use chess_lab::errors::PieceReprError;
-    ///
+    /// # use chess_lab::errors::PieceReprError;
     /// let error = PieceReprError::new('X');
     /// ```
     ///
@@ -52,3 +50,5 @@ impl PieceReprError {
         PieceReprError { piece_repr }
     }
 }
+
+// TODO add tests for FEN errors

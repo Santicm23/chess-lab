@@ -253,20 +253,6 @@ impl ops::Sub<(i8, i8)> for &Position {
 }
 
 impl Display for Position {
-    /// Converts the position to a string
-    ///
-    /// # Returns
-    /// The string representation of the position
-    ///
-    /// # Examples
-    /// ```
-    /// use chess_lab::core::Position;
-    ///
-    /// let pos = Position::new(0, 0).unwrap();
-    ///
-    /// assert_eq!(pos.to_string(), "a1");
-    /// ```
-    ///
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -279,7 +265,7 @@ impl Display for Position {
 
 #[cfg(test)]
 mod tests {
-    use super::Position;
+    use super::*;
 
     #[test]
     fn test_position() {

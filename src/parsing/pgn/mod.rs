@@ -20,7 +20,7 @@ struct PGNParser;
 ///
 /// # Returns
 /// * `Ok(Vec<Game>)` - A vector of [Game] structs with the parsed PGNs
-/// * `Err(PGNError)` - A [PgnError] with the reason why the PGN string could not be parsed
+/// * `Err(PGNError)` - A [PGNError] with the reason why the PGN string could not be parsed
 ///
 pub fn parse_multiple_pgn<T: Variant + VariantBuilder>(input: &str) -> Result<Vec<T>, PGNError> {
     let pair = PGNParser::parse(Rule::pgn_file, input)

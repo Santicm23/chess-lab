@@ -2,7 +2,7 @@ use thiserror::Error;
 
 use crate::core::Move;
 
-/// Errors that can occur when trying to [move](Move) a piece
+/// Errors that can occur when trying to move a [Piece](crate::core::Piece)
 ///
 #[non_exhaustive]
 #[derive(Debug, Error, PartialEq)]
@@ -18,7 +18,7 @@ pub enum MoveError {
     Ambiguous(String),
 }
 
-/// Errors that can occur when trying to [move](Move) a piece
+/// Errors that can occur when trying to move a [Piece](crate::core::Piece)
 ///
 #[derive(Debug, Error)]
 #[error("Error moving piece: {error}")]
@@ -30,21 +30,18 @@ pub struct MoveInfoError {
 }
 
 impl MoveInfoError {
-    /// Creates a new [MoveInfoError] with the given error message and [move](Move)
+    /// Creates a new [MoveInfoError] with the given error message and [Move]
     ///
     /// # Arguments
     /// * `error` - The error message
-    /// * `mov` - The move that caused the error
+    /// * `mov` - The [Move] that caused the error
     ///
     /// # Example
     /// ```
+    /// # use chess_lab::errors::MoveInfoError;
     /// use chess_lab::core::{Color, PieceType, Position, Move, MoveType, Piece};
-    /// use chess_lab::errors::MoveInfoError;
     ///
-    /// let piece = Piece {
-    ///     color: Color::White,
-    ///     piece_type: PieceType::Pawn,
-    /// };
+    /// let piece = Piece::new(Color::White, PieceType::Pawn);
     /// let from = Position::new(4, 1).unwrap();
     /// let to = Position::new(4, 3).unwrap();
     /// let move_type = MoveType::Normal {
@@ -73,3 +70,5 @@ impl MoveInfoError {
         MoveInfoError { error, mov }
     }
 }
+
+// TODO add tests for Move errors

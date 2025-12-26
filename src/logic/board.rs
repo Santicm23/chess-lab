@@ -489,11 +489,6 @@ impl Board {
 }
 
 impl Display for Board {
-    /// Converts the board to a string
-    ///
-    /// # Returns
-    /// A string representation of the board in FEN format
-    ///
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut board = String::new();
         for row in (0..8).rev() {
@@ -527,7 +522,7 @@ impl Display for Board {
 
 #[cfg(test)]
 mod tests {
-    use super::Board;
+    use super::*;
     use crate::core::{Color, Piece, PieceType, Position};
 
     #[test]

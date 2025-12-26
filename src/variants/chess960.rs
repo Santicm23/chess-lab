@@ -10,14 +10,14 @@ use crate::{
     utils::os::{read_file, write_file},
 };
 
-/// Chess960 is a variant of chess that uses the same rules as standard chess, but the starting position of the pieces is randomized.
+/// Chess960 is a variant of chess that uses the same rules as [standard chess](crate::variants::StandardChess), but the starting position of the pieces is randomized.
 ///
 /// # Attributes
-/// * `game` - The game struct that contains the current state of the game
+/// * `game` - The [Game] struct that contains the current state of the game
 ///
 #[derive(Debug, Clone)]
 pub struct Chess960 {
-    /// The game struct that contains the current state of the game
+    /// The [Game] struct that contains the current state of the game
     game: Game,
 }
 
@@ -25,12 +25,11 @@ impl Default for Chess960 {
     /// Generates a random starting position for the pieces
     ///
     /// # Returns
-    /// A Chess960 struct with a random starting position
+    /// A [Chess960] struct with a random starting position
     ///
     /// # Example
     /// ```
-    /// use chess_lab::variants::Chess960;
-    ///
+    /// # use chess_lab::variants::Chess960;
     /// let variant = Chess960::default();
     /// ```
     ///
@@ -80,36 +79,36 @@ impl Default for Chess960 {
 }
 
 impl VariantBuilder for Chess960 {
-    /// Returns the name of the variant
+    /// Returns the name of the [Variant]
     ///
     /// # Returns
-    /// A string with the name of the variant
+    /// A string with the name of the [Variant]
     ///
     /// # Example
     /// ```
-    /// use chess_lab::core::VariantBuilder;
-    /// use chess_lab::variants::Chess960;
-    ///
+    /// # use chess_lab::core::VariantBuilder;
+    /// # use chess_lab::variants::Chess960;
     /// let name = Chess960::name();
+    /// assert_eq!(name, "Chess960");
     /// ```
     ///
     fn name() -> &'static str {
         "Chess960"
     }
 
-    /// Returns a new instance of the variant from a game struct
+    /// Returns a new instance of the variant from a [Game] struct
     ///
     /// # Arguments
-    /// * `game` - The game struct that contains the current state of the game
+    /// * `game` - The [Game] struct that contains the current state of the game
     ///
     /// # Returns
     /// A Chess960 struct with the game state
     ///
     /// # Example
     /// ```
-    /// use chess_lab::core::VariantBuilder;
+    /// # use chess_lab::core::VariantBuilder;
+    /// # use chess_lab::variants::Chess960;
     /// use chess_lab::logic::Game;
-    /// use chess_lab::variants::Chess960;
     ///
     /// let game = Game::default();
     /// let variant = Chess960::new(game);
@@ -125,14 +124,13 @@ impl VariantBuilder for Chess960 {
     /// * `fen` - The FEN string that represents the game state
     ///
     /// # Returns
-    /// * `Ok(Chess960)` - A Chess960 struct with the game state
+    /// * `Ok(Chess960)` - A [Chess960] struct with the game state
     /// * `Err(FenError)` - An error that indicates that the FEN string is invalid
     ///
     /// # Example
     /// ```
-    /// use chess_lab::core::VariantBuilder;
-    /// use chess_lab::variants::Chess960;
-    ///
+    /// # use chess_lab::core::VariantBuilder;
+    /// # use chess_lab::variants::Chess960;
     /// let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     /// let variant = Chess960::from_fen(fen).unwrap();
     /// ```
@@ -149,14 +147,13 @@ impl VariantBuilder for Chess960 {
     /// * `pgn` - The PGN string that represents the game state
     ///
     /// # Returns
-    /// * `Ok(Chess960)` - A Chess960 struct with the game state
+    /// * `Ok(Chess960)` - A [Chess960] struct with the game state
     /// * `Err(PgnError)` - An error that indicates that the PGN string is invalid
     ///
     /// # Example
     /// ```
-    /// use chess_lab::core::VariantBuilder;
-    /// use chess_lab::variants::Chess960;
-    ///
+    /// # use chess_lab::core::VariantBuilder;
+    /// # use chess_lab::variants::Chess960;
     /// let pgn = "1. e4 e5 2. Nf3 Nc6";
     /// let variant = Chess960::from_pgn(pgn).unwrap();
     /// ```
@@ -176,9 +173,8 @@ impl VariantBuilder for Chess960 {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::core::VariantBuilder;
-    /// use chess_lab::variants::Chess960;
-    ///
+    /// # use chess_lab::core::VariantBuilder;
+    /// # use chess_lab::variants::Chess960;
     /// let path = "data/chess960/ex.pgn"; // TODO: Change to the chess960 file
     /// let variant = Chess960::load(path).unwrap();
     /// ```
@@ -199,9 +195,8 @@ impl VariantBuilder for Chess960 {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::core::VariantBuilder;
-    /// use chess_lab::variants::Chess960;
-    ///
+    /// # use chess_lab::core::VariantBuilder;
+    /// # use chess_lab::variants::Chess960;
     /// let path = "data/standard/ex3.pgn"; // TODO: Change to the chess960 file
     /// let variants = Chess960::load_all(path).unwrap();
     /// ```
@@ -224,9 +219,8 @@ impl Variant for Chess960 {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::core::{Variant, VariantBuilder};
-    /// use chess_lab::variants::Chess960;
-    ///
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::Chess960;
     /// let mut variant = Chess960::default();
     /// variant.move_piece("e4").unwrap();
     /// ```
@@ -235,13 +229,12 @@ impl Variant for Chess960 {
         self.game.move_piece(move_str)
     }
 
-    /// Undoes the last move made
+    /// Undoes the last [Move] made
     ///
     /// # Example
     /// ```
-    /// use chess_lab::core::{Variant, VariantBuilder};
-    /// use chess_lab::variants::Chess960;
-    ///
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::Chess960;
     /// let mut variant = Chess960::default();
     /// variant.move_piece("e4").unwrap();
     /// variant.undo();
@@ -251,13 +244,12 @@ impl Variant for Chess960 {
         self.game.undo()
     }
 
-    /// Redoes the last move that was undone
+    /// Redoes the last [Move] that was undone
     ///
     /// # Example
     /// ```
-    /// use chess_lab::core::{Variant, VariantBuilder};
-    /// use chess_lab::variants::Chess960;
-    ///
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::Chess960;
     /// let mut variant = Chess960::default();
     /// variant.move_piece("e4").unwrap();
     /// variant.undo();
@@ -275,9 +267,8 @@ impl Variant for Chess960 {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::core::{Variant, VariantBuilder};
-    /// use chess_lab::variants::Chess960;
-    ///
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::Chess960;
     /// let variant = Chess960::default();
     /// let pgn = variant.pgn();
     /// ```
@@ -286,15 +277,15 @@ impl Variant for Chess960 {
         self.game.pgn()
     }
 
-    /// Returns the FEN string of the game
+    /// Returns the FEN string of the [Game]
     ///
     /// # Returns
-    /// A string with the FEN of the game
+    /// A string with the FEN of the [Game]
     ///
     /// # Example
     /// ```
-    /// use chess_lab::core::{Variant, VariantBuilder};
-    /// use chess_lab::variants::Chess960;
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::Chess960;
     ///
     /// let variant = Chess960::default();
     /// let fen = variant.fen();
@@ -304,7 +295,7 @@ impl Variant for Chess960 {
         self.game.fen()
     }
 
-    /// Saves the PGN string of the game to a file
+    /// Saves the PGN string of the [Game] to a file
     ///
     /// # Arguments
     /// * `path` - The path to the file
@@ -316,8 +307,8 @@ impl Variant for Chess960 {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::core::{Variant, VariantBuilder};
-    /// use chess_lab::variants::Chess960;
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::Chess960;
     ///
     /// let variant = Chess960::default();
     /// variant.save("data/chess960/ex.pgn", true).unwrap();
@@ -328,15 +319,16 @@ impl Variant for Chess960 {
         Ok(())
     }
 
-    /// Resigns the game for a color
+    /// Resigns the [Game] for a [Color]
     ///
     /// # Arguments
     /// * `color` - The color that resigns
     ///
     /// # Example
     /// ```
-    /// use chess_lab::core::{Variant, VariantBuilder, Color};
-    /// use chess_lab::variants::Chess960;
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::Chess960;
+    /// use chess_lab::core::Color;
     ///
     /// let mut variant = Chess960::default();
     /// variant.resign(Color::White);
@@ -346,13 +338,12 @@ impl Variant for Chess960 {
         self.game.resign(color)
     }
 
-    /// Sets the game as a draw
+    /// Sets the [Game] as a draw
     ///
     /// # Example
     /// ```
-    /// use chess_lab::core::{Variant, VariantBuilder};
-    /// use chess_lab::variants::Chess960;
-    ///
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::Chess960;
     /// let mut variant = Chess960::default();
     /// variant.draw();
     /// ```
@@ -361,15 +352,16 @@ impl Variant for Chess960 {
         self.game.set_draw_by_agreement()
     }
 
-    /// Sets the game lost in time for a color
+    /// Sets the game lost in time for a [Color]
     ///
     /// # Arguments
-    /// * `color` - The color that lost in time
+    /// * `color` - The [Color] that lost in time
     ///
     /// # Example
     /// ```
-    /// use chess_lab::core::{Variant, VariantBuilder, Color};
-    /// use chess_lab::variants::Chess960;
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::Chess960;
+    /// use chess_lab::core::Color;
     ///
     /// let mut variant = Chess960::default();
     /// variant.set_lost_in_time(Color::White);
@@ -379,16 +371,15 @@ impl Variant for Chess960 {
         self.game.set_lost_in_time(color)
     }
 
-    /// Returns the board of the game.
+    /// Returns the [Board] of the [Game]
     ///
     /// # Returns
-    /// A copy of the board of the game.
+    /// A copy of the [Board] of the [Game]
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::Variant;
-    /// use chess_lab::variants::Chess960;
-    ///
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::Chess960;
     /// let game = Chess960::default();
     /// let board = game.get_board();
     /// ```
@@ -397,16 +388,15 @@ impl Variant for Chess960 {
         self.game.board.clone()
     }
 
-    /// Returns whether it is white's turn to move.
+    /// Returns whether it is white's turn to move
     ///
     /// # Returns
-    /// Whether it is white's turn to move.
+    /// Whether it is white's turn to move
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::Variant;
-    /// use chess_lab::variants::Chess960;
-    ///
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::Chess960;
     /// let game = Chess960::default();
     /// let color = game.is_white_turn();
     /// ```
@@ -415,16 +405,15 @@ impl Variant for Chess960 {
         self.game.is_white_turn
     }
 
-    /// Returns the halfmove clock of the game.
+    /// Returns the halfmove clock of the [Game]
     ///
     /// # Returns
-    /// The halfmove clock of the game.
+    /// The halfmove clock of the [Game]
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::Variant;
-    /// use chess_lab::variants::Chess960;
-    ///
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::Chess960;
     /// let game = Chess960::default();
     /// let halfmove_clock = game.get_halfmove_clock();
     /// ```
@@ -433,16 +422,15 @@ impl Variant for Chess960 {
         self.game.halfmove_clock
     }
 
-    /// Returns the fullmove number of the game.
+    /// Returns the fullmove number of the [Game]
     ///
     /// # Returns
-    /// The fullmove number of the game.
+    /// The fullmove number of the [Game]
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::Variant;
-    /// use chess_lab::variants::Chess960;
-    ///
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::Chess960;
     /// let game = Chess960::default();
     /// let fullmove_number = game.get_fullmove_number();
     /// ```
@@ -451,16 +439,15 @@ impl Variant for Chess960 {
         self.game.fullmove_number
     }
 
-    /// Returns the castling rights of the game.
+    /// Returns the current castling rights of the [Game]
     ///
     /// # Returns
-    /// The castling rights of the game.
+    /// The current castling rights of the [Game]
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::Variant;
-    /// use chess_lab::variants::Chess960;
-    ///
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::Chess960;
     /// let game = Chess960::default();
     /// let castling_rights = game.get_castling_rights();
     /// ```
@@ -487,16 +474,15 @@ impl Variant for Chess960 {
         castling_rights
     }
 
-    /// Returns the en passant square of the game.
+    /// Returns the en passant square of the [Game]
     ///
     /// # Returns
-    /// The en passant square of the game.
+    /// The en passant square of the [Game]
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::Variant;
-    /// use chess_lab::variants::Chess960;
-    ///
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::Chess960;
     /// let game = Chess960::default();
     /// let en_passant = game.get_en_passant();
     /// ```
@@ -505,16 +491,15 @@ impl Variant for Chess960 {
         self.game.en_passant
     }
 
-    /// Returns the starting FEN of the game.
+    /// Returns the starting FEN of the [Game]
     ///
     /// # Returns
-    /// A copy of the starting FEN of the game.
+    /// A copy of the starting FEN of the [Game]
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::Variant;
-    /// use chess_lab::variants::Chess960;
-    ///
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::Chess960;
     /// let game = Chess960::default();
     /// let starting_fen = game.get_starting_fen();
     /// ```
@@ -523,16 +508,15 @@ impl Variant for Chess960 {
         self.game.starting_fen.clone()
     }
 
-    /// Returns the history of the game.
+    /// Returns the history of the [Game]
     ///
     /// # Returns
-    /// A copy of the history of the game.
+    /// A copy of the history of the [Game]
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::Variant;
-    /// use chess_lab::variants::Chess960;
-    ///
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::Chess960;
     /// let game = Chess960::default();
     /// let history = game.get_history();
     /// ```
@@ -541,16 +525,15 @@ impl Variant for Chess960 {
         self.game.history.clone()
     }
 
-    /// Returns the previous positions of the game.
+    /// Returns the previous positions of the [Game]
     ///
     /// # Returns
-    /// A copy of the previous positions of the game.
+    /// A copy of the previous positions of the [Game]
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::Variant;
-    /// use chess_lab::variants::Chess960;
-    ///
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::Chess960;
     /// let game = Chess960::default();
     /// let prev_positions = game.get_prev_positions();
     /// ```
@@ -559,15 +542,15 @@ impl Variant for Chess960 {
         self.game.prev_positions.clone()
     }
 
-    /// Returns the status of the game.
+    /// Returns the status of the [Game]
     ///
     /// # Returns
-    /// The status of the game.
+    /// The status of the [Game]
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{Variant, GameStatus};
-    /// use chess_lab::variants::Chess960;
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::Chess960;
     ///
     /// let game = Chess960::default();
     /// let status = game.get_status();

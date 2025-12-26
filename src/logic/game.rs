@@ -20,8 +20,7 @@ use super::board::Board;
 ///
 /// # Example
 /// ```
-/// use chess_lab::logic::Game;
-///
+/// # use chess_lab::logic::Game;
 /// let game = Game::default();
 /// assert_eq!(game.to_string(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 /// ```
@@ -46,8 +45,7 @@ impl Default for Game {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::logic::Game;
-    ///
+    /// # use chess_lab::logic::Game;
     /// let game = Game::default();
     /// assert_eq!(game.to_string(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     /// ```
@@ -89,8 +87,7 @@ impl Game {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::logic::Game;
-    ///
+    /// # use chess_lab::logic::Game;
     /// let game = Game::new("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", true).unwrap();
     /// assert_eq!(game.to_string(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     /// ```
@@ -114,8 +111,7 @@ impl Game {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::logic::Game;
-    ///
+    /// # use chess_lab::logic::Game;
     /// let game = Game::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1").unwrap();
     /// assert_eq!(game.to_string(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     /// ```
@@ -173,8 +169,7 @@ impl Game {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::logic::Game;
-    ///
+    /// # use chess_lab::logic::Game;
     /// let mut game = Game::default();
     /// game.move_piece("e4").unwrap();
     /// assert_eq!(game.to_string(), "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1");
@@ -1316,19 +1311,6 @@ impl Game {
 }
 
 impl fmt::Display for Game {
-    /// Convert the game to a FEN string
-    ///
-    /// # Returns
-    /// The FEN string
-    ///
-    /// # Example
-    /// ```
-    /// use chess_lab::logic::Game;
-    ///
-    /// let game = Game::default();
-    /// assert_eq!(game.fen(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-    /// ```
-    ///
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.fen())
     }
@@ -1339,7 +1321,7 @@ mod tests {
 
     use crate::core::{Color, MoveType, PieceType, Position};
 
-    use super::Game;
+    use super::*;
 
     #[test]
     fn test_fen() {

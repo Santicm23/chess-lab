@@ -4,7 +4,7 @@ use crate::errors::MoveInfoError;
 
 use super::{GameStatus, Piece, PieceType, Position};
 
-/// Represents the type of a move
+/// Represents the type of a [Move]
 ///
 #[derive(Debug, Clone, PartialEq)]
 pub enum MoveType {
@@ -12,7 +12,7 @@ pub enum MoveType {
     Normal {
         /// Whether the move is a capture
         capture: bool,
-        /// The piece type to promote to
+        /// The [PieceType] to promote to
         promotion: Option<PieceType>,
     },
     /// A castle move
@@ -38,15 +38,15 @@ pub enum CastleType {
 ///
 #[derive(Debug, Clone, PartialEq)]
 pub struct Move {
-    /// The piece that is moving
+    /// The [Piece] that is moving
     pub piece: Piece,
-    /// The position the piece is moving from
+    /// The [Position] the piece is moving from
     pub from: Position,
-    /// The position the piece is moving to
+    /// The [Position] the piece is moving to
     pub to: Position,
-    /// The type of the move
+    /// The [type](Move) of the move
     pub move_type: MoveType,
-    /// The piece that is captured, if any
+    /// The type of the piece that is captured, if any
     pub captured_piece: Option<PieceType>,
     /// The position of the rook, if the move is a castle
     pub rook_from: Option<Position>,
@@ -59,15 +59,15 @@ pub struct Move {
 }
 
 impl Move {
-    /// Creates a new [move](Move)
+    /// Creates a new [Move]
     ///
     /// # Arguments
-    /// * `piece`: The piece that is moving
-    /// * `from`: The position the piece is moving from
-    /// * `to`: The position the piece is moving to
-    /// * `move_type`: The type of the move
-    /// * `captured_piece`: The piece that is captured, if any
-    /// * `rook_from`: The position of the rook, if the move is a castle
+    /// * `piece`: The [Piece] that is moving
+    /// * `from`: The [Position] the piece is moving from
+    /// * `to`: The [Position] the piece is moving to
+    /// * `move_type`: The [type](MoveType) of the move
+    /// * `captured_piece`: The [Piece] that is captured, if any
+    /// * `rook_from`: The [Position] of the rook, if the move is a castle
     /// * `ambiguity`: A tuple of booleans representing the ambiguity of the move
     /// * `check`: Whether the move puts the opponent in check
     /// * `checkmate`: Whether the move puts the opponent in checkmate
@@ -81,10 +81,7 @@ impl Move {
     /// ```
     /// use chess_lab::core::{Color, PieceType, Piece, Position, Move, MoveType};
     ///
-    /// let piece = Piece {
-    ///     color: Color::White,
-    ///     piece_type: PieceType::Pawn,
-    /// };
+    /// let piece = Piece::new(Color::White, PieceType::Pawn);
     /// let from = Position::new(4, 1).unwrap();
     /// let to = Position::new(4, 3).unwrap();
     /// let move_type = MoveType::Normal {
@@ -234,7 +231,7 @@ impl fmt::Display for Move {
     }
 }
 
-/// Represents the information of a move
+/// Represents the information of a [Move]
 ///
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct MoveInfo {
@@ -246,21 +243,21 @@ pub struct MoveInfo {
     pub en_passant: Option<Position>,
     /// The castling rights
     pub castling_rights: u8,
-    /// The status of the game
+    /// The status of the [Game](crate::logic::Game)
     pub game_status: GameStatus,
-    /// A map of previous positions and their occurrence counts
+    /// A map of previous board positions and their occurrence counts
     pub prev_positions: HashMap<String, u32>,
 }
 
 impl MoveInfo {
-    /// Creates a new move info
+    /// Creates a new [MoveInfo]
     ///
     /// # Arguments
     /// * `halfmove_clock`: The number of halfmoves since the last capture or pawn move
     /// * `fullmove_number`: The number of fullmoves
     /// * `en_passant`: The en passant target square
     /// * `castling_rights`: The castling rights
-    /// * `game_status`: The status of the game
+    /// * `game_status`: The current [GameStatus]
     ///
     /// # Example
     /// ```
@@ -295,3 +292,5 @@ impl MoveInfo {
         }
     }
 }
+
+// TODO add tests for Move and MoveInfo

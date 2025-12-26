@@ -2,24 +2,24 @@ use thiserror::Error;
 
 use crate::core::Position;
 
-/// Error indicating that a specific [position](Position) is already occupied
+/// Error indicating that a specific [Position] is already occupied
 ///
 #[derive(Debug, Error)]
 #[error("Position {position} is already occupied")]
 pub struct PositionOccupiedError {
-    /// The position that is already occupied
+    /// The [Position] that is already occupied
     pub position: Position,
 }
 
 impl PositionOccupiedError {
-    /// Creates a new [PositionOccupiedError] with the given [position](Position)
+    /// Creates a new [PositionOccupiedError] with the given [Position]
     ///
     /// # Arguments
-    /// * `position` - The [position](Position) that is occupied
+    /// * `position` - The [Position] that is occupied
     ///
     /// # Example
     /// ```
-    /// use chess_lab::errors::PositionOccupiedError;
+    /// # use chess_lab::errors::PositionOccupiedError;
     /// use chess_lab::core::Position;
     ///
     /// let position = Position::from_string("a1").unwrap();
@@ -31,24 +31,24 @@ impl PositionOccupiedError {
     }
 }
 
-/// Error indicating that a specific position is empty
+/// Error indicating that a specific [Position] is empty
 ///
 #[derive(Debug, Error)]
 #[error("Position {position} is empty")]
 pub struct PositionEmptyError {
-    /// The position that is empty
+    /// The [Position] that is empty
     pub position: Position,
 }
 
 impl PositionEmptyError {
-    /// Creates a new [PositionEmptyError] with the given [position](Position)
+    /// Creates a new [PositionEmptyError] with the given [Position]
     ///
     /// # Arguments
-    /// * `position` - The [position](Position) that is empty
+    /// * `position` - The [Position] that is empty
     ///
     /// # Example
     /// ```
-    /// use chess_lab::errors::PositionEmptyError;
+    /// # use chess_lab::errors::PositionEmptyError;
     /// use chess_lab::core::Position;
     ///
     /// let position = Position::from_string("a1").unwrap();
@@ -60,7 +60,7 @@ impl PositionEmptyError {
     }
 }
 
-/// Error indicating that a [position](Position) is out of the allowed range
+/// Error indicating that a [Position] is out of the allowed range
 ///
 #[derive(Debug, PartialEq, Error)]
 #[error("Position ({col}, {row}) is out of range")]
@@ -80,8 +80,7 @@ impl PositionOutOfRangeError {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::errors::PositionOutOfRangeError;
-    ///
+    /// # use chess_lab::errors::PositionOutOfRangeError;
     /// let col = 8;
     /// let row = 8;
     /// let error = PositionOutOfRangeError::new(col, row);
@@ -92,12 +91,12 @@ impl PositionOutOfRangeError {
     }
 }
 
-/// Error indicating that a [position](Position) is invalid
+/// Error indicating that a [Position] is invalid
 ///
 #[derive(Debug, PartialEq, Error)]
 #[error("Invalid position: {position_str}")]
 pub struct PositionInvalidError {
-    /// The string representation of the [position](Position) that is invali
+    /// The string representation of the [Position] that is invali
     pub position_str: String,
 }
 
@@ -109,8 +108,7 @@ impl PositionInvalidError {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::errors::PositionInvalidError;
-    ///
+    /// # use chess_lab::errors::PositionInvalidError;
     /// let error = PositionInvalidError::new("Invalid position".to_string());
     /// ```
     ///
@@ -119,14 +117,14 @@ impl PositionInvalidError {
     }
 }
 
-/// Error indicating that two [positions](Position) are not aligned
+/// Error indicating that two [Positions](Position) are not aligned
 ///
 #[derive(Debug, PartialEq, Error)]
 #[error("Positions {position1} and {position2} are not aligned")]
 pub struct UnalignedPositionsError {
-    /// The first position that is not aligned
+    /// The first [Position] that is not aligned
     pub position1: Position,
-    /// The second position that is not aligned
+    /// The second [Position] that is not aligned
     pub position2: Position,
 }
 
@@ -134,16 +132,17 @@ impl UnalignedPositionsError {
     /// Creates a new [UnalignedPositionsError] with the given positions
     ///
     /// # Arguments
-    /// * `position1` - The first position that is not aligned
-    /// * `position2` - The second position that is not aligned
+    /// * `position1` - The first [Position] that is not aligned
+    /// * `position2` - The second [Position] that is not aligned
     ///
     /// # Example
     /// ```
-    /// use chess_lab::errors::UnalignedPositionsError;
+    /// # use chess_lab::errors::UnalignedPositionsError;
     /// use chess_lab::core::Position;
     ///
     /// let position1 = Position::from_string("a1").unwrap();
     /// let position2 = Position::from_string("b3").unwrap();
+    ///
     /// let error = UnalignedPositionsError::new(position1, position2);
     /// ```
     ///
@@ -155,15 +154,15 @@ impl UnalignedPositionsError {
     }
 }
 
-/// Error type to handle errors on `piece_between` function
+/// Error types for [Position] between operations
 ///
 #[non_exhaustive]
 #[derive(Debug, PartialEq, Error)]
 pub enum PositionBetweenError {
-    /// Indicates that the position is outside the allowed range
+    /// Indicates that the [Position] is outside the allowed range
     #[error(transparent)]
     OutOfRange(#[from] PositionOutOfRangeError),
-    /// Indicates that two positions are not aligned and they should be
+    /// Indicates that two [Positions](Position) are not aligned and they should be
     #[error(transparent)]
     Unaligned(#[from] UnalignedPositionsError),
 }

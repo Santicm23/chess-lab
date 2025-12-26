@@ -345,7 +345,7 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
         }
     }
 
-    /// Adds metadata to the PGN tree
+    /// Adds metadata to the [PGNTree]
     ///
     /// # Arguments
     /// * `key`: The metadata key
@@ -1268,9 +1268,9 @@ impl<T: PartialEq + Clone + Display + Debug> DoubleEndedIterator for PGNTree<T> 
 mod tests {
     use std::collections::HashMap;
 
-    use crate::core::{
-        Color, GameStatus, Move, MoveType, PGNTree, Piece, PieceType, Position, WinReason,
-    };
+    use crate::core::{Color, Move, MoveType, Piece, PieceType, WinReason};
+
+    use super::*;
 
     #[test]
     fn test_add_move() {

@@ -205,3 +205,5 @@ pub trait VariantBuilder: Sized + Default {
     ///
     fn load_all(path: &str) -> Result<Vec<Self>, PGNError>;
 }
+
+// TODO fix Result return types docs

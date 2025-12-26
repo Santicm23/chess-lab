@@ -176,20 +176,6 @@ impl Piece {
 }
 
 impl Display for Piece {
-    /// Converts the piece to a FEN character
-    ///
-    /// # Returns
-    /// The FEN character representing the piece
-    ///
-    /// # Examples
-    /// ```
-    /// use chess_lab::core::{Color, PieceType, Piece};
-    ///
-    /// let piece = Piece::new(Color::White, PieceType::Pawn);
-    ///
-    /// assert_eq!(piece.to_string(), "P");
-    /// ```
-    ///
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         let char = match self.piece_type {
             PieceType::Pawn => "p",
@@ -345,10 +331,7 @@ pub fn piece_movement(piece: &Piece, start_pos: &Position, end_pos: &Position) -
 mod tests {
     use crate::core::{Color, PieceType, Position};
 
-    use super::{
-        bishop_movement, king_movement, knight_movement, pawn_movement, queen_movement,
-        rook_movement, Piece,
-    };
+    use super::*;
 
     #[test]
     fn test_pawn_movement() {

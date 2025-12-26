@@ -61,7 +61,7 @@ pub fn read_file(file_name: &str) -> Result<String, std::io::Error> {
 
 #[cfg(test)]
 mod tests {
-    use super::{read_file, write_file};
+    use super::*;
     use std::fs;
 
     #[test]

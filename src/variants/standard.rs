@@ -8,8 +8,8 @@ use crate::{
     utils::os::{read_file, write_file},
 };
 
-/// Standard Chess variant
-/// This variant is the most common chess variant played worldwide.
+/// Standard Chess [Variant]
+/// This [Variant] is the most common chess variant played worldwide
 /// It is played on an 8x8 board with the following pieces for each player:
 /// - 8 Pawns
 /// - 2 Rooks
@@ -18,27 +18,12 @@ use crate::{
 /// - 1 Queen
 /// - 1 King
 ///
-/// The game is won by checkmating the opponent's king.
-/// The game is drawn by stalemate, threefold repetition, the fifty-move rule, or agreement.
-/// The game is lost by resigning or losing on time.
+/// The game is won by checkmating the opponent's king
+/// The game is drawn by stalemate, threefold repetition, the fifty-move rule, or agreement
+/// The game is lost by resigning or losing on time
 ///
 /// # Attributes
-/// * `game` - The game struct that holds the state of the game.
-///
-/// # Methods
-/// * `new` - Creates a new instance of the StandardChess variant.
-/// * `from_fen` - Creates a new instance of the StandardChess variant from a FEN string.
-/// * `from_pgn` - Creates a new instance of the StandardChess variant from a PGN string.
-/// * `move_piece` - Moves a piece on the board.
-/// * `undo` - Undoes the last move.
-/// * `redo` - Redoes the last undone move.
-/// * `pgn` - Returns the PGN string of the game.
-/// * `fen` - Returns the FEN string of the game.
-/// * `save` - Saves the game to a PGN file.
-/// * `load` - Loads the game from a PGN file.
-/// * `resign` - Resigns the game for a player.
-/// * `draw` - Sets the game as a draw by agreement.
-/// * `set_lost_in_time` - Sets the game as lost in time for a player.
+/// * `game` - The game struct that holds the state of the game
 ///
 #[derive(Debug, Clone)]
 pub struct StandardChess {
@@ -46,16 +31,14 @@ pub struct StandardChess {
 }
 
 impl Default for StandardChess {
-    /// Creates a new instance of the StandardChess variant with default values.
+    /// Creates a new instance of the [StandardChess] [Variant] with default values
     ///
     /// # Returns
-    /// A new instance of the StandardChess variant.
+    /// A new instance of the [StandardChess] [Variant]
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::Variant;
-    /// use chess_lab::variants::StandardChess;
-    ///
+    /// # use chess_lab::variants::StandardChess;
     /// let game = StandardChess::default();
     /// ```
     ///
@@ -67,25 +50,33 @@ impl Default for StandardChess {
 }
 
 impl VariantBuilder for StandardChess {
-    /// Returns the name of the variant.
+    /// Returns the name of the [Variant]
     ///
     /// # Returns
-    /// The name of the variant.
+    /// The name of the [Variant]
+    ///
+    /// # Examples
+    /// ```
+    /// # use chess_lab::core::VariantBuilder;
+    /// # use chess_lab::variants::StandardChess;
+    /// let name = StandardChess::name();
+    /// assert_eq!(name, "Standard");
+    /// ```
     ///
     fn name() -> &'static str {
         "Standard"
     }
 
-    /// Creates a new instance of the StandardChess variant.
+    /// Creates a new instance of the [StandardChess] [Variant]
     ///
     /// # Returns
-    /// A new instance of the StandardChess variant.
+    /// A new instance of the [StandardChess] [Variant]
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{Variant, VariantBuilder};
+    /// # use chess_lab::core::VariantBuilder;
+    /// # use chess_lab::variants::StandardChess;
     /// use chess_lab::logic::Game;
-    /// use chess_lab::variants::StandardChess;
     ///
     /// let game = StandardChess::new(Game::default());
     /// ```
@@ -94,14 +85,14 @@ impl VariantBuilder for StandardChess {
         StandardChess { game }
     }
 
-    /// Creates a new instance of the StandardChess variant from a FEN string.
+    /// Creates a new instance of the [StandardChess] [Variant] from a FEN string
     ///
     /// # Arguments
-    /// * `fen` - A FEN string.
+    /// * `fen` - A FEN string
     ///
     /// # Returns
-    /// * `Ok(StandardChess)` - A new instance of the StandardChess variant.
-    /// * `Err(FenError)` - An error occurred while parsing the FEN string.
+    /// * `Ok(StandardChess)` - A new instance of the [StandardChess] [Variant]
+    /// * `Err(FenError)` - An error occurred while parsing the FEN string
     ///
     /// # Examples
     /// ```
@@ -118,14 +109,14 @@ impl VariantBuilder for StandardChess {
         })
     }
 
-    /// Creates a new instance of the StandardChess variant from a PGN string.
+    /// Creates a new instance of the [StandardChess] [Variant] from a PGN string
     ///
     /// # Arguments
-    /// * `pgn` - A PGN string.
+    /// * `pgn` - A PGN string
     ///
     /// # Returns
-    /// * `Ok(StandardChess)` - A new instance of the StandardChess variant.
-    /// * `Err(PgnError)` - An error occurred while parsing the PGN string.
+    /// * `Ok(StandardChess)` - A new instance of the [StandardChess] [Variant]
+    /// * `Err(PgnError)` - An error occurred while parsing the PGN string
     ///
     /// # Examples
     /// ```
@@ -141,14 +132,14 @@ impl VariantBuilder for StandardChess {
         parse_pgn(pgn)
     }
 
-    /// Loads the game from a file.
+    /// Loads the [Game] from a file
     ///
     /// # Arguments
-    /// * `path` - The path to the file.
+    /// * `path` - The path to the file
     ///
     /// # Returns
-    /// * `Ok(StandardChess)` - The game was loaded successfully.
-    /// * `Err(PgnError)` - An error occurred while loading the game.
+    /// * `Ok(StandardChess)` - The [Game] was loaded successfully
+    /// * `Err(PgnError)` - An error occurred while loading the [Game]
     ///
     /// # Examples
     /// ```
@@ -164,14 +155,14 @@ impl VariantBuilder for StandardChess {
         StandardChess::from_pgn(&pgn)
     }
 
-    /// Loads multiple games from a file.
+    /// Loads multiple [Games](Game) from a file
     ///
     /// # Arguments
-    /// * `path` - The path to the file.
+    /// * `path` - The path to the file
     ///
     /// # Returns
-    /// * `Ok(Vec<StandardChess>)` - The games were loaded successfully.
-    /// * `Err(PgnError)` - An error occurred while loading the games.
+    /// * `Ok(Vec<StandardChess>)` - The games were loaded successfully
+    /// * `Err(PgnError)` - An error occurred while loading the games
     ///
     /// # Examples
     /// ```
@@ -189,7 +180,7 @@ impl VariantBuilder for StandardChess {
 }
 
 impl Variant for StandardChess {
-    /// Moves a piece on the board.
+    /// Moves a [Piece] on the [Board]
     ///
     /// # Arguments
     /// * `move_str` - A move string in algebraic notation.
@@ -213,7 +204,7 @@ impl Variant for StandardChess {
         self.game.move_piece(move_str)
     }
 
-    /// Undoes the last move.
+    /// Undoes the last [Move]
     ///
     /// # Examples
     /// ```
@@ -231,7 +222,7 @@ impl Variant for StandardChess {
         self.game.undo()
     }
 
-    /// Redoes the last undone move.
+    /// Redoes the last undone [Move]
     ///
     /// # Examples
     /// ```
@@ -250,10 +241,10 @@ impl Variant for StandardChess {
         self.game.redo()
     }
 
-    /// Returns the PGN string of the game.
+    /// Returns the PGN string of the [Game]
     ///
     /// # Returns
-    /// The PGN string of the game.
+    /// The PGN string of the [Game]
     ///
     /// # Examples
     /// ```
@@ -272,10 +263,10 @@ impl Variant for StandardChess {
         self.game.pgn()
     }
 
-    /// Returns the FEN string of the game.
+    /// Returns the FEN string of the game
     ///
     /// # Returns
-    /// The FEN string of the game.
+    /// The FEN string of the game
     ///
     /// # Examples
     /// ```
@@ -292,15 +283,15 @@ impl Variant for StandardChess {
         self.game.fen()
     }
 
-    /// Saves the game to a file.
+    /// Saves the [Game] to a file
     ///
     /// # Arguments
-    /// * `path` - The path to the file.
-    /// * `overwrite` - Whether to overwrite the file if it already exists.
+    /// * `path` - The path to the file
+    /// * `overwrite` - Whether to overwrite the file if it already exists
     ///
     /// # Returns
-    /// * `Ok(())` - The game was saved successfully.
-    /// * `Err(std::io::Error)` - An error occurred while saving the game.
+    /// * `Ok(())` - The game was saved successfully
+    /// * `Err(std::io::Error)` - An error occurred while saving the game
     ///
     /// # Examples
     /// ```
@@ -318,10 +309,10 @@ impl Variant for StandardChess {
         Ok(())
     }
 
-    /// Resigns the game for a player.
+    /// Resigns the [Game] for a player
     ///
     /// # Arguments
-    /// * `color` - The color of the player who resigns.
+    /// * `color` - The [Color] of the player who resigns
     ///
     /// # Examples
     /// ```
@@ -336,7 +327,7 @@ impl Variant for StandardChess {
         self.game.resign(color)
     }
 
-    /// Sets the game as a draw by agreement.
+    /// Sets the [Game] as a draw by agreement
     ///
     /// # Examples
     /// ```
@@ -351,10 +342,10 @@ impl Variant for StandardChess {
         self.game.set_draw_by_agreement()
     }
 
-    /// Sets the game as lost in time for a player.
+    /// Sets the [Game] as lost in time for a player
     ///
     /// # Arguments
-    /// * `color` - The color of the player who lost in time.
+    /// * `color` - The [Color] of the player who lost in time
     ///
     /// # Examples
     /// ```
@@ -369,10 +360,10 @@ impl Variant for StandardChess {
         self.game.set_lost_in_time(color)
     }
 
-    /// Returns the board of the game.
+    /// Returns the [Board] of the game
     ///
     /// # Returns
-    /// A copy of the board of the game.
+    /// A copy of the [Board] of the game
     ///
     /// # Examples
     /// ```
@@ -387,10 +378,10 @@ impl Variant for StandardChess {
         self.game.board.clone()
     }
 
-    /// Returns whether it is white's turn to move.
+    /// Returns whether it is white's turn to [Move]
     ///
     /// # Returns
-    /// Whether it is white's turn to move.
+    /// Whether it is white's turn to [Move]
     ///
     /// # Examples
     /// ```
@@ -405,10 +396,10 @@ impl Variant for StandardChess {
         self.game.is_white_turn
     }
 
-    /// Returns the halfmove clock of the game.
+    /// Returns the halfmove clock of the [Game]
     ///
     /// # Returns
-    /// The halfmove clock of the game.
+    /// The halfmove clock of the [Game]
     ///
     /// # Examples
     /// ```
@@ -423,10 +414,10 @@ impl Variant for StandardChess {
         self.game.halfmove_clock
     }
 
-    /// Returns the fullmove number of the game.
+    /// Returns the fullmove number of the [Game]
     ///
     /// # Returns
-    /// The fullmove number of the game.
+    /// The fullmove number of the [Game]
     ///
     /// # Examples
     /// ```
@@ -441,10 +432,10 @@ impl Variant for StandardChess {
         self.game.fullmove_number
     }
 
-    /// Returns the castling rights of the game.
+    /// Returns the castling rights of the [Game]
     ///
     /// # Returns
-    /// The castling rights of the game.
+    /// The castling rights of the [Game]
     ///
     /// # Examples
     /// ```
@@ -477,10 +468,10 @@ impl Variant for StandardChess {
         castling_rights
     }
 
-    /// Returns the en passant square of the game.
+    /// Returns the en passant square of the [Game]
     ///
     /// # Returns
-    /// The en passant square of the game.
+    /// The en passant square of the [Game]
     ///
     /// # Examples
     /// ```
@@ -495,10 +486,10 @@ impl Variant for StandardChess {
         self.game.en_passant
     }
 
-    /// Returns the starting FEN of the game.
+    /// Returns the starting FEN of the [game]
     ///
     /// # Returns
-    /// A copy of the starting FEN of the game.
+    /// A copy of the starting FEN of the [Game]
     ///
     /// # Examples
     /// ```
@@ -513,10 +504,10 @@ impl Variant for StandardChess {
         self.game.starting_fen.clone()
     }
 
-    /// Returns the history of the game.
+    /// Returns the history of the [Game]
     ///
     /// # Returns
-    /// A copy of the history of the game.
+    /// A copy of the history of the [Game]
     ///
     /// # Examples
     /// ```
@@ -531,10 +522,10 @@ impl Variant for StandardChess {
         self.game.history.clone()
     }
 
-    /// Returns the previous positions of the game.
+    /// Returns the previous positions of the [Game]
     ///
     /// # Returns
-    /// A copy of the previous positions of the game.
+    /// A copy of the previous positions of the [Game]
     ///
     /// # Examples
     /// ```
@@ -549,10 +540,10 @@ impl Variant for StandardChess {
         self.game.prev_positions.clone()
     }
 
-    /// Returns the status of the game.
+    /// Returns the status of the [Game]
     ///
     /// # Returns
-    /// The status of the game.
+    /// The status of the [Game]
     ///
     /// # Examples
     /// ```
@@ -567,3 +558,5 @@ impl Variant for StandardChess {
         self.game.status
     }
 }
+
+// TODO: Implement tests for StandardChess variant
