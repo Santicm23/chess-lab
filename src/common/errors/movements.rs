@@ -71,4 +71,39 @@ impl MoveInfoError {
     }
 }
 
-// TODO add tests for Move errors
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_move_info_error_creation() {
+        let piece =
+            crate::core::Piece::new(crate::core::Color::White, crate::core::PieceType::Pawn);
+        let from = crate::core::Position::new(4, 1).unwrap();
+        let to = crate::core::Position::new(4, 3).unwrap();
+        let move_type = crate::core::MoveType::Normal {
+            capture: false,
+            promotion: None,
+        };
+        let captured_piece = None;
+        let rook_from = None;
+        let ambiguity = (false, false);
+
+        let mov = Move::new(
+            piece,
+            from,
+            to,
+            move_type,
+            captured_piece,
+            rook_from,
+            ambiguity,
+            false,
+            false,
+        )
+        .unwrap();
+        let error = MoveInfoError::new("Invalid move".to_string(), mov.clone());
+
+        assert_eq!(error.error, "Invalid move");
+        assert_eq!(error.mov, mov);
+    }
+}

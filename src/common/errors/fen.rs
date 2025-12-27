@@ -51,4 +51,26 @@ impl PieceReprError {
     }
 }
 
-// TODO add tests for FEN errors
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_fen_error_creation() {
+        let fen = "invalid_fen".to_string();
+        let error = FenError::new(fen.clone());
+        assert_eq!(error.fen, fen);
+        assert_eq!(format!("{}", error), format!("Invalid FEN: {}", fen));
+    }
+
+    #[test]
+    fn test_piece_repr_error_creation() {
+        let piece_repr = 'X';
+        let error = PieceReprError::new(piece_repr);
+        assert_eq!(error.piece_repr, piece_repr);
+        assert_eq!(
+            format!("{}", error),
+            format!("Invalid piece representation: {}", piece_repr)
+        );
+    }
+}

@@ -52,4 +52,14 @@ impl PGNMetadataError {
     }
 }
 
-// TODO add tests for PGN errors
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_pgn_metadata_error_new() {
+        let metadata = "Invalid metadata".to_string();
+        let error = PGNMetadataError::new(metadata.clone());
+        assert_eq!(error.metadata, metadata);
+    }
+}
