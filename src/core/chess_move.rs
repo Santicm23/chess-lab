@@ -293,4 +293,56 @@ impl MoveInfo {
     }
 }
 
-// TODO add tests for Move and MoveInfo
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::core::{Color, PieceType};
+
+    #[test]
+    fn test_move_display_normal() {
+        let piece = Piece::new(Color::White, PieceType::Knight);
+        let from = Position::new(1, 0).unwrap(); // b1
+        let to = Position::new(2, 2).unwrap(); // c3
+        let move_type = MoveType::Normal {
+            capture: false,
+            promotion: None,
+        };
+        let mv = Move::new(
+            piece,
+            from,
+            to,
+            move_type,
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        assert_eq!(mv.to_string(), "Nc3");
+    }
+
+    #[test]
+    fn test_move_display_capture() {
+        let piece = Piece::new(Color::Black, PieceType::Bishop);
+        let from = Position::new(2, 7).unwrap(); // c8
+        let to = Position::new(5, 4).unwrap(); // f5
+        let move_type = MoveType::Normal {
+            capture: true,
+            promotion: None,
+        };
+        let mv = Move::new(
+            piece,
+            from,
+            to,
+            move_type,
+            Some(PieceType::Pawn),
+            None,
+            (false, false),
+            true,
+            false,
+        )
+        .unwrap();
+        assert_eq!(mv.to_string(), "Bxf5+");
+    }
+}

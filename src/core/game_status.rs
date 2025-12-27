@@ -64,4 +64,15 @@ impl fmt::Display for WinReason {
     }
 }
 
-// TODO add tests for GameStatus, DrawReason, and WinReason
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_game_status_display() {
+        let draw_reason = DrawReason::Stalemate;
+        assert_eq!(draw_reason.to_string(), "Stalemate");
+
+        let win_reason = WinReason::Checkmate;
+        assert_eq!(win_reason.to_string(), "Checkmate");
+    }
+}
