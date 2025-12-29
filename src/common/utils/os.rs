@@ -68,6 +68,7 @@ mod tests {
     fn test_write_and_read_file() {
         let file_name = "test_file.txt";
         let content = "Hello, Chess Lab!";
+        let append_content = "Appending this line.";
 
         // Write to the file
         write_file(file_name, content, false).expect("Failed to write to file");
@@ -76,6 +77,13 @@ mod tests {
         let read_content = read_file(file_name).expect("Failed to read from file");
 
         assert_eq!(content, read_content);
+
+        // Append to the file
+        write_file(file_name, append_content, true).expect("Failed to append to file");
+        let read_content_after_append =
+            read_file(file_name).expect("Failed to read from file after append");
+        let expected_content = format!("{}\n\n{}", content, append_content);
+        assert_eq!(expected_content, read_content_after_append);
 
         // Clean up
         fs::remove_file(file_name).expect("Failed to delete test file");

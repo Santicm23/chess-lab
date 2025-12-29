@@ -142,6 +142,9 @@ mod tests {
         let start_pos = Position::new(0, 2).unwrap();
         let end_pos = Position::new(2, 0).unwrap();
         assert!(movement_direction(&start_pos, &end_pos, (1, -1)));
+        let start_pos = Position::new(0, 0).unwrap();
+        let end_pos = Position::new(1, 0).unwrap();
+        assert!(movement_direction(&start_pos, &end_pos, (1, 0)));
     }
 
     #[test]

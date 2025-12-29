@@ -282,6 +282,22 @@ mod tests {
     }
 
     #[test]
+    fn test_position_invalid() {
+        let pos = Position::new(8, 0);
+        assert!(pos.is_err());
+        let pos = Position::new(0, 8);
+        assert!(pos.is_err());
+        let pos = Position::from_string("i1");
+        assert!(pos.is_err());
+        let pos = Position::from_string("a9");
+        assert!(pos.is_err());
+        let pos = Position::from_string("a");
+        assert!(pos.is_err());
+        let pos = Position::from_string("a12");
+        assert!(pos.is_err());
+    }
+
+    #[test]
     fn test_position_to_bitboard() {
         let pos = Position::new(0, 0).unwrap();
         assert_eq!(pos.to_bitboard(), 0x0000000000000001);
