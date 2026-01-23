@@ -1,13 +1,12 @@
 use std::fmt::Display;
 
-use regex::Regex;
-
 use crate::{
     core::{piece_movement, Color, Piece, PieceType, Position},
     errors::{
         FenError, PositionBetweenError, PositionEmptyError, PositionOccupiedError,
         PositionOutOfRangeError, UnalignedPositionsError,
     },
+    parsing::fen::parse_simple_fen,
     utils::movements::{diagonal_movement, linear_movement},
 };
 
@@ -108,46 +107,12 @@ impl Board {
     /// * `fen`: A FEN string representing the board
     ///
     /// # Returns
+    /// A `Result<Board, FenError>` object
     /// * `Ok(Board)`: A new board with the position represented by the FEN string
     /// * `Err(FenError)`: If the FEN string is invalid
     ///
     pub fn from_fen(fen: &str) -> Result<Board, FenError> {
-        let re = Regex::new(r"^([1-8PpNnBbRrQqKk]{1,8}/){7}[1-8PpNnBbRrQqKk]{1,8}$").unwrap(); // safe unwrap
-
-        if !re.is_match(fen) {
-            return Err(FenError::new(fen.to_string()));
-        }
-
-        let mut board = Board::empty();
-        let ranks = fen.split('/').collect::<Vec<&str>>();
-
-        let mut row = 8;
-        for rank in ranks {
-            row -= 1;
-
-            let mut col = 0;
-            for c in rank.chars() {
-                match c {
-                    '1'..='8' => {
-                        col += c.to_digit(10).unwrap() as u8;
-                    }
-                    _ => {
-                        let piece = Piece::from_fen(c).unwrap();
-
-                        board
-                            .set_piece(
-                                piece,
-                                &Position::new(col, row)
-                                    .map_err(|_| FenError::new(fen.to_string()))?,
-                            )
-                            .unwrap();
-
-                        col += 1;
-                    }
-                }
-            }
-        }
-        Ok(board)
+        parse_simple_fen(fen)
     }
 
     /// Checks if a position is occupied by a piece

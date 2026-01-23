@@ -359,7 +359,7 @@ fn parse_full_move(game: &mut Game, full_move: Pair<Rule>) {
 mod tests {
     use crate::{core::Variant, utils::os::read_file, variants::StandardChess};
 
-    use super::{parse_multiple_pgn, parse_pgn};
+    use super::*;
 
     #[test]
     fn test_parse_pgn() {

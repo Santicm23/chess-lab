@@ -8,6 +8,7 @@ use crate::{
         PieceType, Position, WinReason,
     },
     errors::{FenError, MoveError},
+    parsing::fen::parse_fen,
 };
 
 use super::board::Board;
@@ -117,38 +118,7 @@ impl Game {
     /// ```
     ///
     pub fn from_fen(fen: &str) -> Result<Game, FenError> {
-        let re = Regex::new(r"^([1-8PpNnBbRrQqKk]{1,8}/){7}[1-8PpNnBbRrQqKk]{1,8} [wb] (-|[KQkq]{1,4}) (-|[a-h][1-8]) \d+ ([1-9]\d*)$").unwrap();
-
-        if !re.is_match(fen) {
-            return Err(FenError::new(fen.to_string()));
-        }
-
-        let mut game = Game::default();
-        game.starting_fen = fen.to_string();
-
-        game.prev_positions.clear();
-        game.prev_positions.insert(game.get_fen_reduced(), 1);
-
-        let parts = fen.split(' ').collect::<Vec<&str>>();
-        game.board = Board::new(parts[0])?;
-        game.is_white_turn = parts[1] == "w";
-        game.castling_rights = parts[2].chars().fold(0, |acc, c| match c {
-            'K' => acc | 0b1000,
-            'Q' => acc | 0b0100,
-            'k' => acc | 0b0010,
-            'q' => acc | 0b0001,
-            _ => 0,
-        });
-
-        game.en_passant = if parts[3] == "-" {
-            None
-        } else {
-            Some(Position::from_string(parts[3]).unwrap())
-        };
-        game.halfmove_clock = parts[4].parse::<u32>().unwrap();
-        game.fullmove_number = parts[5].parse::<u32>().unwrap();
-
-        Ok(game)
+        parse_fen(fen)
     }
 
     pub fn get_variant(&self) -> String {
