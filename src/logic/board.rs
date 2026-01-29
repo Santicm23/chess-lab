@@ -4,7 +4,7 @@ use crate::{
     core::{piece_movement, Color, Piece, PieceType, Position},
     errors::{
         FenError, PositionBetweenError, PositionEmptyError, PositionOccupiedError,
-        PositionOutOfRangeError, UnalignedPositionsError,
+        UnalignedPositionsError,
     },
     parsing::fen::parse_simple_fen,
     utils::movements::{diagonal_movement, linear_movement},
@@ -430,17 +430,7 @@ impl Board {
         let direction = from.direction(to);
         let mut pos = from.to_owned();
 
-        loop {
-            if pos.col as i8 + direction.0 < 0
-                || pos.col as i8 + direction.0 > 7
-                || pos.row as i8 + direction.1 < 0
-                || pos.row as i8 + direction.1 > 7
-            {
-                return Err(PositionBetweenError::from(PositionOutOfRangeError::new(
-                    (pos.col as i8 + direction.0) as u8,
-                    (pos.row as i8 + direction.1) as u8,
-                )));
-            }
+        for _ in 0..7 {
             pos = &pos + direction;
             if pos == *to {
                 break;
@@ -527,6 +517,15 @@ mod tests {
             board.to_string(),
             "rnbqkbnr/pppppppp/8/8/8/4P3/PPPPPPPP/RNBQKBNR"
         );
+    }
+
+    #[test]
+    fn test_set_piece_occupied() {
+        let mut board = Board::default();
+        let pos = Position::new(0, 1).unwrap();
+        let piece = Piece::new(Color::White, PieceType::Pawn);
+        let result = board.set_piece(piece, &pos);
+        assert!(result.is_err());
     }
 
     #[test]

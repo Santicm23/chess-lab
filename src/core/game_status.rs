@@ -69,10 +69,22 @@ mod tests {
     use super::*;
     #[test]
     fn test_game_status_display() {
-        let draw_reason = DrawReason::Stalemate;
+        let mut draw_reason = DrawReason::Stalemate;
         assert_eq!(draw_reason.to_string(), "Stalemate");
+        draw_reason = DrawReason::InsufficientMaterial;
+        assert_eq!(draw_reason.to_string(), "Insufficient material");
+        draw_reason = DrawReason::ThreefoldRepetition;
+        assert_eq!(draw_reason.to_string(), "Threefold repetition");
+        draw_reason = DrawReason::FiftyMoveRule;
+        assert_eq!(draw_reason.to_string(), "Fifty move rule");
+        draw_reason = DrawReason::Agreement;
+        assert_eq!(draw_reason.to_string(), "Agreement");
 
-        let win_reason = WinReason::Checkmate;
+        let mut win_reason = WinReason::Checkmate;
         assert_eq!(win_reason.to_string(), "Checkmate");
+        win_reason = WinReason::Resignation;
+        assert_eq!(win_reason.to_string(), "Resignation");
+        win_reason = WinReason::Time;
+        assert_eq!(win_reason.to_string(), "Time");
     }
 }

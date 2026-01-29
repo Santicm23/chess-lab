@@ -159,9 +159,6 @@ impl UnalignedPositionsError {
 #[non_exhaustive]
 #[derive(Debug, PartialEq, Error)]
 pub enum PositionBetweenError {
-    /// Indicates that the [Position] is outside the allowed range
-    #[error(transparent)]
-    OutOfRange(#[from] PositionOutOfRangeError),
     /// Indicates that two [Positions](Position) are not aligned and they should be
     #[error(transparent)]
     Unaligned(#[from] UnalignedPositionsError),
@@ -221,14 +218,5 @@ mod tests {
         assert_eq!(error.position1, position1);
         assert_eq!(error.position2, position2);
         assert_eq!(format!("{}", error), "Positions a1 and b3 are not aligned");
-    }
-
-    #[test]
-    fn test_position_between_error() {
-        let col = 8;
-        let row = 8;
-        let error = PositionBetweenError::OutOfRange(PositionOutOfRangeError::new(col, row));
-
-        assert_eq!(error.to_string(), "Position (8, 8) is out of range");
     }
 }

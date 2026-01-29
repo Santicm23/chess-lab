@@ -345,4 +345,184 @@ mod tests {
         .unwrap();
         assert_eq!(mv.to_string(), "Bxf5+");
     }
+
+    #[test]
+    fn test_move_display_kingside_castle() {
+        let piece = Piece::new(Color::White, PieceType::King);
+        let from = Position::new(4, 0).unwrap(); // e1
+        let to = Position::new(6, 0).unwrap(); // g1
+        let move_type = MoveType::Castle {
+            side: CastleType::KingSide,
+        };
+        let mv = Move::new(
+            piece,
+            from,
+            to,
+            move_type,
+            None,
+            Some(Position::new(7, 0).unwrap()), // h1
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        assert_eq!(mv.to_string(), "O-O");
+    }
+
+    #[test]
+    fn test_move_display_queenside_castle() {
+        let piece = Piece::new(Color::Black, PieceType::King);
+        let from = Position::new(4, 7).unwrap(); // e8
+        let to = Position::new(2, 7).unwrap(); // c8
+        let move_type = MoveType::Castle {
+            side: CastleType::QueenSide,
+        };
+        let mv = Move::new(
+            piece,
+            from,
+            to,
+            move_type,
+            None,
+            Some(Position::new(0, 7).unwrap()), // a8
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        assert_eq!(mv.to_string(), "O-O-O");
+    }
+
+    #[test]
+    fn test_capture_invalid_error() {
+        let piece = Piece::new(Color::Black, PieceType::Bishop);
+        let from = Position::new(2, 7).unwrap(); // c8
+        let to = Position::new(5, 4).unwrap(); // f5
+        let move_type = MoveType::Normal {
+            capture: true,
+            promotion: None,
+        };
+        let mv_result = Move::new(
+            piece,
+            from,
+            to,
+            move_type,
+            None, // No captured piece provided
+            None,
+            (false, false),
+            true,
+            false,
+        );
+        assert!(mv_result.is_err());
+    }
+
+    #[test]
+    fn test_normal_move_with_capture_piece_error() {
+        let piece = Piece::new(Color::White, PieceType::Rook);
+        let from = Position::new(0, 0).unwrap(); // a1
+        let to = Position::new(0, 5).unwrap(); // a6
+        let move_type = MoveType::Normal {
+            capture: false,
+            promotion: None,
+        };
+        let mv_result = Move::new(
+            piece,
+            from,
+            to,
+            move_type,
+            Some(PieceType::Knight), // Captured piece provided incorrectly
+            None,
+            (false, false),
+            false,
+            false,
+        );
+        assert!(mv_result.is_err());
+    }
+
+    #[test]
+    fn test_promoting_non_pawn_error() {
+        let piece = Piece::new(Color::White, PieceType::Knight);
+        let from = Position::new(6, 7).unwrap(); // g8
+        let to = Position::new(7, 7).unwrap(); // h8
+        let move_type = MoveType::Normal {
+            capture: false,
+            promotion: Some(PieceType::Queen),
+        };
+        let mv_result = Move::new(
+            piece,
+            from,
+            to,
+            move_type,
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        );
+        assert!(mv_result.is_err());
+    }
+
+    #[test]
+    fn test_castling_non_king_error() {
+        let piece = Piece::new(Color::Black, PieceType::Queen);
+        let from = Position::new(4, 7).unwrap(); // e8
+        let to = Position::new(6, 7).unwrap(); // g8
+        let move_type = MoveType::Castle {
+            side: CastleType::KingSide,
+        };
+        let mv_result = Move::new(
+            piece,
+            from,
+            to,
+            move_type,
+            None,
+            Some(Position::new(7, 7).unwrap()), // h8
+            (false, false),
+            false,
+            false,
+        );
+        assert!(mv_result.is_err());
+    }
+
+    #[test]
+    fn test_castle_with_no_rook_error() {
+        let piece = Piece::new(Color::White, PieceType::King);
+        let from = Position::new(4, 0).unwrap(); // e1
+        let to = Position::new(2, 0).unwrap(); // c1
+        let move_type = MoveType::Castle {
+            side: CastleType::QueenSide,
+        };
+        let mv_result = Move::new(
+            piece,
+            from,
+            to,
+            move_type,
+            None,
+            None, // No rook position provided
+            (false, false),
+            false,
+            false,
+        );
+        assert!(mv_result.is_err());
+    }
+
+    #[test]
+    fn test_en_passant_non_pawn_error() {
+        let piece = Piece::new(Color::Black, PieceType::Bishop);
+        let from = Position::new(3, 4).unwrap(); // d5
+        let to = Position::new(4, 3).unwrap(); // e4
+        let move_type = MoveType::EnPassant;
+
+        let mv_result = Move::new(
+            piece,
+            from,
+            to,
+            move_type,
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        );
+        assert!(mv_result.is_err());
+    }
 }

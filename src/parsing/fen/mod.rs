@@ -117,7 +117,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn simple_fen() {
+    fn test_simple_fen() {
         let board = parse_simple_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR").unwrap();
         assert_eq!(
             board.to_string(),
@@ -126,13 +126,13 @@ mod tests {
     }
 
     #[test]
-    fn invalid_simple_fen() {
+    fn test_invalid_simple_fen() {
         let board = parse_simple_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR/8");
         assert!(board.is_err());
     }
 
     #[test]
-    fn fen() {
+    fn test_fen() {
         let game =
             Game::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1").unwrap();
         assert_eq!(
@@ -142,18 +142,29 @@ mod tests {
     }
 
     #[test]
-    fn invalid_fen() {
+    fn test_invalid_fen() {
         let game = Game::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0");
         assert!(game.is_err());
     }
 
     #[test]
-    fn fen_reduced() {
+    fn test_fen_reduced() {
         let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         let reduced = get_fen_reduced(fen);
         assert_eq!(
             reduced,
             "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -"
         );
+    }
+
+    #[test]
+    fn test_en_passant_fen() {
+        let game =
+            Game::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq e3 0 1").unwrap();
+        assert_eq!(
+            game.fen(),
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq e3 0 1"
+        );
+        assert_eq!(game.en_passant, Some(Position::from_string("e3").unwrap()));
     }
 }

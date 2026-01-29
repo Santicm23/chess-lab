@@ -335,6 +335,35 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_from_char() {
+        assert_eq!(PieceType::from_char('p'), Some(PieceType::Pawn));
+        assert_eq!(PieceType::from_char('P'), Some(PieceType::Pawn));
+        assert_eq!(PieceType::from_char('N'), Some(PieceType::Knight));
+        assert_eq!(PieceType::from_char('n'), Some(PieceType::Knight));
+        assert_eq!(PieceType::from_char('B'), Some(PieceType::Bishop));
+        assert_eq!(PieceType::from_char('b'), Some(PieceType::Bishop));
+        assert_eq!(PieceType::from_char('R'), Some(PieceType::Rook));
+        assert_eq!(PieceType::from_char('r'), Some(PieceType::Rook));
+        assert_eq!(PieceType::from_char('Q'), Some(PieceType::Queen));
+        assert_eq!(PieceType::from_char('q'), Some(PieceType::Queen));
+        assert_eq!(PieceType::from_char('K'), Some(PieceType::King));
+        assert_eq!(PieceType::from_char('k'), Some(PieceType::King));
+
+        assert_eq!(PieceType::from_char('X'), None);
+        assert_eq!(PieceType::from_char('y'), None);
+    }
+
+    #[test]
+    fn test_to_char() {
+        assert_eq!(PieceType::Pawn.to_char(), 'P');
+        assert_eq!(PieceType::Knight.to_char(), 'N');
+        assert_eq!(PieceType::Bishop.to_char(), 'B');
+        assert_eq!(PieceType::Rook.to_char(), 'R');
+        assert_eq!(PieceType::Queen.to_char(), 'Q');
+        assert_eq!(PieceType::King.to_char(), 'K');
+    }
+
+    #[test]
     fn test_pawn_movement() {
         assert!(pawn_movement(
             Color::White,
@@ -908,6 +937,12 @@ mod tests {
         let bking = Piece::from_fen('k').unwrap();
         assert_eq!(bking.color, Color::Black);
         assert_eq!(bking.piece_type, PieceType::King);
+    }
+
+    #[test]
+    fn test_from_fen_invalid() {
+        let result = Piece::from_fen('X');
+        assert!(result.is_err());
     }
 
     #[test]
