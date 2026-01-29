@@ -366,24 +366,36 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
     /// ```
     ///
     pub fn add_metadata(&mut self, key: &str, value: &str) -> Result<(), PGNMetadataError> {
-        if key == "Event" {
-            self.event = value.to_string();
-        } else if key == "Site" {
-            self.site = value.to_string();
-        } else if key == "Date" {
-            self.date = value.to_string();
-        } else if key == "Round" {
-            self.round = value.to_string();
-        } else if key == "White" {
-            self.white = value.to_string();
-        } else if key == "Black" {
-            self.black = value.to_string();
-        } else if key == "Result" {
-            self.result = value.to_string();
-        } else {
-            let metadata = OptionPGNMetadata::from_string(key, value)
-                .ok_or(PGNMetadataError::new(format!("[{} \"{}\"]", key, value)))?;
-            self.option_metadata.push(metadata);
+        match key {
+            "Event" => {
+                self.event = value.to_string();
+            }
+            "Site" => {
+                self.site = value.to_string();
+            }
+            "Date" => {
+                self.date = value.to_string();
+            }
+            "Round" => {
+                self.round = value.to_string();
+            }
+            "White" => {
+                self.white = value.to_string();
+            }
+            "Black" => {
+                self.black = value.to_string();
+            }
+            "Result" => {
+                self.result = value.to_string();
+            }
+            "Variant" => {
+                self.variant = Some(value.to_string());
+            }
+            _ => {
+                let metadata = OptionPGNMetadata::from_string(key, value)
+                    .ok_or(PGNMetadataError::new(format!("[{} \"{}\"]", key, value)))?;
+                self.option_metadata.push(metadata);
+            }
         }
         Ok(())
     }

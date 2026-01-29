@@ -25,7 +25,7 @@ struct PGNParser;
 ///
 pub fn parse_multiple_pgn<T: Variant + VariantBuilder>(input: &str) -> Result<Vec<T>, PGNError> {
     let pair = PGNParser::parse(Rule::pgn_file, input)
-        .expect("Failed to parse PGN")
+        .map_err(|e| PGNError::InvalidPgn(e.to_string()))?
         .next()
         .ok_or(PGNError::InvalidPgn(input.to_string()))?;
 
@@ -61,14 +61,14 @@ pub fn parse_multiple_pgn<T: Variant + VariantBuilder>(input: &str) -> Result<Ve
 /// * `Ok(Game)` - A Game struct with the parsed PGN
 /// * `Err(PgnError)` - An error with the reason why the PGN could not be parsed
 ///
+/// pub fn parse_pgn<T: Variant + VariantBuilder>(input: &str) -> Result<T, PGNError> {
 pub fn parse_pgn<T: Variant + VariantBuilder>(input: &str) -> Result<T, PGNError> {
     let pair = PGNParser::parse(Rule::pgn, input)
-        .expect("Failed to parse PGN")
+        .map_err(|_| PGNError::InvalidPgn(input.to_string()))?
         .next()
         .ok_or(PGNError::InvalidPgn(input.to_string()))?;
 
     let game = parse_single_pgn(pair)?;
-
     if &game.get_variant() != T::name() {
         return Err(PGNError::InvalidVariant(game.get_variant()));
     }
@@ -269,7 +269,6 @@ fn parse_multi_half_subsequence(game: &mut Game, multi_half_subsequence: Pair<Ru
             _ => unreachable!(),
         }
     }
-    game.undo();
 }
 
 /// Plays a sub variation of moves in a game that starts with a half move
@@ -282,22 +281,28 @@ fn parse_half_subsequence(game: &mut Game, half_subsequence: Pair<Rule>) {
     let mut pairs = half_subsequence.into_inner();
 
     let half_move = pairs.next().unwrap();
-    parse_partial_move(game, half_move);
-
-    let sequence = pairs.next().unwrap();
 
     game.undo();
+    parse_partial_move(game, half_move);
 
-    let root_fullmove_number = game.fullmove_number;
+    if let Some(sequence) = pairs.next() {
+        match sequence.as_rule() {
+            Rule::sequence => {
+                let first_fen = game.fen();
 
-    parse_sequence(game, sequence);
+                parse_sequence(game, sequence);
 
-    let mut fullmove_number = game.fullmove_number;
+                game.undo();
 
-    while root_fullmove_number != fullmove_number && game.fen() != game.starting_fen {
-        game.undo();
-        fullmove_number = game.fullmove_number;
+                while game.fen() != first_fen {
+                    game.undo();
+                }
+            }
+            Rule::COMMENT => (),
+            _ => unreachable!(),
+        }
     }
+    game.undo();
 
     game.redo();
 }
@@ -399,6 +404,37 @@ mod tests {
             .for_each(|metadata| {
                 assert!(input.contains(&format!("{}", metadata)));
             });
+    }
+
+    #[test]
+    fn test_invalid_variant() {
+        let input = "[Variant \"Chess960\"]\
+        1. e4 c6";
+        let result: Result<StandardChess, PGNError> = parse_pgn(input);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_multiple_invalid_variants() {
+        let input = "[Event \"caro kann: exchange\"]
+        [Variant \"Chess960\"]
+        1. e4 c6\
+        [Event \"another game\"]
+        [Variant \"Standard\"]
+        1. d4 d5";
+        let result: Result<Vec<StandardChess>, PGNError> = parse_multiple_pgn(&input);
+        println!("{:?}", result);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_multiple_lines_pgn() {
+        let input = "[Event \"game 1\"]\
+        1. e4 e5 2. Nf3 Nc6 (2... Nf6 3. Nxe5 d6) (2... g6) 3. Bb5 a6";
+
+        let game = parse_pgn::<StandardChess>(&input).unwrap();
+
+        assert_eq!(game.pgn(), "[Event \"game 1\"]\n[Site \"\"]\n[Date \"\"]\n[Round \"\"]\n[White \"\"]\n[Black \"\"]\n[Result \"\"]\n1. e4 e5 2. Nf3 Nc6 (2... Nf6 3. Nxe5 d6) (2... g6) 3. Bb5 a6")
     }
 
     #[test]
