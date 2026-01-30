@@ -3,7 +3,7 @@ COMMENT    =  { "{" ~ (!"}" ~ ANY)* ~ "}" }
 
 // Constants
 key           = @{ (!("]" | "\"") ~ ASCII_ALPHA)+ }
-value         =  { (!("]" | "\"") ~ ANY)+ }
+value         = @{ (!("]" | "\"") ~ ANY)+ }
 file          = @{ 'a'..'h' }
 rank          = @{ '1'..'8' }
 piece         = @{ ("K" | "Q" | "R" | "B" | "N") }
@@ -39,12 +39,13 @@ sequence               = {
   | line
 }
 subsequence            = { "(" ~ sequence ~ ")" }
-half_subsequence       = { "(" ~ half_move ~ sequence? ~ ")" }
+half_sequence          = { (half_move | move) ~ sequence? }
+half_subsequence       = { "(" ~ half_sequence ~ ")" }
 multi_subsequence      = { subsequence+ }
 multi_half_subsequence = { half_subsequence+ }
-white_sequence         = { (full_move* ~ partial_move) ~ multi_subsequence ~ ((half_move | move) ~ sequence)? }
+white_sequence         = { (full_move* ~ partial_move) ~ multi_subsequence ~ half_sequence? }
 black_sequence         = { (full_move+ ~ multi_half_subsequence ~ sequence?) }
 
 // PGN
 pgn      = !{ metadata* ~ sequence ~ result? }
-pgn_file = ${ SOI ~ WHITESPACE* ~ pgn ~ ((WHITESPACE+) ~ pgn)* ~ WHITESPACE* ~ EOI }
+pgn_file = ${ SOI ~ WHITESPACE* ~ pgn ~ (WHITESPACE* ~ pgn)* ~ WHITESPACE* ~ EOI }

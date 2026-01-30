@@ -1093,10 +1093,17 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
             ));
         }
 
-        pgn.push_str(&format!(
-            " {}",
-            self.pgn_line_moves(Rc::clone(&self.lines[0]), 2, false)
-        ));
+        if self.lines.len() > 1 {
+            pgn.push_str(&format!(
+                " 1... {}",
+                self.pgn_line_moves(Rc::clone(&self.lines[0]), 2, false)
+            ));
+        } else {
+            pgn.push_str(&format!(
+                " {}",
+                self.pgn_line_moves(Rc::clone(&self.lines[0]), 2, false)
+            ));
+        };
 
         pgn
     }
@@ -1106,7 +1113,7 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
     /// # Arguments
     /// * `line` - The line
     /// * `move_number` - The move number
-    /// * `secondary` - Whether the line is secondary
+    /// * `secondary` - Whether the line is a subsequent line
     ///
     /// # Returns
     /// The PGN moves of a line
@@ -1123,16 +1130,18 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
 
         if secondary {
             if tmp_move_number % 2 == 0 {
-                pgn.push_str(&format!("{}... ", tmp_move_number / 2))
+                pgn.push_str(&format!("{}... ", tmp_move_number / 2));
             } else {
                 pgn.push_str(&format!("{}. ", tmp_move_number / 2 + 1));
-            };
+            }
             pgn.push_str(&format!("{} ", line.as_ref().borrow().mov));
 
             tmp_move_number += 1;
         }
 
         let mut stack = vec![line];
+
+        let mut is_half_sequence = false;
 
         while let Some(current) = stack.pop() {
             let line = current.as_ref().borrow();
@@ -1144,13 +1153,23 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
                 if tmp_move_number % 2 != 0 {
                     pgn.push_str(&format!("{}. ", tmp_move_number / 2 + 1));
                 };
-                tmp_move_number += 1;
 
                 let next = Rc::clone(&line.lines[0]);
-                pgn.push_str(&format!("{} ", next.as_ref().borrow().mov));
+                if is_half_sequence {
+                    is_half_sequence = false;
+                    pgn.push_str(&format!(
+                        "{}... {} ",
+                        tmp_move_number / 2,
+                        next.as_ref().borrow().mov
+                    ));
+                } else {
+                    pgn.push_str(&format!("{} ", next.as_ref().borrow().mov));
+                }
                 stack.push(Rc::clone(&next));
+                tmp_move_number += 1;
 
                 if line.lines.len() != 1 {
+                    is_half_sequence = tmp_move_number % 2 == 0;
                     for next in line.lines.iter().skip(1) {
                         pgn.push_str(&format!(
                             "{} ",
