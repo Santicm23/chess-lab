@@ -168,9 +168,6 @@ fn parse_white_sequence(game: &mut Game, white_sequence: Pair<Rule>) {
             Rule::half_sequence => {
                 parse_half_sequence(game, mov_type);
             }
-            Rule::sequence => {
-                parse_sequence(game, mov_type);
-            }
             Rule::multi_subsequence => {
                 parse_multi_subsequence(game, mov_type);
             }
@@ -468,22 +465,22 @@ mod tests {
     fn test_comments_in_pgn() {
         let input = "[Event \"game with comments\"]
             {First comment}
-            1. e4 e5 {This is a comment} 2. Nf3 Nc6 {Another comment} 3. {This weird comment} Bb5 {Another one} a6
-            {Last comment}";
+            1. e4 {A comment} (1. c4 {Another comment}) {Other one} (1. d4) e5 2. {Other} Nf3 Nc6 {And other} (2... {Another one} Nf6 3. Nxe5 {And other} d6) {And other} (2... g6) 3. Bb5 (3. Bc4) 3... {This one} a6
+            {Last one}";
 
         let variant = parse_pgn::<StandardChess>(&input).unwrap();
 
-        assert_eq!(variant.pgn(), "[Event \"game with comments\"]\n[Site \"\"]\n[Date \"\"]\n[Round \"\"]\n[White \"\"]\n[Black \"\"]\n[Result \"\"]\n1. e4 e5 2. Nf3 Nc6 3. Bb5 a6")
+        assert_eq!(variant.pgn(), "[Event \"game with comments\"]\n[Site \"\"]\n[Date \"\"]\n[Round \"\"]\n[White \"\"]\n[Black \"\"]\n[Result \"\"]\n1. e4 (1. c4) (1. d4) 1... e5 2. Nf3 Nc6 (2... Nf6 3. Nxe5 d6) (2... g6) 3. Bb5 (3. Bc4) 3... a6")
     }
 
     #[test]
     fn test_multiple_lines_pgn() {
         let input = "[Event \"game 1\"]
-        1. e4 (1. e3) e5 2. Nf3 Nc6 (2... Nf6 3. Nxe5 d6) (2... g6) 3. Bb5 (3. Bc4) 3... a6";
+        1. e4 (1. c4) (1. d4) e5 2. Nf3 Nc6 (2... Nf6 3. Nxe5 d6) (2... g6) 3. Bb5 (3. Bc4) 3... a6";
 
         let variant = parse_pgn::<StandardChess>(&input).unwrap();
 
-        assert_eq!(variant.pgn(), "[Event \"game 1\"]\n[Site \"\"]\n[Date \"\"]\n[Round \"\"]\n[White \"\"]\n[Black \"\"]\n[Result \"\"]\n1. e4 (1. e3) 1... e5 2. Nf3 Nc6 (2... Nf6 3. Nxe5 d6) (2... g6) 3. Bb5 (3. Bc4) 3... a6")
+        assert_eq!(variant.pgn(), "[Event \"game 1\"]\n[Site \"\"]\n[Date \"\"]\n[Round \"\"]\n[White \"\"]\n[Black \"\"]\n[Result \"\"]\n1. e4 (1. c4) (1. d4) 1... e5 2. Nf3 Nc6 (2... Nf6 3. Nxe5 d6) (2... g6) 3. Bb5 (3. Bc4) 3... a6")
     }
 
     #[test]
