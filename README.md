@@ -29,7 +29,7 @@ Chess Lab is a comprehensive chess library written in rust that supports multipl
 Add the following dependency to your `Cargo.toml` file:
 ```toml
 [dependencies]
-chess-lab = "0.2.0"
+chess-lab = "0.2.2"
 ```
 
 ## Features

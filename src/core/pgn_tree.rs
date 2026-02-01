@@ -391,11 +391,10 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
             "Variant" => {
                 self.variant = Some(value.to_string());
             }
-            _ => {
-                let metadata = OptionPGNMetadata::from_string(key, value)
-                    .ok_or(PGNMetadataError::new(format!("[{} \"{}\"]", key, value)))?;
-                self.option_metadata.push(metadata);
-            }
+            _ => self.option_metadata.push(
+                OptionPGNMetadata::from_string(key, value)
+                    .ok_or(PGNMetadataError::new(format!("[{} \"{}\"]", key, value)))?,
+            ),
         }
         Ok(())
     }
@@ -468,7 +467,7 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
                     .position(|x| *x == new_line)
                 {
                     Some(idx) => idx,
-                    None => return,
+                    None => unreachable!(),
                 };
 
                 self.next_move_variant(index as u32);
@@ -496,7 +495,7 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
             if self.lines.contains(&new_line) {
                 let index = match self.lines.iter().position(|x| *x == new_line) {
                     Some(idx) => idx,
-                    None => return,
+                    None => unreachable!(),
                 };
 
                 self.next_move_variant(index as u32);
@@ -540,29 +539,41 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
             None => return,
         };
 
-        let weak_parent = match &current_line.borrow().parent {
-            Some(parent) => parent.clone(),
-            None => return,
-        };
+        let borrowed_line = current_line.borrow();
 
-        let parent = match weak_parent.upgrade() {
-            Some(parent) => parent,
-            None => return, // Could not upgrade Weak reference; parent might have been dropped.
-        };
+        if let Some(weak_parent) = &borrowed_line.parent {
+            let parent = weak_parent.upgrade().unwrap();
 
-        let index = match parent
-            .borrow()
-            .lines
-            .iter()
-            .position(|x| Rc::ptr_eq(x, &current_line))
-        {
-            Some(idx) => idx,
-            None => return, // Current line not found in parent's lines.
-        };
+            let index = match parent
+                .borrow()
+                .lines
+                .iter()
+                .position(|x| Rc::ptr_eq(x, &current_line))
+            {
+                Some(idx) => idx,
+                None => unreachable!(),
+            };
 
-        parent.as_ref().borrow_mut().lines.remove(index);
+            parent.as_ref().borrow_mut().lines.remove(index);
 
-        self.current_line = Some(parent);
+            self.current_line = Some(parent);
+        } else {
+            // If there is no parent, we are at the root level.
+            let index = match self.lines.iter().position(|x| Rc::ptr_eq(x, &current_line)) {
+                Some(idx) => idx,
+                None => unreachable!(),
+            };
+            self.lines.remove(index);
+
+            match self.lines.get(0) {
+                Some(main_line) => {
+                    self.current_line = Some(Rc::clone(main_line));
+                }
+                None => {
+                    self.current_line = None;
+                }
+            }
+        }
     }
 
     /// Returns the current move
@@ -874,21 +885,17 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
     /// ```
     ///
     pub fn prev_move(&mut self) -> Option<T> {
-        if self.current_line.as_ref()?.borrow().parent.is_none() {
-            self.current_line = None;
-            return None;
+        if let Some(current_line) = self.current_line.take() {
+            if let Some(parent_weak) = &current_line.borrow().parent {
+                if let Some(parent_rc) = parent_weak.upgrade() {
+                    let mov = parent_rc.borrow().mov.clone();
+                    self.current_line = Some(parent_rc);
+                    return Some(mov);
+                }
+            }
         }
-
-        let parent = &self
-            .current_line
-            .as_ref()?
-            .borrow()
-            .parent
-            .as_ref()?
-            .upgrade()?;
-
-        self.current_line = Some(Rc::clone(parent));
-        Some(self.current_line.as_ref()?.borrow().mov.clone())
+        self.current_line = None;
+        None
     }
 
     /// Returns whether there is a next move
@@ -1035,19 +1042,17 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
     /// ```
     ///
     pub fn game_over(&mut self, game_status: GameStatus) {
-        if game_status != GameStatus::InProgress {
-            match game_status {
-                GameStatus::WhiteWins(_) => {
-                    self.result = "1-0".to_string();
-                }
-                GameStatus::BlackWins(_) => {
-                    self.result = "0-1".to_string();
-                }
-                GameStatus::Draw(_) => {
-                    self.result = "1/2-1/2".to_string();
-                }
-                _ => (),
+        match game_status {
+            GameStatus::WhiteWins(_) => {
+                self.result = "1-0".to_string();
             }
+            GameStatus::BlackWins(_) => {
+                self.result = "0-1".to_string();
+            }
+            GameStatus::Draw(_) => {
+                self.result = "1/2-1/2".to_string();
+            }
+            _ => (),
         }
     }
 
@@ -1542,16 +1547,74 @@ mod tests {
 
     #[test]
     fn test_pgn_header() {
-        let mut tree: PGNTree<Move> = PGNTree::default();
-        tree.event = "Event".to_string();
-        tree.site = "Site".to_string();
-        tree.date = "Date".to_string();
-        tree.round = "Round".to_string();
-        tree.white = "White".to_string();
-        tree.black = "Black".to_string();
-        tree.result = "Result".to_string();
+        let tree: PGNTree<Move> = PGNTree::new(
+            "Event".to_string(),
+            "Site".to_string(),
+            "Date".to_string(),
+            "Round".to_string(),
+            "White".to_string(),
+            "Black".to_string(),
+            "Result".to_string(),
+            None,
+        );
 
         assert_eq!(tree.pgn_header(), "[Event \"Event\"]\n[Site \"Site\"]\n[Date \"Date\"]\n[Round \"Round\"]\n[White \"White\"]\n[Black \"Black\"]\n[Result \"Result\"]\n");
+    }
+
+    #[test]
+    fn test_pgn_optional_metadata() {
+        let mut tree: PGNTree<Move> = PGNTree::default();
+        tree.add_metadata("TimeControl", "3+2").unwrap();
+        tree.add_metadata("Termination", "Draw").unwrap();
+        tree.add_metadata("WhiteTitle", "GM").unwrap();
+        tree.add_metadata("BlackTitle", "IM").unwrap();
+        tree.add_metadata("WhiteUSCF", "no rating").unwrap();
+        tree.add_metadata("BlackUSCF", "no rating").unwrap();
+        tree.add_metadata("WhiteNA", "no rating").unwrap();
+        tree.add_metadata("BlackNA", "no rating").unwrap();
+        tree.add_metadata("WhiteType", "no rating").unwrap();
+        tree.add_metadata("BlackType", "no rating").unwrap();
+        tree.add_metadata("EventSponsor", "none").unwrap();
+        tree.add_metadata("Section", "none").unwrap();
+        tree.add_metadata("Stage", "none").unwrap();
+        tree.add_metadata("Board", "none").unwrap();
+        tree.add_metadata("Variation", "Queen's Gambit").unwrap();
+        tree.add_metadata("SubVariation", "Catalan System").unwrap();
+        tree.add_metadata("NIC", "none").unwrap();
+        tree.add_metadata("Time", "3pm").unwrap();
+        tree.add_metadata("SetUp", "none").unwrap();
+        tree.add_metadata(
+            "FEN",
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+        )
+        .unwrap();
+        tree.add_metadata("Mode", "Standard").unwrap();
+
+        assert!(tree.pgn_header().contains("[TimeControl \"3+2\"]"));
+        assert!(tree.pgn_header().contains("[Termination \"Draw\"]"));
+        assert!(tree.pgn_header().contains("[WhiteTitle \"GM\"]"));
+        assert!(tree.pgn_header().contains("[BlackTitle \"IM\"]"));
+        assert!(tree.pgn_header().contains("[WhiteUSCF \"no rating\"]"));
+        assert!(tree.pgn_header().contains("[BlackUSCF \"no rating\"]"));
+        assert!(tree.pgn_header().contains("[WhiteNA \"no rating\"]"));
+        assert!(tree.pgn_header().contains("[BlackNA \"no rating\"]"));
+        assert!(tree.pgn_header().contains("[WhiteType \"no rating\"]"));
+        assert!(tree.pgn_header().contains("[BlackType \"no rating\"]"));
+        assert!(tree.pgn_header().contains("[EventSponsor \"none\"]"));
+        assert!(tree.pgn_header().contains("[Section \"none\"]"));
+        assert!(tree.pgn_header().contains("[Stage \"none\"]"));
+        assert!(tree.pgn_header().contains("[Board \"none\"]"));
+        assert!(tree.pgn_header().contains("[Variation \"Queen's Gambit\"]"));
+        assert!(tree
+            .pgn_header()
+            .contains("[SubVariation \"Catalan System\"]"));
+        assert!(tree.pgn_header().contains("[NIC \"none\"]"));
+        assert!(tree.pgn_header().contains("[Time \"3pm\"]"));
+        assert!(tree.pgn_header().contains("[SetUp \"none\"]"));
+        assert!(tree
+            .pgn_header()
+            .contains("[FEN \"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\"]"));
+        assert!(tree.pgn_header().contains("[Mode \"Standard\"]"));
     }
 
     #[test]
@@ -1670,6 +1733,219 @@ mod tests {
     }
 
     #[test]
+    fn test_empty_pgn() {
+        let pgn_tree = PGNTree::<Move>::default();
+
+        assert_eq!(pgn_tree.pgn(), "[Event \"\"]\n[Site \"\"]\n[Date \"\"]\n[Round \"\"]\n[White \"\"]\n[Black \"\"]\n[Result \"\"]\n");
+    }
+
+    #[test]
+    fn test_play_same_move() {
+        let mut pgn_tree = PGNTree::default();
+        let mov1 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("e2").unwrap(),
+            Position::from_string("e4").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+
+        let mov2 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("e7").unwrap(),
+            Position::from_string("e5").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.prev_move();
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.add_move(
+            mov2.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.prev_move();
+        pgn_tree.add_move(
+            mov2.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+
+        assert_eq!(1, pgn_tree.lines.len());
+        assert_eq!(1, pgn_tree.lines[0].as_ref().borrow().lines.len());
+    }
+
+    #[test]
+    fn test_rm_move_subline() {
+        let mut pgn_tree = PGNTree::default();
+        let mov1 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("e2").unwrap(),
+            Position::from_string("e4").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        let mov2 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("d2").unwrap(),
+            Position::from_string("d4").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.prev_move();
+        pgn_tree.add_move(
+            mov2.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+
+        pgn_tree.rm_move();
+
+        assert_eq!(1, pgn_tree.lines.len());
+        assert_eq!(pgn_tree.current_line.unwrap(), pgn_tree.lines[0]);
+        assert_eq!(0, pgn_tree.lines[0].as_ref().borrow().lines.len());
+    }
+
+    #[test]
+    fn test_rm_move_not_at_root() {
+        let mut pgn_tree = PGNTree::default();
+        let mov1 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("e2").unwrap(),
+            Position::from_string("e4").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        let mov2 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("d2").unwrap(),
+            Position::from_string("d4").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.add_move(
+            mov2.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+
+        pgn_tree.rm_move();
+
+        assert_eq!(1, pgn_tree.lines.len());
+        assert_eq!(0, pgn_tree.lines[0].as_ref().borrow().lines.len());
+    }
+
+    #[test]
+    fn test_rm_move_no_current_line() {
+        let mut pgn_tree = PGNTree::<Move>::default();
+
+        pgn_tree.rm_move();
+
+        assert!(pgn_tree.current_line.is_none());
+        assert!(pgn_tree.lines.is_empty());
+    }
+
+    #[test]
     fn test_has_prev_move() {
         let mut pgn_tree = PGNTree::default();
         let mov1 = Move::new(
@@ -1763,11 +2039,229 @@ mod tests {
     }
 
     #[test]
+    fn test_all_next_moves_non_root() {
+        let mut pgn_tree = PGNTree::default();
+        let mov1 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("e4").unwrap(),
+            Position::from_string("e2").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        let mov2 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("d2").unwrap(),
+            Position::from_string("d4").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.add_move(
+            mov2.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.prev_move();
+
+        assert_eq!(vec![mov2.clone()], pgn_tree.all_next_moves());
+    }
+
+    #[test]
+    fn test_all_next_moves_empty() {
+        let pgn_tree = PGNTree::<Move>::default();
+
+        assert!(pgn_tree.all_next_moves().is_empty());
+    }
+
+    #[test]
+    fn next_move_variant_out_of_bounds() {
+        let mut pgn_tree = PGNTree::default();
+        let mov1 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("e2").unwrap(),
+            Position::from_string("e4").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+
+        assert!(pgn_tree.next_move_variant(1).is_none());
+    }
+
+    #[test]
     fn test_game_over() {
         let mut pgn_tree: PGNTree<Move> = PGNTree::default();
+
+        pgn_tree.game_over(GameStatus::InProgress);
+
+        assert_eq!(pgn_tree.result, "".to_string());
 
         pgn_tree.game_over(GameStatus::WhiteWins(WinReason::Checkmate));
 
         assert_eq!(pgn_tree.result, "1-0".to_string());
+
+        pgn_tree.game_over(GameStatus::BlackWins(WinReason::Resignation));
+
+        assert_eq!(pgn_tree.result, "0-1".to_string());
+    }
+
+    #[test]
+    fn test_iterator() {
+        let mut pgn_tree = PGNTree::default();
+        let mov1 = Move::new(
+            Piece::new(Color::Black, PieceType::Pawn),
+            Position::from_string("e2").unwrap(),
+            Position::from_string("e4").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        let mov2 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("e7").unwrap(),
+            Position::from_string("e5").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.add_move(
+            mov2.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+
+        pgn_tree.prev_move();
+        pgn_tree.prev_move();
+
+        assert_eq!(mov1, pgn_tree.next().unwrap());
+        assert_eq!(mov2, pgn_tree.next().unwrap());
+    }
+
+    #[test]
+    fn test_double_ended_iter() {
+        let mut pgn_tree = PGNTree::default();
+        let mov1 = Move::new(
+            Piece::new(Color::Black, PieceType::Pawn),
+            Position::from_string("e2").unwrap(),
+            Position::from_string("e4").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        let mov2 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("e7").unwrap(),
+            Position::from_string("e5").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.add_move(
+            mov2.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+
+        assert_eq!(mov2, pgn_tree.get_move().unwrap());
+        assert_eq!(mov1, pgn_tree.next_back().unwrap());
     }
 }
