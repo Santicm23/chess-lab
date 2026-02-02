@@ -368,6 +368,8 @@ impl Game {
             };
         } else if self.stalemate() {
             self.status = GameStatus::Draw(DrawReason::Stalemate);
+        } else if self.insufficient_material() {
+            self.status = GameStatus::Draw(DrawReason::InsufficientMaterial);
         } else if posistions == 2 {
             self.status = GameStatus::Draw(DrawReason::ThreefoldRepetition);
         } else if self.halfmove_clock >= 100 {
@@ -686,7 +688,7 @@ impl Game {
                     Position::from_string("c8").unwrap()
                 };
             } else {
-                return Err(MoveError::Invalid(move_str));
+                unreachable!()
             }
             return Ok((
                 PieceType::King,
@@ -942,7 +944,39 @@ impl Game {
         !self.has_legal_moves()
     }
 
-    /// Ends the game and sets the winner to the opposite of the color that resigned
+    /// Returns whether the game is in insufficient material
+    ///
+    /// # Returns
+    /// Whether the game is in insufficient material
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lab::logic::Game;
+    ///
+    /// let game = Game::from_fen("8/8/8/8/8/4K3/8/4kB2 w - - 0 1").unwrap();
+    /// assert!(game.insufficient_material());
+    /// ```
+    ///
+    pub fn insufficient_material(&self) -> bool {
+        let white_pieces = self.board.find_all(Color::White);
+        let black_pieces = self.board.find_all(Color::Black);
+
+        if white_pieces.len() > 2 || black_pieces.len() > 2 {
+            return false;
+        }
+
+        let pieces = [white_pieces, black_pieces].concat();
+        for pos in pieces {
+            let piece = self.board.get_piece(&pos).unwrap();
+            match piece.piece_type {
+                PieceType::Pawn | PieceType::Rook | PieceType::Queen => return false,
+                _ => {}
+            }
+        }
+
+        true
+    }
+
     ///
     /// # Arguments
     /// * `color`: The color of the player that resigned
@@ -1339,6 +1373,12 @@ mod tests {
     }
 
     #[test]
+    fn test_invalid_move() {
+        let mut game = Game::default();
+        assert!(game.move_piece("abc").is_err());
+    }
+
+    #[test]
     fn test_castle_kingside() {
         let mut game = Game::default();
         game.move_piece("e4").unwrap();
@@ -1366,10 +1406,42 @@ mod tests {
         game.move_piece("Qd2").unwrap();
         game.move_piece("Qd7").unwrap();
         game.move_piece("O-O-O").unwrap();
+        game.move_piece("O-O-O").unwrap();
         assert_eq!(
             game.fen(),
-            "r3kbnr/pppqpppp/2n5/3p1b2/3P1B2/2N5/PPPQPPPP/2KR1BNR b kq - 7 5"
+            "2kr1bnr/pppqpppp/2n5/3p1b2/3P1B2/2N5/PPPQPPPP/2KR1BNR w - - 8 6"
         );
+    }
+
+    #[test]
+    fn test_castle_with_no_rights() {
+        let mut game = Game::default();
+        game.move_piece("e4").unwrap();
+        game.move_piece("e5").unwrap();
+        game.move_piece("Nf3").unwrap();
+        game.move_piece("Nc6").unwrap();
+        game.move_piece("Bb5").unwrap();
+        game.move_piece("a6").unwrap();
+        game.move_piece("Ke2").unwrap();
+        game.move_piece("Nf6").unwrap();
+        game.move_piece("Ke1").unwrap();
+        game.move_piece("d6").unwrap();
+        assert!(game.move_piece("O-O").is_err());
+
+        game = Game::default();
+        game.move_piece("d4").unwrap();
+        game.move_piece("d5").unwrap();
+        game.move_piece("Nc3").unwrap();
+        game.move_piece("Nc6").unwrap();
+        game.move_piece("Bf4").unwrap();
+        game.move_piece("Bf5").unwrap();
+        game.move_piece("Qd2").unwrap();
+        game.move_piece("Qd7").unwrap();
+        game.move_piece("Kd1").unwrap();
+        game.move_piece("Kd8").unwrap();
+        game.move_piece("Ke1").unwrap();
+        game.move_piece("Ke8").unwrap();
+        assert!(game.move_piece("O-O-O").is_err());
     }
 
     #[test]
@@ -1439,6 +1511,13 @@ mod tests {
     }
 
     #[test]
+    fn test_promotion_invalid() {
+        let mut game = Game::default();
+        assert!(game.move_piece("e4=Q").is_err());
+        assert!(game.move_piece("Ke4=Q").is_err());
+    }
+
+    #[test]
     fn test_illegal_move() {
         let mut game = Game::default();
         assert!(game.move_piece("e5").is_err());
@@ -1473,7 +1552,17 @@ mod tests {
     }
 
     #[test]
-    fn test_undo_castle() {
+    fn test_undo_no_moves() {
+        let mut game = Game::default();
+        game.undo();
+        assert_eq!(
+            game.fen(),
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+        );
+    }
+
+    #[test]
+    fn test_undo_castle_kingside() {
         let mut game = Game::default();
         game.move_piece("e4").unwrap();
         game.move_piece("e5").unwrap();
@@ -1486,6 +1575,25 @@ mod tests {
         assert_eq!(
             game.fen(),
             "r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4"
+        );
+    }
+
+    #[test]
+    fn test_undo_castle_queenside() {
+        let mut game = Game::default();
+        game.move_piece("d4").unwrap();
+        game.move_piece("d5").unwrap();
+        game.move_piece("Nc3").unwrap();
+        game.move_piece("Nc6").unwrap();
+        game.move_piece("Bf4").unwrap();
+        game.move_piece("Bf5").unwrap();
+        game.move_piece("Qd2").unwrap();
+        game.move_piece("Qd7").unwrap();
+        game.move_piece("O-O-O").unwrap();
+        game.undo();
+        assert_eq!(
+            game.fen(),
+            "r3kbnr/pppqpppp/2n5/3p1b2/3P1B2/2N5/PPPQPPPP/R3KBNR w KQkq - 6 5"
         );
     }
 
@@ -1552,6 +1660,16 @@ mod tests {
             "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1"
         );
         game.undo();
+    }
+
+    #[test]
+    fn test_redo_no_moves() {
+        let mut game = Game::default();
+        game.redo();
+        assert_eq!(
+            game.fen(),
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+        );
     }
 
     #[test]
@@ -1727,6 +1845,16 @@ mod tests {
     }
 
     #[test]
+    fn test_redo_nth_no_moves() {
+        let mut game = Game::default();
+        game.redo_nth(0);
+        assert_eq!(
+            game.fen(),
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+        );
+    }
+
+    #[test]
     fn test_start() {
         let mut game = Game::default();
         game.move_piece("e4").unwrap();
@@ -1867,9 +1995,29 @@ mod tests {
     }
 
     #[test]
+    fn test_fifty_move_rule() {
+        let mut game = Game::from_fen("8/4P3/8/8/8/4K3/8/4k3 w - - 99 50").unwrap();
+        game.move_piece("Kd3").unwrap();
+        assert_eq!(game.status, GameStatus::Draw(DrawReason::FiftyMoveRule));
+    }
+
+    #[test]
     fn test_stalemate() {
-        let game = Game::from_fen("8/8/8/8/8/4KQ2/8/4k3 b - - 0 1").unwrap();
+        let mut game = Game::from_fen("8/8/8/8/4Q3/4K3/8/4k3 w - - 0 1").unwrap();
+        game.move_piece("Qd3").unwrap();
         assert!(game.stalemate());
+        assert_eq!(game.status, GameStatus::Draw(DrawReason::Stalemate));
+    }
+
+    #[test]
+    fn test_insufficient_material() {
+        let mut game = Game::from_fen("8/8/8/8/8/3pK3/8/4kB2 w - - 0 1").unwrap();
+        game.move_piece("Bxd3").unwrap();
+        assert!(game.insufficient_material());
+        assert_eq!(
+            game.status,
+            GameStatus::Draw(DrawReason::InsufficientMaterial)
+        );
     }
 
     #[test]
