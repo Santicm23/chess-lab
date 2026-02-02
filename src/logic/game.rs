@@ -118,7 +118,12 @@ impl Game {
     /// ```
     ///
     pub fn from_fen(fen: &str) -> Result<Game, FenError> {
-        parse_fen(fen)
+        let mut game = parse_fen(fen)?;
+        game.history.add_metadata("FEN", fen).unwrap();
+        game.history
+            .add_metadata("Variant", "From Position")
+            .unwrap();
+        Ok(game)
     }
 
     pub fn get_variant(&self) -> String {
@@ -248,7 +253,7 @@ impl Game {
 
                 Ok(self.status)
             }
-            Err(_) => Err(MoveError::Invalid(move_str.to_string())),
+            Err(_) => unreachable!(),
         }
     }
 
@@ -371,9 +376,7 @@ impl Game {
             self.status = GameStatus::InProgress;
         };
 
-        if self.status != GameStatus::InProgress {
-            self.history.game_over(self.status);
-        }
+        self.history.game_over(self.status);
     }
 
     /// Returns the FEN representation of the game
@@ -1249,7 +1252,7 @@ impl Game {
                     let end_pos = Position::new(col, row).unwrap();
 
                     let mut board = self.board.clone();
-                    if !board.can_capture(&piece_pos, &end_pos).unwrap() {
+                    if !board.can_move(&piece_pos, &end_pos).unwrap() {
                         continue;
                     }
 
@@ -1303,6 +1306,19 @@ mod tests {
     }
 
     #[test]
+    fn test_new_game() {
+        let game = Game::new(
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+            true,
+        )
+        .unwrap();
+        assert_eq!(
+            game.fen(),
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+        );
+    }
+
+    #[test]
     fn test_from_fen() {
         let game =
             Game::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1").unwrap();
@@ -1323,7 +1339,7 @@ mod tests {
     }
 
     #[test]
-    fn test_castle() {
+    fn test_castle_kingside() {
         let mut game = Game::default();
         game.move_piece("e4").unwrap();
         game.move_piece("e5").unwrap();
@@ -1335,6 +1351,24 @@ mod tests {
         assert_eq!(
             game.fen(),
             "r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQ1RK1 b kq - 1 4"
+        );
+    }
+
+    #[test]
+    fn test_castle_queenside() {
+        let mut game = Game::default();
+        game.move_piece("d4").unwrap();
+        game.move_piece("d5").unwrap();
+        game.move_piece("Nc3").unwrap();
+        game.move_piece("Nc6").unwrap();
+        game.move_piece("Bf4").unwrap();
+        game.move_piece("Bf5").unwrap();
+        game.move_piece("Qd2").unwrap();
+        game.move_piece("Qd7").unwrap();
+        game.move_piece("O-O-O").unwrap();
+        assert_eq!(
+            game.fen(),
+            "r3kbnr/pppqpppp/2n5/3p1b2/3P1B2/2N5/PPPQPPPP/2KR1BNR b kq - 7 5"
         );
     }
 
@@ -1402,6 +1436,29 @@ mod tests {
             game.fen(),
             "Qnbqkbnr/4pppp/8/p7/8/8/PPPP1PPP/RNBQKBNR b KQk - 0 5"
         );
+    }
+
+    #[test]
+    fn test_illegal_move() {
+        let mut game = Game::default();
+        assert!(game.move_piece("e5").is_err());
+        game.move_piece("e4").unwrap();
+        assert!(game.move_piece("e4").is_err());
+        game.move_piece("e5").unwrap();
+        assert!(game.move_piece("Nf6").is_err());
+    }
+
+    #[test]
+    fn test_ambiguity() {
+        let mut game = Game::default();
+        game.move_piece("Nf3").unwrap();
+        game.move_piece("Nc6").unwrap();
+        game.move_piece("Na3").unwrap();
+        game.move_piece("Nb8").unwrap();
+        game.move_piece("Nc4").unwrap();
+        game.move_piece("Nc6").unwrap();
+
+        assert!(game.move_piece("Ne5").is_err());
     }
 
     #[test]
@@ -1773,7 +1830,25 @@ mod tests {
         game.move_piece("Bc4").unwrap();
         game.move_piece("Nf6").unwrap();
         game.move_piece("Qxf7#").unwrap();
+        assert_eq!(game.status, GameStatus::WhiteWins(WinReason::Checkmate));
         assert!(game.checkmate());
+
+        game = Game::default();
+        game.move_piece("f3").unwrap();
+        game.move_piece("e5").unwrap();
+        game.move_piece("g4").unwrap();
+        game.move_piece("Qh4#").unwrap();
+        assert_eq!(game.status, GameStatus::BlackWins(WinReason::Checkmate));
+        assert!(game.checkmate());
+    }
+
+    #[test]
+    fn test_stalemate_pgn() {
+        let mut game = Game::from_fen("6k1/8/6K1/5Q2/8/8/8/8 w - - 0 1").unwrap();
+        game.move_piece("Qf6").unwrap();
+        println!("{}", game.pgn());
+        assert!(game.pgn().contains("[Result \"1/2-1/2\"]"));
+        assert!(game.pgn().contains("1. Qf6 1/2-1/2"));
     }
 
     #[test]

@@ -1069,6 +1069,11 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
         header.push_str(&format!("[Round \"{}\"]\n", self.round));
         header.push_str(&format!("[White \"{}\"]\n", self.white));
         header.push_str(&format!("[Black \"{}\"]\n", self.black));
+        if let Some(variant) = &self.variant {
+            if variant != "Standard" {
+                header.push_str(&format!("[Variant \"{}\"]\n", variant));
+            }
+        }
         header.push_str(&format!("[Result \"{}\"]\n", self.result));
         for metadata in self.option_metadata.iter() {
             header.push_str(&format!("{}\n", metadata));
@@ -1109,6 +1114,10 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
                 self.pgn_line_moves(Rc::clone(&self.lines[0]), 2, false)
             ));
         };
+
+        if pgn.ends_with(' ') {
+            pgn.pop();
+        }
 
         pgn
     }

@@ -7,6 +7,7 @@ use crate::{
     core::{Variant, VariantBuilder},
     errors::PGNError,
     logic::Game,
+    variants::StandardChess,
 };
 
 #[derive(Parser)]
@@ -41,7 +42,9 @@ pub fn parse_multiple_pgn<T: Variant + VariantBuilder>(input: &str) -> Result<Ve
     let mut variants: Vec<T> = Vec::new();
 
     for game in games.iter() {
-        if &game.get_variant() != T::name() {
+        if game.get_variant() != T::name()
+            && !(T::name() == StandardChess::name() && game.get_variant() == "From Position")
+        {
             return Err(PGNError::InvalidVariant(game.get_variant()));
         }
         let variant = T::new(game.clone());
@@ -69,7 +72,9 @@ pub fn parse_pgn<T: Variant + VariantBuilder>(input: &str) -> Result<T, PGNError
         .ok_or(PGNError::InvalidPgn(input.to_string()))?;
 
     let game = parse_single_pgn(pair)?;
-    if &game.get_variant() != T::name() {
+    if game.get_variant() != T::name()
+        && !(T::name() == StandardChess::name() && game.get_variant() == "From Position")
+    {
         return Err(PGNError::InvalidVariant(game.get_variant()));
     }
 

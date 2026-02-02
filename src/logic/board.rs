@@ -352,7 +352,7 @@ impl Board {
     pub fn is_attacked(&self, pos: Position, color: Color) -> bool {
         let pieces = self.find_all(color);
         for piece in pieces {
-            if self.can_capture(&piece, &pos).unwrap() {
+            if self.is_attacking(&piece, &pos).unwrap() {
                 // safe unwrap (depends on find_all method)
                 return true;
             }
@@ -360,19 +360,17 @@ impl Board {
         false
     }
 
-    /// Checks if a piece can capture another piece
-    /// The function does not check if the move is legal
-    /// It only checks if the piece can capture the other piece
+    /// Checks if a piece can move without considering checks
     ///
     /// # Arguments
     /// * `start_pos`: The position of the piece to move
     /// * `end_pos`: The position of the piece to capture
     ///
     /// # Returns
-    /// * `Ok(bool)`: Whether the piece can capture the other piece
+    /// * `Ok(bool)`: Whether the piece can move acording to its movement rules
     /// * `Err(PositionEmptyError)`: If the start position is empty
     ///
-    pub fn can_capture(
+    pub fn can_move(
         &self,
         start_pos: &Position,
         end_pos: &Position,
@@ -381,19 +379,56 @@ impl Board {
             .get_piece(start_pos)
             .ok_or(PositionEmptyError::new(start_pos.clone()))?;
 
-        match self.get_piece(end_pos) {
-            None => (),
+        let captured_piece = self.get_piece(end_pos);
+        match captured_piece {
             Some(captured_piece) => {
                 if captured_piece.color == piece.color {
                     return Ok(false);
                 }
             }
+            None => (),
         }
 
         if piece_movement(&piece, start_pos, end_pos) {
-            if piece.piece_type == PieceType::Pawn && start_pos.col == end_pos.col {
-                return Ok(false);
-            }
+            return match piece.piece_type {
+                PieceType::Pawn => {
+                    if start_pos.col == end_pos.col {
+                        return Ok(!self.piece_between(start_pos, end_pos).unwrap()
+                            && captured_piece.is_none()); // safe unwrap (depends on piece_movement)
+                    }
+                    Ok(captured_piece.is_some())
+                }
+                PieceType::Knight | PieceType::King => Ok(true),
+                PieceType::Bishop | PieceType::Rook | PieceType::Queen => {
+                    Ok(!self.piece_between(start_pos, end_pos).unwrap()) // safe unwrap (depends on piece_movement)
+                }
+            };
+        }
+        Ok(false)
+    }
+
+    /// Checks if a piece of a postion is attacking a position
+    /// The function does not check if the move is legal
+    /// It only checks if the piece is attacking the position according to its movement rules
+    ///
+    /// # Arguments
+    /// * `start_pos`: The position of the piece to move
+    /// * `end_pos`: The position of the piece to capture
+    ///
+    /// # Returns
+    /// * `Ok(bool)`: Whether the piece is attacking the position
+    /// * `Err(PositionEmptyError)`: If the start position is empty
+    ///
+    pub fn is_attacking(
+        &self,
+        start_pos: &Position,
+        end_pos: &Position,
+    ) -> Result<bool, PositionEmptyError> {
+        let piece = self
+            .get_piece(start_pos)
+            .ok_or(PositionEmptyError::new(start_pos.clone()))?;
+
+        if piece_movement(&piece, start_pos, end_pos) {
             return match piece.piece_type {
                 PieceType::Pawn => Ok(diagonal_movement(start_pos, end_pos)),
                 PieceType::Knight | PieceType::King => Ok(true),
