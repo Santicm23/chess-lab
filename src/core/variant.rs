@@ -75,7 +75,7 @@ pub trait Variant {
     /// # Arguments
     /// * `color` - The color of the player that lost in time.
     ///
-    fn set_lost_in_time(&mut self, color: Color);
+    fn lost_on_time(&mut self, color: Color);
 
     /// Returns the board of the game.
     ///

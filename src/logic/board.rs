@@ -525,7 +525,7 @@ mod tests {
     }
 
     #[test]
-    fn from_fen() {
+    fn test_from_fen() {
         let board = Board::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR").unwrap();
         assert_eq!(
             board.to_string(),

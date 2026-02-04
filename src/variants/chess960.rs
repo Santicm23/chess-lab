@@ -355,7 +355,7 @@ impl Variant for Chess960 {
     /// ```
     ///
     fn draw(&mut self) {
-        self.game.set_draw_by_agreement()
+        self.game.draw_by_agreement()
     }
 
     /// Sets the game lost in time for a [Color]
@@ -373,8 +373,8 @@ impl Variant for Chess960 {
     /// variant.set_lost_in_time(Color::White);
     /// ```
     ///
-    fn set_lost_in_time(&mut self, color: Color) {
-        self.game.set_lost_in_time(color)
+    fn lost_on_time(&mut self, color: Color) {
+        self.game.lost_on_time(color)
     }
 
     /// Returns the [Board] of the [Game]

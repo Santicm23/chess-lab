@@ -335,7 +335,7 @@ impl Variant for StandardChess {
     /// ```
     ///
     fn draw(&mut self) {
-        self.game.set_draw_by_agreement()
+        self.game.draw_by_agreement()
     }
 
     /// Sets the [Game] as lost in time for a player
@@ -353,8 +353,8 @@ impl Variant for StandardChess {
     /// game.set_lost_in_time(Color::Black);
     /// ```
     ///
-    fn set_lost_in_time(&mut self, color: Color) {
-        self.game.set_lost_in_time(color)
+    fn lost_on_time(&mut self, color: Color) {
+        self.game.lost_on_time(color)
     }
 
     /// Returns the [Board] of the game

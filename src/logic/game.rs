@@ -910,7 +910,7 @@ impl Game {
                 Color::Black
             };
             let kings = self.board.find(PieceType::King, color);
-            return !kings.is_empty();
+            return kings.is_empty();
         }
         if !self.check() {
             return false;
@@ -993,6 +993,9 @@ impl Game {
     /// ```
     ///
     pub fn resign(&mut self, color: Color) {
+        if self.status != GameStatus::InProgress {
+            return;
+        }
         self.status = if color == Color::White {
             GameStatus::BlackWins(WinReason::Resignation)
         } else {
@@ -1016,7 +1019,10 @@ impl Game {
     /// assert_eq!(game.status, GameStatus::BlackWins(WinReason::Time));
     /// ```
     ///
-    pub fn set_lost_in_time(&mut self, color: Color) {
+    pub fn lost_on_time(&mut self, color: Color) {
+        if self.status != GameStatus::InProgress {
+            return;
+        }
         self.status = if color == Color::White {
             GameStatus::BlackWins(WinReason::Time)
         } else {
@@ -1036,7 +1042,10 @@ impl Game {
     ///
     /// assert_eq!(game.status, GameStatus::Draw(DrawReason::Agreement));
     ///
-    pub fn set_draw_by_agreement(&mut self) {
+    pub fn draw_by_agreement(&mut self) {
+        if self.status != GameStatus::InProgress {
+            return;
+        }
         self.status = GameStatus::Draw(DrawReason::Agreement);
     }
 
@@ -1831,7 +1840,7 @@ mod tests {
     }
 
     #[test]
-    fn redo_nth() {
+    fn test_redo_nth() {
         let mut game = Game::default();
         game.move_piece("e4").unwrap();
         game.undo();
@@ -2021,7 +2030,48 @@ mod tests {
     }
 
     #[test]
-    fn move_ambiguity() {
+    fn test_resign() {
+        let mut game = Game::default();
+        game.resign(Color::White);
+        assert_eq!(game.status, GameStatus::BlackWins(WinReason::Resignation));
+
+        game = Game::default();
+        game.resign(Color::Black);
+        assert_eq!(game.status, GameStatus::WhiteWins(WinReason::Resignation));
+        game.resign(Color::White);
+        // this should have no effect
+        assert_eq!(game.status, GameStatus::WhiteWins(WinReason::Resignation));
+    }
+
+    #[test]
+    fn test_lose_on_time() {
+        let mut game = Game::default();
+        game.lost_on_time(Color::White);
+        assert_eq!(game.status, GameStatus::BlackWins(WinReason::Time));
+
+        game = Game::default();
+        game.lost_on_time(Color::Black);
+        assert_eq!(game.status, GameStatus::WhiteWins(WinReason::Time));
+        game.lost_on_time(Color::White);
+        // this should have no effect
+        assert_eq!(game.status, GameStatus::WhiteWins(WinReason::Time));
+    }
+
+    #[test]
+    fn test_draw_by_agreement() {
+        let mut game = Game::default();
+        game.draw_by_agreement();
+        assert_eq!(game.status, GameStatus::Draw(DrawReason::Agreement));
+
+        game = Game::default();
+        game.resign(Color::White);
+        // drawing a ended game should have no effect
+        game.draw_by_agreement();
+        assert_eq!(game.status, GameStatus::BlackWins(WinReason::Resignation));
+    }
+
+    #[test]
+    fn test_move_ambiguity() {
         let game =
             Game::from_fen("r3k1nr/ppq2ppp/2nbp3/3p3b/3P4/2PB1N1P/PP3PP1/RNBQR1K1 w kq - 3 10")
                 .unwrap();
@@ -2038,5 +2088,23 @@ mod tests {
             ),
             (true, false)
         );
+    }
+
+    #[test]
+    fn test_capture_king_game() {
+        let mut game = Game::new(
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+            true,
+        )
+        .unwrap();
+
+        game.move_piece("f3").unwrap();
+        game.move_piece("e5").unwrap();
+        game.move_piece("g4").unwrap();
+        game.move_piece("Qh4").unwrap();
+        assert!(!game.checkmate());
+        game.move_piece("Kf2").unwrap();
+        game.move_piece("Qxf2").unwrap();
+        assert!(game.checkmate());
     }
 }
