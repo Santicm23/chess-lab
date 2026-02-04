@@ -1081,11 +1081,16 @@ impl Game {
         if start_pos != (None, None) {
             positions = positions
                 .iter()
-                .filter(|pos| match start_pos {
-                    (Some(col), Some(row)) => pos.col == col && pos.row == row,
-                    (Some(col), None) => pos.col == col,
-                    (None, Some(row)) => pos.row == row,
-                    (None, None) => true,
+                .filter(|pos| -> bool {
+                    let has_col = match start_pos {
+                        (Some(col), _) => pos.col == col,
+                        _ => true,
+                    };
+                    let has_row = match start_pos {
+                        (_, Some(row)) => pos.row == row,
+                        _ => true,
+                    };
+                    has_col && has_row
                 })
                 .cloned()
                 .collect();
@@ -1234,12 +1239,14 @@ impl Game {
         match side {
             CastleType::KingSide => {
                 if piece.color == Color::White && self.castling_rights & 0b1000 == 0 {
-                    return false;
+                    // This should never happen, this is covered in parse_move
+                    unreachable!()
                 } else if piece.color == Color::Black && self.castling_rights & 0b0010 == 0 {
-                    return false;
+                    // This should never happen, this is covered in parse_move
+                    unreachable!()
                 }
 
-                for col in start_pos.col + 0..end_pos.col + 1 {
+                for col in start_pos.col..end_pos.col + 1 {
                     let new_pos = Position::new(col, start_pos.row).unwrap();
                     if (&new_pos != start_pos && self.board.is_ocupied(&new_pos))
                         || self.board.is_attacked(
@@ -1254,15 +1261,16 @@ impl Game {
             }
             CastleType::QueenSide => {
                 if piece.color == Color::White && self.castling_rights & 0b0100 == 0 {
-                    return false;
+                    // This should never happen, this is covered in parse_move
+                    unreachable!()
                 } else if piece.color == Color::Black && self.castling_rights & 0b0001 == 0 {
-                    return false;
+                    // This should never happen, this is covered in parse_move
+                    unreachable!()
                 }
 
-                for col in start_pos.col - 0..end_pos.col + 1 {
-                    if self
-                        .board
-                        .is_ocupied(&Position::new(col, start_pos.row).unwrap())
+                for col in end_pos.col..start_pos.col + 1 {
+                    let new_pos = Position::new(col, start_pos.row).unwrap();
+                    if (&new_pos != start_pos && self.board.is_ocupied(&new_pos))
                         || self.board.is_attacked(
                             Position::new(col, start_pos.row).unwrap(),
                             piece.color.opposite(),
@@ -1349,6 +1357,15 @@ mod tests {
     }
 
     #[test]
+    fn test_fmt() {
+        let game = Game::default();
+        assert_eq!(
+            format!("{}", game),
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+        );
+    }
+
+    #[test]
     fn test_new_game() {
         let game = Game::new(
             "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
@@ -1423,6 +1440,44 @@ mod tests {
     }
 
     #[test]
+    fn test_castle_through_check() {
+        let mut game = Game::default();
+        game.move_piece("e4").unwrap();
+        game.move_piece("e5").unwrap();
+        game.move_piece("Nf3").unwrap();
+        game.move_piece("Nc6").unwrap();
+        game.move_piece("Bb5").unwrap();
+        game.move_piece("a6").unwrap();
+        game.move_piece("Bxc6").unwrap();
+        game.move_piece("dxc6").unwrap();
+        game.move_piece("c3").unwrap();
+        game.move_piece("Be6").unwrap();
+        game.move_piece("d4").unwrap();
+        game.move_piece("Bc4").unwrap();
+        assert!(game.move_piece("O-O").is_err());
+
+        game = Game::default();
+        game.move_piece("e4").unwrap();
+        game.move_piece("c5").unwrap();
+        game.move_piece("Nf3").unwrap();
+        game.move_piece("d6").unwrap();
+        game.move_piece("d4").unwrap();
+        game.move_piece("cxd4").unwrap();
+        game.move_piece("Nxd4").unwrap();
+        game.move_piece("Nf6").unwrap();
+        game.move_piece("Nc3").unwrap();
+        game.move_piece("a6").unwrap();
+        game.move_piece("Be3").unwrap();
+        game.move_piece("e5").unwrap();
+        game.move_piece("Nb3").unwrap();
+        game.move_piece("Bg4").unwrap();
+        game.move_piece("Qd2").unwrap();
+        game.move_piece("Be7").unwrap();
+        println!("{}", game);
+        assert!(game.move_piece("O-O-O").is_err());
+    }
+
+    #[test]
     fn test_castle_with_no_rights() {
         let mut game = Game::default();
         game.move_piece("e4").unwrap();
@@ -1451,6 +1506,19 @@ mod tests {
         game.move_piece("Ke1").unwrap();
         game.move_piece("Ke8").unwrap();
         assert!(game.move_piece("O-O-O").is_err());
+    }
+
+    #[test]
+    fn test_is_legal_nonsense_move() {
+        let game = Game::default();
+        assert!(!game.is_legal(
+            &Piece::new(Color::White, PieceType::Knight),
+            &Position::from_string("e1").unwrap(),
+            &Position::from_string("e1").unwrap(),
+            &MoveType::Castle {
+                side: CastleType::KingSide,
+            },
+        ))
     }
 
     #[test]
