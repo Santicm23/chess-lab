@@ -1,11 +1,9 @@
-use std::collections::HashMap;
-
 use crate::{
     errors::{FenError, MoveError, PGNError},
-    logic::{Board, Game},
+    logic::Game,
 };
 
-use super::{Color, GameStatus, Move, PGNTree, Position};
+use super::{Color, GameStatus, Position};
 
 /// A trait for a chess variant.
 ///
@@ -77,12 +75,12 @@ pub trait Variant {
     ///
     fn lost_on_time(&mut self, color: Color);
 
-    /// Returns the board of the game.
+    /// Gets the minified fen of the game.
     ///
     /// # Returns
-    /// A copy of the board of the game.
+    /// The minified fen of the game.
     ///
-    fn get_board(&self) -> Board;
+    fn get_minified_fen(&self) -> String;
 
     /// Returns whether it is white's turn to move.
     ///
@@ -125,20 +123,6 @@ pub trait Variant {
     /// The starting FEN of the game.
     ///
     fn get_starting_fen(&self) -> String;
-
-    /// Returns the history of the game.
-    ///
-    /// # Returns
-    /// A cloned PGN tree object that stores the moves of the game.
-    ///
-    fn get_history(&self) -> PGNTree<Move>;
-
-    /// Returns the previous positions of the game.
-    ///
-    /// # Returns
-    /// A hashmap that stores the number of times a position has occurred.
-    ///
-    fn get_prev_positions(&self) -> HashMap<String, u32>;
 
     /// Returns the status of the game.
     ///

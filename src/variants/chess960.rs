@@ -1,12 +1,13 @@
-use std::collections::HashMap;
-
 use rand::Rng;
 
 use crate::{
-    core::{Color, GameStatus, Move, PGNTree, Position, Variant, VariantBuilder},
+    core::{Color, GameStatus, Position, Variant, VariantBuilder},
     errors::{FenError, MoveError, PGNError},
-    logic::{Board, Game},
-    parsing::pgn::{parse_multiple_pgn, parse_pgn},
+    logic::Game,
+    parsing::{
+        fen::get_minified_fen,
+        pgn::{parse_multiple_pgn, parse_pgn},
+    },
     utils::os::{read_file, write_file},
 };
 
@@ -377,21 +378,21 @@ impl Variant for Chess960 {
         self.game.lost_on_time(color)
     }
 
-    /// Returns the [Board] of the [Game]
+    /// Returns the minified FEN string of the [Game]
     ///
     /// # Returns
-    /// A copy of the [Board] of the [Game]
+    /// A string with the minified FEN of the [Game]
     ///
-    /// # Examples
+    /// # Example
     /// ```
     /// # use chess_lab::core::Variant;
     /// # use chess_lab::variants::Chess960;
-    /// let game = Chess960::default();
-    /// let board = game.get_board();
+    /// let variant = Chess960::default();
+    /// let minified_fen = variant.get_minified_fen();
     /// ```
     ///
-    fn get_board(&self) -> Board {
-        self.game.board.clone()
+    fn get_minified_fen(&self) -> String {
+        get_minified_fen(&self.fen())
     }
 
     /// Returns whether it is white's turn to move
@@ -512,40 +513,6 @@ impl Variant for Chess960 {
     ///
     fn get_starting_fen(&self) -> String {
         self.game.starting_fen.clone()
-    }
-
-    /// Returns the history of the [Game]
-    ///
-    /// # Returns
-    /// A copy of the history of the [Game]
-    ///
-    /// # Examples
-    /// ```
-    /// # use chess_lab::core::Variant;
-    /// # use chess_lab::variants::Chess960;
-    /// let game = Chess960::default();
-    /// let history = game.get_history();
-    /// ```
-    ///
-    fn get_history(&self) -> PGNTree<Move> {
-        self.game.history.clone()
-    }
-
-    /// Returns the previous positions of the [Game]
-    ///
-    /// # Returns
-    /// A copy of the previous positions of the [Game]
-    ///
-    /// # Examples
-    /// ```
-    /// # use chess_lab::core::Variant;
-    /// # use chess_lab::variants::Chess960;
-    /// let game = Chess960::default();
-    /// let prev_positions = game.get_prev_positions();
-    /// ```
-    ///
-    fn get_prev_positions(&self) -> HashMap<String, u32> {
-        self.game.prev_positions.clone()
     }
 
     /// Returns the status of the [Game]

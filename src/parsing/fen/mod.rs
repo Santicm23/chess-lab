@@ -64,6 +64,11 @@ fn get_fen_reduced(fen: &str) -> String {
     fen_parts.join(" ")
 }
 
+pub(crate) fn get_minified_fen(fen: &str) -> String {
+    let parts: Vec<&str> = fen.split_whitespace().collect();
+    parts[0].to_string()
+}
+
 /// Creates a new board from a FEN string
 ///
 /// # Arguments
@@ -74,7 +79,7 @@ fn get_fen_reduced(fen: &str) -> String {
 /// * `Ok(Board)`: A new board with the position represented by the FEN string
 /// * `Err(FenError)`: If the FEN string is invalid
 ///
-pub fn parse_simple_fen(fen: &str) -> Result<Board, FenError> {
+pub fn parse_minified_fen(fen: &str) -> Result<Board, FenError> {
     let re = Regex::new(r"^([1-8PpNnBbRrQqKk]{1,8}/){7}[1-8PpNnBbRrQqKk]{1,8}$").unwrap(); // safe unwrap
 
     if !re.is_match(fen) {
@@ -117,8 +122,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_simple_fen() {
-        let board = parse_simple_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR").unwrap();
+    fn test_minified_fen() {
+        let board = parse_minified_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR").unwrap();
         assert_eq!(
             board.to_string(),
             "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
@@ -126,8 +131,8 @@ mod tests {
     }
 
     #[test]
-    fn test_invalid_simple_fen() {
-        let board = parse_simple_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR/8");
+    fn test_invalid_minified_fen() {
+        let board = parse_minified_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR/8");
         assert!(board.is_err());
     }
 

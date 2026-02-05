@@ -1,10 +1,11 @@
-use std::collections::HashMap;
-
 use crate::{
-    core::{Color, GameStatus, Move, PGNTree, Position, Variant, VariantBuilder},
+    core::{Color, GameStatus, Position, Variant, VariantBuilder},
     errors::{FenError, MoveError, PGNError},
-    logic::{Board, Game},
-    parsing::pgn::{parse_multiple_pgn, parse_pgn},
+    logic::Game,
+    parsing::{
+        fen::get_minified_fen,
+        pgn::{parse_multiple_pgn, parse_pgn},
+    },
     utils::os::{read_file, write_file},
 };
 
@@ -210,7 +211,6 @@ impl Variant for StandardChess {
     /// ```
     /// # use chess_lab::core::Variant;
     /// # use chess_lab::variants::StandardChess;
-    ///
     /// let mut game = StandardChess::default();
     /// game.move_piece("e4").unwrap();
     /// game.undo();
@@ -357,21 +357,21 @@ impl Variant for StandardChess {
         self.game.lost_on_time(color)
     }
 
-    /// Returns the [Board] of the game
+    /// Returns the minified FEN string of the [Game]
     ///
     /// # Returns
-    /// A copy of the [Board] of the game
+    /// The minified FEN string of the [Game]
     ///
     /// # Examples
     /// ```
     /// # use chess_lab::core::Variant;
     /// # use chess_lab::variants::StandardChess;
     /// let game = StandardChess::default();
-    /// let board = game.get_board();
+    /// let minified_fen = game.get_minified_fen();
     /// ```
     ///
-    fn get_board(&self) -> Board {
-        self.game.board.clone()
+    fn get_minified_fen(&self) -> String {
+        get_minified_fen(&self.fen())
     }
 
     /// Returns whether it is white's turn to [Move]
@@ -400,7 +400,6 @@ impl Variant for StandardChess {
     /// ```
     /// # use chess_lab::core::Variant;
     /// # use chess_lab::variants::StandardChess;
-    ///
     /// let game = StandardChess::default();
     /// let halfmove_clock = game.get_halfmove_clock();
     /// ```
@@ -416,9 +415,8 @@ impl Variant for StandardChess {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::Variant;
-    /// use chess_lab::variants::StandardChess;
-    ///
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::StandardChess;
     /// let game = StandardChess::default();
     /// let fullmove_number = game.get_fullmove_number();
     /// ```
@@ -436,7 +434,6 @@ impl Variant for StandardChess {
     /// ```
     /// # use chess_lab::core::Variant;
     /// # use chess_lab::variants::StandardChess;
-    ///
     /// let game = StandardChess::default();
     /// let castling_rights = game.get_castling_rights();
     /// ```
@@ -472,7 +469,6 @@ impl Variant for StandardChess {
     /// ```
     /// # use chess_lab::core::Variant;
     /// # use chess_lab::variants::StandardChess;
-    ///
     /// let game = StandardChess::default();
     /// let en_passant = game.get_en_passant();
     /// ```
@@ -490,49 +486,12 @@ impl Variant for StandardChess {
     /// ```
     /// # use chess_lab::core::Variant;
     /// # use chess_lab::variants::StandardChess;
-    ///
     /// let game = StandardChess::default();
     /// let starting_fen = game.get_starting_fen();
     /// ```
     ///
     fn get_starting_fen(&self) -> String {
         self.game.starting_fen.clone()
-    }
-
-    /// Returns the history of the [Game]
-    ///
-    /// # Returns
-    /// A copy of the history of the [Game]
-    ///
-    /// # Examples
-    /// ```
-    /// # use chess_lab::core::Variant;
-    /// # use chess_lab::variants::StandardChess;
-    ///
-    /// let game = StandardChess::default();
-    /// let history = game.get_history();
-    /// ```
-    ///
-    fn get_history(&self) -> PGNTree<Move> {
-        self.game.history.clone()
-    }
-
-    /// Returns the previous positions of the [Game]
-    ///
-    /// # Returns
-    /// A copy of the previous positions of the [Game]
-    ///
-    /// # Examples
-    /// ```
-    /// # use chess_lab::core::Variant;
-    /// # use chess_lab::variants::StandardChess;
-    ///
-    /// let game = StandardChess::default();
-    /// let prev_positions = game.get_prev_positions();
-    /// ```
-    ///
-    fn get_prev_positions(&self) -> HashMap<String, u32> {
-        self.game.prev_positions.clone()
     }
 
     /// Returns the status of the [Game]
@@ -544,7 +503,6 @@ impl Variant for StandardChess {
     /// ```
     /// # use chess_lab::core::{Variant, GameStatus};
     /// # use chess_lab::variants::StandardChess;
-    ///
     /// let game = StandardChess::default();
     /// let status = game.get_status();
     /// ```
@@ -554,4 +512,202 @@ impl Variant for StandardChess {
     }
 }
 
-// TODO: Implement tests for StandardChess variant
+#[cfg(test)]
+mod tests {
+    use crate::core::WinReason;
+
+    use super::*;
+
+    #[test]
+    fn test_standard_chess_name() {
+        assert_eq!(StandardChess::name(), "Standard");
+    }
+
+    #[test]
+    fn test_default() {
+        let variant = StandardChess::default();
+        assert_eq!(
+            variant.fen(),
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+        );
+    }
+
+    #[test]
+    fn test_new() {
+        let game = Game::default();
+        let variant = StandardChess::new(game.clone());
+        assert_eq!(variant.fen(), game.fen());
+    }
+
+    #[test]
+    fn test_from_fen() {
+        let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+        let variant = StandardChess::from_fen(fen).unwrap();
+        assert_eq!(variant.fen(), fen);
+    }
+
+    #[test]
+    fn test_from_pgn() {
+        let pgn = "1. e4 e5 2. Nf3 Nc6 3. Bb5 a6";
+        let variant = StandardChess::from_pgn(pgn).unwrap();
+        assert!(variant.pgn().contains("1. e4 e5 2. Nf3 Nc6 3. Bb5 a6"));
+    }
+
+    #[test]
+    fn test_load() {
+        let path = "data/standard/ex1.pgn";
+        let variant = StandardChess::load(path).unwrap();
+        assert!(variant.pgn().contains("1. e4 c6 2. d4 d5 3. exd5 cxd5"));
+    }
+
+    #[test]
+    fn test_load_all() {
+        let path = "data/standard/ex3.pgn";
+        let variants = StandardChess::load_all(path).unwrap();
+        assert_eq!(variants.len(), 20);
+    }
+
+    #[test]
+    fn test_move_piece() {
+        let mut variant = StandardChess::default();
+        let status = variant.move_piece("e4").unwrap();
+        assert_eq!(status, GameStatus::InProgress);
+        assert_eq!(
+            variant.fen(),
+            "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1"
+        );
+    }
+
+    #[test]
+    fn test_undo_redo() {
+        let mut variant = StandardChess::default();
+        variant.move_piece("e4").unwrap();
+        variant.undo();
+        assert_eq!(
+            variant.fen(),
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+        );
+        variant.redo();
+        assert_eq!(
+            variant.fen(),
+            "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1"
+        );
+    }
+
+    #[test]
+    fn test_save() {
+        let mut variant = StandardChess::default();
+        let path = "data/standard/test_save.pgn";
+
+        variant.move_piece("e4").unwrap();
+        variant.save(path, true).unwrap();
+
+        let loaded_variant = StandardChess::load(path).unwrap();
+        assert_eq!(variant.fen(), loaded_variant.fen());
+
+        // Clean up
+        std::fs::remove_file(path).unwrap();
+    }
+
+    #[test]
+    fn test_resign() {
+        let mut variant = StandardChess::default();
+
+        variant.resign(Color::White);
+        assert_eq!(
+            variant.get_status(),
+            GameStatus::BlackWins(WinReason::Resignation)
+        );
+    }
+
+    #[test]
+    fn test_draw() {
+        let mut variant = StandardChess::default();
+
+        variant.draw();
+        assert_eq!(
+            variant.get_status(),
+            GameStatus::Draw(crate::core::DrawReason::Agreement)
+        );
+    }
+
+    #[test]
+    fn test_lost_on_time() {
+        let mut variant = StandardChess::default();
+
+        variant.lost_on_time(Color::Black);
+        assert_eq!(variant.get_status(), GameStatus::WhiteWins(WinReason::Time));
+    }
+
+    #[test]
+    fn test_minified_fen() {
+        let variant = StandardChess::default();
+        let minified_fen = variant.get_minified_fen();
+        assert_eq!(minified_fen, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+    }
+
+    #[test]
+    fn test_is_white_turn() {
+        let mut variant = StandardChess::default();
+        assert!(variant.is_white_turn());
+
+        variant.move_piece("e4").unwrap();
+        assert!(!variant.is_white_turn());
+    }
+
+    #[test]
+    fn test_get_castling_rights() {
+        let mut variant = StandardChess::default();
+        let castling_rights = variant.get_castling_rights();
+        assert_eq!(castling_rights, "KQkq");
+
+        variant = StandardChess::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 1")
+            .unwrap();
+        let castling_rights = variant.get_castling_rights();
+        assert_eq!(castling_rights, "-");
+    }
+
+    #[test]
+    fn test_get_en_passant() {
+        let mut variant = StandardChess::default();
+        assert_eq!(variant.get_en_passant(), None);
+
+        variant.move_piece("e4").unwrap();
+        variant.move_piece("d5").unwrap();
+        variant.move_piece("e5").unwrap();
+        variant.move_piece("f5").unwrap();
+        assert_eq!(
+            variant.get_en_passant().unwrap(),
+            Position::new(5, 5).unwrap()
+        );
+    }
+
+    #[test]
+    fn test_get_halfmove_clock() {
+        let variant = StandardChess::default();
+        assert_eq!(variant.get_halfmove_clock(), 0);
+    }
+
+    #[test]
+    fn test_get_fullmove_number() {
+        let variant = StandardChess::default();
+        assert_eq!(variant.get_fullmove_number(), 1);
+    }
+
+    #[test]
+    fn test_get_starting_fen() {
+        let variant = StandardChess::default();
+        let starting_fen = variant.get_starting_fen();
+
+        assert_eq!(
+            starting_fen,
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+        );
+    }
+
+    #[test]
+    fn test_get_status() {
+        let variant = StandardChess::default();
+        assert_eq!(variant.get_status(), GameStatus::InProgress);
+    }
+}

@@ -418,31 +418,18 @@ mod tests {
 
         let variant: StandardChess = parse_pgn(input).unwrap();
 
-        assert_eq!(variant.get_history().event, "caro kann: exchange");
-        assert_eq!(
-            variant.get_history().site,
-            "https://lichess.org/study/H6cwzXnM/pE8AwLer"
-        );
+        let pgn = variant.pgn();
 
-        assert_eq!(variant.get_history().result, "1-0");
-        assert_eq!(
-            variant.get_history().site,
-            "https://lichess.org/study/H6cwzXnM/pE8AwLer"
-        );
-        assert_eq!(variant.get_history().date, "");
-        assert_eq!(variant.get_history().round, "");
-        assert_eq!(variant.get_history().white, "");
-        assert_eq!(variant.get_history().black, "");
-        assert_eq!(variant.get_history().result, "1-0");
-        variant
-            .get_history()
-            .option_metadata
-            .iter()
-            .for_each(|metadata| {
-                assert!(input.contains(&format!("{}", metadata)));
-            });
-
-        assert!(variant.pgn().contains("1. e4 c6 2. d4 d5 3. exd5 cxd5 4. Bd3 (4. c4 Nf6 5. Nc3 Nc6 6. Nf3 (6. Bg5 a6 7. Bxf6 (7. Nf3 Be6 8. Be2 (8. c5 g6 9. Bd3 Bg7) 8... g6 9. Bxf6 exf6 10. O-O Bg7 11. Qd2 h5) 7... exf6 8. cxd5 Ne7 9. Qa4+ Bd7) 6... g6 7. cxd5 Nxd5 8. Qb3 e6 9. Bb5 Bg7 10. O-O O-O 11. Bxc6 bxc6 12. Na4 Qd6 13. Re1 Rb8 14. Qd1 c5 15. Nxc5 Bb7 16. Nxb7 Rxb7 17. b3 Rc8) (4. Nf3 Nc6 5. c3 (5. c4) (5. Bb5 Qa5+ 6. Nc3 Bg4)) 4... Nc6 5. c3 (5. Nf3 Bg4 6. c3 Qc7 7. O-O e6 8. h3 Bh5 9. Re1 Bd6 10. Nbd2 Nge7 11. Nf1 h6 12. Be2 Bg6) 5... Nf6 6. Nf3 (6. Bf4 Bg4 7. Qb3 (7. f3 Bh5 8. g4 Bg6 9. Ne2) 7... Qd7 8. Nd2 e6 9. Ngf3 Bd6 10. Bxd6 Qxd6 11. O-O O-O 12. Rfe1 Bh5 13. Ne5 Qc7 14. f4 Ne7) (6. Bg5 Bg4 7. Qb3 (7. Ne2 e6 8. Qc2 Qc7 9. Ng3 Nh5) 7... e5 8. Qxb7 Bd7 9. Bxf6 gxf6 10. Bf5 Rb8) 6... Bg4 7. O-O Qb8 8. h3 Bh5 1-0"));
+        assert!(pgn.contains("[Event \"caro kann: exchange\"]"));
+        assert!(pgn.contains("[Site \"https://lichess.org/study/H6cwzXnM/pE8AwLer\"]"));
+        assert!(pgn.contains("[Result \"1-0\"]"));
+        assert!(!pgn.contains("[Variant \"Standard\"]"));
+        assert!(pgn.contains("[ECO \"B13\"]"));
+        assert!(pgn.contains("[Opening \"Caro-Kann Defense: Exchange Variation\"]"));
+        assert!(pgn.contains("[Annotator \"https://lichess.org/@/Santicastrom\"]"));
+        assert!(pgn.contains("[UTCDate \"2021.07.20\"]"));
+        assert!(pgn.contains("[UTCTime \"16:35:48\"]"));
+        assert!(pgn.contains("1. e4 c6 2. d4 d5 3. exd5 cxd5 4. Bd3 (4. c4 Nf6 5. Nc3 Nc6 6. Nf3 (6. Bg5 a6 7. Bxf6 (7. Nf3 Be6 8. Be2 (8. c5 g6 9. Bd3 Bg7) 8... g6 9. Bxf6 exf6 10. O-O Bg7 11. Qd2 h5) 7... exf6 8. cxd5 Ne7 9. Qa4+ Bd7) 6... g6 7. cxd5 Nxd5 8. Qb3 e6 9. Bb5 Bg7 10. O-O O-O 11. Bxc6 bxc6 12. Na4 Qd6 13. Re1 Rb8 14. Qd1 c5 15. Nxc5 Bb7 16. Nxb7 Rxb7 17. b3 Rc8) (4. Nf3 Nc6 5. c3 (5. c4) (5. Bb5 Qa5+ 6. Nc3 Bg4)) 4... Nc6 5. c3 (5. Nf3 Bg4 6. c3 Qc7 7. O-O e6 8. h3 Bh5 9. Re1 Bd6 10. Nbd2 Nge7 11. Nf1 h6 12. Be2 Bg6) 5... Nf6 6. Nf3 (6. Bf4 Bg4 7. Qb3 (7. f3 Bh5 8. g4 Bg6 9. Ne2) 7... Qd7 8. Nd2 e6 9. Ngf3 Bd6 10. Bxd6 Qxd6 11. O-O O-O 12. Rfe1 Bh5 13. Ne5 Qc7 14. f4 Ne7) (6. Bg5 Bg4 7. Qb3 (7. Ne2 e6 8. Qc2 Qc7 9. Ng3 Nh5) 7... e5 8. Qxb7 Bd7 9. Bxf6 gxf6 10. Bf5 Rb8) 6... Bg4 7. O-O Qb8 8. h3 Bh5 1-0"));
     }
 
     #[test]

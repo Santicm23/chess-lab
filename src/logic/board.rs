@@ -6,7 +6,7 @@ use crate::{
         FenError, PositionBetweenError, PositionEmptyError, PositionOccupiedError,
         UnalignedPositionsError,
     },
-    parsing::fen::parse_simple_fen,
+    parsing::fen::parse_minified_fen,
     utils::movements::{diagonal_movement, linear_movement},
 };
 
@@ -112,7 +112,7 @@ impl Board {
     /// * `Err(FenError)`: If the FEN string is invalid
     ///
     pub fn from_fen(fen: &str) -> Result<Board, FenError> {
-        parse_simple_fen(fen)
+        parse_minified_fen(fen)
     }
 
     /// Checks if a position is occupied by a piece
