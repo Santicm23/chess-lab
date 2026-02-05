@@ -67,7 +67,7 @@ impl Default for Chess960 {
         }
 
         let mut game = Game::from_fen(&format!(
-            "{}/pppppppp/8/8/8/8/PPPPPPPP/{} w - - 0 1",
+            "{}/pppppppp/8/8/8/8/PPPPPPPP/{} w KQkq - 0 1",
             first_row,
             first_row.to_uppercase()
         ))
@@ -534,4 +534,228 @@ impl Variant for Chess960 {
     }
 }
 
-// TODO: add unit tests
+#[cfg(test)]
+mod tests {
+    use crate::core::WinReason;
+
+    use super::*;
+
+    #[test]
+    fn test_standard_chess_name() {
+        assert_eq!(Chess960::name(), "Chess960");
+    }
+
+    #[test]
+    fn test_default() {
+        let variant = Chess960::default();
+
+        let minified_fen = variant.get_minified_fen();
+
+        let parts: Vec<&str> = minified_fen.split('/').collect();
+
+        assert!(parts[0].chars().all(|c| c.is_lowercase()));
+        assert!(parts[7].chars().all(|c| c.is_uppercase()));
+        assert_eq!(parts[0], parts[7].to_lowercase());
+
+        for piece in ['r', 'n', 'b', 'q', 'k'] {
+            let count = parts[0].chars().filter(|&c| c == piece).count();
+            match piece {
+                'r' => assert_eq!(count, 2),
+                'n' => assert_eq!(count, 2),
+                'b' => assert_eq!(count, 2),
+                'q' => assert_eq!(count, 1),
+                'k' => assert_eq!(count, 1),
+                _ => (),
+            }
+        }
+
+        let mut castle_chars = vec!['r', 'k', 'r'];
+        for char in parts[0].chars() {
+            if !castle_chars.is_empty() && char == castle_chars[0] {
+                castle_chars.remove(0);
+            }
+        }
+        assert!(castle_chars.is_empty());
+    }
+
+    #[test]
+    fn test_new() {
+        let game = Game::default();
+        let variant = Chess960::new(game.clone());
+        assert_eq!(variant.fen(), game.fen());
+    }
+
+    #[test]
+    fn test_from_fen() {
+        let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+        let variant = Chess960::from_fen(fen).unwrap();
+        assert_eq!(variant.fen(), fen);
+    }
+
+    #[test]
+    fn test_from_pgn() {
+        let pgn = "[Variant \"Chess960\"]\n
+            [FEN \"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\"]\n
+            1. e4 e5 2. Nf3 Nc6 3. Bb5 a6";
+        let variant = Chess960::from_pgn(pgn).unwrap();
+        assert!(variant.pgn().contains("1. e4 e5 2. Nf3 Nc6 3. Bb5 a6"));
+    }
+
+    #[test]
+    fn test_load() {
+        let path = "data/chess960/ex1.pgn";
+        let variant = Chess960::load(path).unwrap();
+        assert!(variant.pgn().contains("1. e4 c6 2. d4 d5 3. exd5 cxd5"));
+    }
+
+    #[test]
+    fn test_load_all() {
+        let path = "data/chess960/ex2.pgn";
+        let variants = Chess960::load_all(path).unwrap();
+        assert_eq!(variants.len(), 3);
+    }
+
+    #[test]
+    fn test_move_piece() {
+        let mut variant =
+            Chess960::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1").unwrap();
+        let status = variant.move_piece("e4").unwrap();
+        assert_eq!(status, GameStatus::InProgress);
+        assert_eq!(
+            variant.fen(),
+            "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1"
+        );
+    }
+
+    #[test]
+    fn test_undo_redo() {
+        let mut variant =
+            Chess960::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1").unwrap();
+        variant.move_piece("e4").unwrap();
+        variant.undo();
+        assert_eq!(
+            variant.fen(),
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+        );
+        variant.redo();
+        assert_eq!(
+            variant.fen(),
+            "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1"
+        );
+    }
+
+    #[test]
+    fn test_save() {
+        let mut variant = Chess960::default();
+        let path = "data/standard/test_save.pgn";
+
+        variant.move_piece("e4").unwrap();
+        variant.save(path, true).unwrap();
+
+        let loaded_variant = Chess960::load(path).unwrap();
+        assert_eq!(variant.fen(), loaded_variant.fen());
+
+        // Clean up
+        std::fs::remove_file(path).unwrap();
+    }
+
+    #[test]
+    fn test_resign() {
+        let mut variant = Chess960::default();
+
+        variant.resign(Color::White);
+        assert_eq!(
+            variant.get_status(),
+            GameStatus::BlackWins(WinReason::Resignation)
+        );
+    }
+
+    #[test]
+    fn test_draw() {
+        let mut variant = Chess960::default();
+
+        variant.draw();
+        assert_eq!(
+            variant.get_status(),
+            GameStatus::Draw(crate::core::DrawReason::Agreement)
+        );
+    }
+
+    #[test]
+    fn test_lost_on_time() {
+        let mut variant = Chess960::default();
+
+        variant.lost_on_time(Color::Black);
+        assert_eq!(variant.get_status(), GameStatus::WhiteWins(WinReason::Time));
+    }
+
+    #[test]
+    fn test_minified_fen() {
+        let variant =
+            Chess960::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1").unwrap();
+        let minified_fen = variant.get_minified_fen();
+        assert_eq!(minified_fen, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+    }
+
+    #[test]
+    fn test_is_white_turn() {
+        let mut variant = Chess960::default();
+        assert!(variant.is_white_turn());
+
+        variant.move_piece("e4").unwrap();
+        assert!(!variant.is_white_turn());
+    }
+
+    #[test]
+    fn test_get_castling_rights() {
+        let mut variant = Chess960::default();
+        let castling_rights = variant.get_castling_rights();
+        assert_eq!(castling_rights, "KQkq");
+
+        variant =
+            Chess960::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 1").unwrap();
+        let castling_rights = variant.get_castling_rights();
+        assert_eq!(castling_rights, "-");
+    }
+
+    #[test]
+    fn test_get_en_passant() {
+        let mut variant = Chess960::default();
+        assert_eq!(variant.get_en_passant(), None);
+
+        variant.move_piece("e4").unwrap();
+        variant.move_piece("d5").unwrap();
+        variant.move_piece("e5").unwrap();
+        variant.move_piece("f5").unwrap();
+        assert_eq!(
+            variant.get_en_passant().unwrap(),
+            Position::new(5, 5).unwrap()
+        );
+    }
+
+    #[test]
+    fn test_get_halfmove_clock() {
+        let variant = Chess960::default();
+        assert_eq!(variant.get_halfmove_clock(), 0);
+    }
+
+    #[test]
+    fn test_get_fullmove_number() {
+        let variant = Chess960::default();
+        assert_eq!(variant.get_fullmove_number(), 1);
+    }
+
+    #[test]
+    fn test_get_starting_fen() {
+        let variant = Chess960::default();
+        let starting_fen = variant.get_starting_fen();
+
+        assert!(starting_fen.contains("w KQkq - 0 1"));
+    }
+
+    #[test]
+    fn test_get_status() {
+        let variant = Chess960::default();
+        assert_eq!(variant.get_status(), GameStatus::InProgress);
+    }
+}
