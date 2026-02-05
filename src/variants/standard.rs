@@ -350,7 +350,7 @@ impl Variant for StandardChess {
     /// use chess_lab::core::Color;
     ///
     /// let mut game = StandardChess::default();
-    /// game.set_lost_in_time(Color::Black);
+    /// game.lost_on_time(Color::Black);
     /// ```
     ///
     fn lost_on_time(&mut self, color: Color) {

@@ -1014,7 +1014,7 @@ impl Game {
     /// use chess_lab::logic::Game;
     ///
     /// let mut game = Game::default();
-    /// game.set_lost_in_time(Color::White);
+    /// game.lost_on_time(Color::White);
     ///
     /// assert_eq!(game.status, GameStatus::BlackWins(WinReason::Time));
     /// ```
@@ -1038,7 +1038,7 @@ impl Game {
     /// use chess_lab::logic::Game;
     ///
     /// let mut game = Game::default();
-    /// game.set_draw_by_agreement();
+    /// game.draw_by_agreement();
     ///
     /// assert_eq!(game.status, GameStatus::Draw(DrawReason::Agreement));
     ///

@@ -157,7 +157,7 @@ impl VariantBuilder for Chess960 {
     /// ```
     /// # use chess_lab::core::VariantBuilder;
     /// # use chess_lab::variants::Chess960;
-    /// let pgn = "1. e4 e5 2. Nf3 Nc6";
+    /// let pgn = "[Variant \"Chess960\"]\n1. e4 e5 2. Nf3 Nc6";
     /// let variant = Chess960::from_pgn(pgn).unwrap();
     /// ```
     ///
@@ -179,7 +179,7 @@ impl VariantBuilder for Chess960 {
     /// ```
     /// # use chess_lab::core::VariantBuilder;
     /// # use chess_lab::variants::Chess960;
-    /// let path = "data/chess960/ex.pgn"; // TODO: Change to the chess960 file
+    /// let path = "data/chess960/ex1.pgn"; // TODO: Change to the chess960 file
     /// let variant = Chess960::load(path).unwrap();
     /// ```
     ///
@@ -202,7 +202,7 @@ impl VariantBuilder for Chess960 {
     /// ```
     /// # use chess_lab::core::VariantBuilder;
     /// # use chess_lab::variants::Chess960;
-    /// let path = "data/standard/ex3.pgn"; // TODO: Change to the chess960 file
+    /// let path = "data/chess960/ex2.pgn";
     /// let variants = Chess960::load_all(path).unwrap();
     /// ```
     ///
@@ -371,7 +371,7 @@ impl Variant for Chess960 {
     /// use chess_lab::core::Color;
     ///
     /// let mut variant = Chess960::default();
-    /// variant.set_lost_in_time(Color::White);
+    /// variant.lost_on_time(Color::White);
     /// ```
     ///
     fn lost_on_time(&mut self, color: Color) {
