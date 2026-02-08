@@ -129,26 +129,10 @@ impl Move {
             checkmate,
         };
         match &move_type {
-            MoveType::Normal { capture, promotion } => {
-                if *capture {
-                    if captured_piece.is_none() {
-                        return Err(MoveInfoError::new(
-                            String::from(
-                                "The move is a capture, but no captured piece is provided",
-                            ),
-                            mov,
-                        ));
-                    }
-                } else {
-                    if captured_piece.is_some() {
-                        return Err(MoveInfoError::new(
-                            String::from(
-                                "The move is not a capture, but a captured piece is provided",
-                            ),
-                            mov,
-                        ));
-                    }
-                }
+            MoveType::Normal {
+                capture: _,
+                promotion,
+            } => {
                 if promotion.is_some() {
                     if piece.piece_type != PieceType::Pawn {
                         return Err(MoveInfoError::new(
@@ -390,52 +374,6 @@ mod tests {
         )
         .unwrap();
         assert_eq!(mv.to_string(), "O-O-O");
-    }
-
-    #[test]
-    fn test_capture_invalid_error() {
-        let piece = Piece::new(Color::Black, PieceType::Bishop);
-        let from = Position::new(2, 7).unwrap(); // c8
-        let to = Position::new(5, 4).unwrap(); // f5
-        let move_type = MoveType::Normal {
-            capture: true,
-            promotion: None,
-        };
-        let mv_result = Move::new(
-            piece,
-            from,
-            to,
-            move_type,
-            None, // No captured piece provided
-            None,
-            (false, false),
-            true,
-            false,
-        );
-        assert!(mv_result.is_err());
-    }
-
-    #[test]
-    fn test_normal_move_with_capture_piece_error() {
-        let piece = Piece::new(Color::White, PieceType::Rook);
-        let from = Position::new(0, 0).unwrap(); // a1
-        let to = Position::new(0, 5).unwrap(); // a6
-        let move_type = MoveType::Normal {
-            capture: false,
-            promotion: None,
-        };
-        let mv_result = Move::new(
-            piece,
-            from,
-            to,
-            move_type,
-            Some(PieceType::Knight), // Captured piece provided incorrectly
-            None,
-            (false, false),
-            false,
-            false,
-        );
-        assert!(mv_result.is_err());
     }
 
     #[test]

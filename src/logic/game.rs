@@ -223,17 +223,16 @@ impl Game {
                         captured_piece =
                             Some(self.board.delete_piece(&captured_pos).unwrap().piece_type);
                     }
+                    MoveType::Normal {
+                        capture: _,
+                        promotion: Some(piece_type),
+                    } => {
+                        self.board.delete_piece(&end_pos).unwrap();
+                        self.board
+                            .set_piece(Piece::new(color, piece_type.to_owned()), &end_pos)
+                            .unwrap();
+                    }
                     _ => {}
-                }
-                if let MoveType::Normal {
-                    capture: _,
-                    promotion: Some(piece_type),
-                } = move_type
-                {
-                    self.board.delete_piece(&end_pos).unwrap();
-                    self.board
-                        .set_piece(Piece::new(color, piece_type), &end_pos)
-                        .unwrap();
                 }
 
                 self.update_rules(
@@ -248,7 +247,7 @@ impl Game {
                         false,
                         false,
                     )
-                    .unwrap(),
+                    .map_err(|e| MoveError::Invalid(e.error))?,
                 );
 
                 Ok(self.status)
@@ -650,7 +649,7 @@ impl Game {
     ) -> Result<(PieceType, (Option<u8>, Option<u8>), Position, MoveType), MoveError> {
         let mut move_str = move_str.to_string();
         let re =
-            Regex::new(r"^([NBRQK]?[a-h]?[1-8]?x?[a-h][1-8](=[NBRQ])?|O(-O){1,2})[+#]?").unwrap();
+            Regex::new(r"^([PNBRQK]?[a-h]?[1-8]?x?[a-h][1-8](=[NBRQ])?|O(-O){1,2})[+#]?").unwrap();
         if !re.is_match(move_str.as_str()) || move_str.starts_with('x') {
             return Err(MoveError::Invalid(move_str));
         }
@@ -700,7 +699,6 @@ impl Game {
             let start_col;
             let start_row;
             let end_pos;
-            let capture = move_str.contains("x");
             let promotion;
             let end_pos_index;
             let piece = match move_str.chars().next().unwrap() {
@@ -709,6 +707,7 @@ impl Game {
                 'R' => PieceType::Rook,
                 'Q' => PieceType::Queen,
                 'K' => PieceType::King,
+                'P' => PieceType::Pawn,
                 _ => {
                     move_str = format!("P{}", move_str);
                     PieceType::Pawn
@@ -734,6 +733,10 @@ impl Game {
                 promotion = None;
             }
 
+            let capture = move_str.contains("x")
+                || self.board.is_ocupied(&end_pos)
+                || self.en_passant.map_or_else(|| false, |pos| pos == end_pos);
+
             if end_pos_index > 1 {
                 if "abcdefgh".contains(move_str.chars().nth(1).unwrap()) {
                     start_col = Some(move_str.chars().nth(1).unwrap() as u8 - 'a' as u8);
@@ -754,15 +757,16 @@ impl Game {
                 start_row = None;
             }
 
-            if capture && self.en_passant.is_some() {
-                if piece == PieceType::Pawn && end_pos == self.en_passant.unwrap() {
-                    return Ok((
-                        PieceType::Pawn,
-                        (start_col, start_row),
-                        end_pos,
-                        MoveType::EnPassant,
-                    ));
-                }
+            if capture
+                && piece == PieceType::Pawn
+                && self.en_passant.map_or_else(|| false, |pos| pos == end_pos)
+            {
+                return Ok((
+                    PieceType::Pawn,
+                    (start_col, start_row),
+                    end_pos,
+                    MoveType::EnPassant,
+                ));
             }
 
             return Ok((
@@ -1396,6 +1400,18 @@ mod tests {
             game.fen(),
             "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1"
         );
+    }
+
+    #[test]
+    fn test_redundant_move() {
+        let mut game = Game::default();
+        assert!(game.move_piece("Pe4").is_ok());
+        game.move_piece("d5").unwrap();
+        assert!(game.move_piece("e4d5").is_ok());
+        game.undo();
+        game.move_piece("e5").unwrap();
+        game.move_piece("f5").unwrap();
+        assert!(game.move_piece("Pe5f6").is_ok());
     }
 
     #[test]
