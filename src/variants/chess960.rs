@@ -647,7 +647,7 @@ mod tests {
     #[test]
     fn test_save() {
         let mut variant = Chess960::default();
-        let path = "data/standard/test_save.pgn";
+        let path = "data/chess960/test_save.pgn";
 
         variant.move_piece("e4").unwrap();
         variant.save(path, true).unwrap();
