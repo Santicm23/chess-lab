@@ -319,6 +319,7 @@ impl Variant for Chess960 {
     ///
     /// let variant = Chess960::default();
     /// variant.save("data/chess960/ex.pgn", true).unwrap();
+    /// # std::fs::remove_file("data/chess960/ex.pgn").unwrap();
     /// ```
     ///
     fn save(&self, path: &str, overwrite: bool) -> Result<(), std::io::Error> {
