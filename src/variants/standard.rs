@@ -374,6 +374,25 @@ impl Variant for StandardChess {
         get_minified_fen(&self.fen())
     }
 
+    /// Returns the last [Move] of the [Game]
+    ///
+    /// # Returns
+    /// The last [Move] of the [Game], if there is one
+    ///
+    /// # Examples
+    /// ```
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::StandardChess;
+    /// let mut game = StandardChess::default();
+    /// game.move_piece("e4").unwrap();
+    /// let last_move = game.get_last_move();
+    /// assert_eq!(last_move.unwrap().to_string(), "e4");
+    /// ```
+    ///
+    fn get_last_move(&self) -> Option<crate::core::Move> {
+        self.game.get_last_move()
+    }
+
     /// Returns whether it is white's turn to [Move]
     ///
     /// # Returns
@@ -644,6 +663,17 @@ mod tests {
         let variant = StandardChess::default();
         let minified_fen = variant.get_minified_fen();
         assert_eq!(minified_fen, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+    }
+
+    #[test]
+    fn test_get_last_move() {
+        let mut variant = StandardChess::default();
+        assert_eq!(variant.get_last_move(), None);
+
+        variant.move_piece("e4").unwrap();
+        let last_move = variant.get_last_move();
+        assert!(last_move.is_some());
+        assert_eq!(last_move.unwrap().to_string(), "e4");
     }
 
     #[test]

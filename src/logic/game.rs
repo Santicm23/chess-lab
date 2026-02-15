@@ -573,6 +573,26 @@ impl Game {
         self.move_piece(mov.to_string().as_str()).unwrap();
     }
 
+    /// Returns the last move made in the game
+    ///
+    /// # Returns
+    /// An `Option<Move>` containing the last move made in the game, or `None` if no moves have been made
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lab::logic::Game;
+    ///
+    /// let mut game = Game::default();
+    /// game.move_piece("e4").unwrap();
+    ///
+    /// let last_move = game.get_last_move().unwrap();
+    /// assert_eq!(last_move.to_string(), "e4");
+    /// ```
+    ///
+    pub fn get_last_move(&self) -> Option<Move> {
+        self.history.get_move()
+    }
+
     /// Undoes all moves until the starting position
     ///
     /// # Example

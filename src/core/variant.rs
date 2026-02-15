@@ -1,4 +1,5 @@
 use crate::{
+    core::Move,
     errors::{FenError, MoveError, PGNError},
     logic::Game,
 };
@@ -81,6 +82,12 @@ pub trait Variant {
     /// The minified fen of the game.
     ///
     fn get_minified_fen(&self) -> String;
+
+    /// Gets the last move of the game.
+    /// # Returns
+    /// The last move of the game, if there is one.
+    ///
+    fn get_last_move(&self) -> Option<Move>;
 
     /// Returns whether it is white's turn to move.
     ///
