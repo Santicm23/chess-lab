@@ -256,130 +256,6 @@ impl Game {
         }
     }
 
-    /// Parses a move string
-    ///
-    /// # Arguments
-    /// * `mov`: A move that holds the piece type, start and end position, the move type, the captured piece and the rook start position
-    ///
-    fn update_rules(&mut self, mut mov: Move) {
-        self.is_white_turn = !self.is_white_turn;
-
-        mov.check = self.check();
-        mov.checkmate = self.checkmate();
-
-        self.history.add_move(
-            mov.clone(),
-            self.halfmove_clock,
-            self.fullmove_number,
-            self.en_passant,
-            self.castling_rights,
-            self.status,
-            self.prev_positions.clone(),
-        );
-
-        if matches!(mov.move_type, MoveType::Castle { .. })
-            || mov.piece.piece_type == PieceType::King
-        {
-            self.castling_rights &= match mov.piece.color {
-                Color::White => 0b0011,
-                Color::Black => 0b1100,
-            };
-        }
-        if mov.piece.piece_type == PieceType::Rook {
-            let king = self.board.find(PieceType::King, mov.piece.color)[0];
-            match mov.piece.color {
-                Color::White => {
-                    if mov.from.col < king.col {
-                        self.castling_rights &= 0b1011;
-                    } else if mov.from.col > king.col {
-                        self.castling_rights &= 0b0111;
-                    }
-                }
-                Color::Black => {
-                    if mov.from.col < king.col {
-                        self.castling_rights &= 0b1110;
-                    } else if mov.from.col > king.col {
-                        self.castling_rights &= 0b1101;
-                    }
-                }
-            }
-        }
-        if let Some(PieceType::Rook) = mov.captured_piece {
-            let king = self.board.find(PieceType::King, mov.piece.color)[0];
-            match mov.piece.color.opposite() {
-                Color::White => {
-                    if mov.to.col < king.col {
-                        self.castling_rights &= 0b1011;
-                    } else if mov.to.col > king.col {
-                        self.castling_rights &= 0b0111;
-                    }
-                }
-                Color::Black => {
-                    if mov.to.col < king.col {
-                        self.castling_rights &= 0b1110;
-                    } else if mov.to.col > king.col {
-                        self.castling_rights &= 0b1101;
-                    }
-                }
-            }
-        }
-        if matches!(mov.move_type, MoveType::Normal { capture: true, .. })
-            || mov.piece.piece_type == PieceType::Pawn
-        {
-            self.halfmove_clock = 0;
-        } else {
-            self.halfmove_clock += 1;
-        }
-        if mov.piece.piece_type == PieceType::Pawn && (&mov.from - &mov.to).1.abs() == 2 {
-            let positions = self.board.find(PieceType::Pawn, mov.piece.color.opposite());
-            let en_passant_pos = Position {
-                col: mov.from.col,
-                row: (mov.from.row + mov.to.row) / 2,
-            };
-
-            let can_en_passant = positions.iter().any(|pos| {
-                let piece = self.board.get_piece(&pos).unwrap();
-                piece_movement(&piece, &pos, &en_passant_pos)
-            });
-
-            if can_en_passant {
-                self.en_passant = Some(en_passant_pos);
-            } else {
-                self.en_passant = None;
-            }
-        } else {
-            self.en_passant = None;
-        }
-        if self.is_white_turn {
-            self.fullmove_number += 1;
-        }
-
-        let current_pos = self.get_fen_reduced();
-        let posistions = *self.prev_positions.get(&current_pos).unwrap_or(&0);
-
-        self.prev_positions.insert(current_pos, posistions + 1);
-
-        if mov.checkmate {
-            self.status = if self.is_white_turn {
-                GameStatus::BlackWins(WinReason::Checkmate)
-            } else {
-                GameStatus::WhiteWins(WinReason::Checkmate)
-            };
-        } else if self.stalemate() {
-            self.status = GameStatus::Draw(DrawReason::Stalemate);
-        } else if self.insufficient_material() {
-            self.status = GameStatus::Draw(DrawReason::InsufficientMaterial);
-        } else if posistions == 2 {
-            self.status = GameStatus::Draw(DrawReason::ThreefoldRepetition);
-        } else if self.halfmove_clock >= 100 {
-            self.status = GameStatus::Draw(DrawReason::FiftyMoveRule);
-        } else {
-            self.status = GameStatus::InProgress;
-        };
-
-        self.history.game_over(self.status);
-    }
-
     /// Returns the FEN representation of the game
     ///
     /// # Returns
@@ -841,17 +717,39 @@ impl Game {
                 return false;
             }
         }
-        if piece.piece_type == PieceType::Pawn
-            && matches!(
+        if piece.piece_type == PieceType::Pawn {
+            if matches!(
                 move_type,
                 MoveType::Normal {
                     capture: false,
                     promotion: _
                 }
-            )
-        {
-            if self.board.get_piece(end_pos).is_some() || start_pos.col != end_pos.col {
+            ) && (self.board.get_piece(end_pos).is_some() || start_pos.col != end_pos.col)
+            {
                 return false;
+            }
+
+            if let MoveType::Normal {
+                capture: _,
+                promotion: Some(_),
+            } = move_type
+            {
+                if (piece.color == Color::White && end_pos.row != 7)
+                    || (piece.color == Color::Black && end_pos.row != 0)
+                {
+                    return false;
+                }
+            }
+            if let MoveType::Normal {
+                capture: _,
+                promotion: None,
+            } = move_type
+            {
+                if (piece.color == Color::White && end_pos.row == 7)
+                    || (piece.color == Color::Black && end_pos.row == 0)
+                {
+                    return false;
+                }
             }
         }
 
@@ -865,6 +763,53 @@ impl Game {
         let king = board.find(PieceType::King, piece.color)[0];
 
         return !board.is_attacked(king, piece.color.opposite());
+    }
+
+    pub fn get_legal_moves(&self, pos: Position) -> Vec<Move> {
+        if self.board.get_piece(&pos).is_none() {
+            return vec![];
+        }
+
+        let piece = self.board.get_piece(&pos).unwrap();
+        if piece.color
+            != if self.is_white_turn {
+                Color::White
+            } else {
+                Color::Black
+            }
+        {
+            return vec![];
+        }
+
+        let mut moves = Vec::new();
+
+        for col in 0..8 {
+            for row in 0..8 {
+                let end_pos = Position { col, row };
+                let move_type = MoveType::Normal {
+                    capture: false,
+                    promotion: None,
+                };
+                if self.is_legal(&piece, &pos, &end_pos, &move_type) {
+                    moves.push(
+                        Move::new(
+                            piece.clone(),
+                            pos,
+                            end_pos,
+                            move_type,
+                            self.board.get_piece(&end_pos).map(|p| p.piece_type),
+                            None,
+                            (false, false),
+                            false,
+                            false,
+                        )
+                        .unwrap(),
+                    );
+                }
+            }
+        }
+
+        moves
     }
 
     /// Returns whether the king is in check
@@ -1071,6 +1016,130 @@ impl Game {
             return;
         }
         self.status = GameStatus::Draw(DrawReason::Agreement);
+    }
+
+    /// Parses a move string
+    ///
+    /// # Arguments
+    /// * `mov`: A move that holds the piece type, start and end position, the move type, the captured piece and the rook start position
+    ///
+    fn update_rules(&mut self, mut mov: Move) {
+        self.is_white_turn = !self.is_white_turn;
+
+        mov.check = self.check();
+        mov.checkmate = self.checkmate();
+
+        self.history.add_move(
+            mov.clone(),
+            self.halfmove_clock,
+            self.fullmove_number,
+            self.en_passant,
+            self.castling_rights,
+            self.status,
+            self.prev_positions.clone(),
+        );
+
+        if matches!(mov.move_type, MoveType::Castle { .. })
+            || mov.piece.piece_type == PieceType::King
+        {
+            self.castling_rights &= match mov.piece.color {
+                Color::White => 0b0011,
+                Color::Black => 0b1100,
+            };
+        }
+        if mov.piece.piece_type == PieceType::Rook {
+            let king = self.board.find(PieceType::King, mov.piece.color)[0];
+            match mov.piece.color {
+                Color::White => {
+                    if mov.from.col < king.col {
+                        self.castling_rights &= 0b1011;
+                    } else if mov.from.col > king.col {
+                        self.castling_rights &= 0b0111;
+                    }
+                }
+                Color::Black => {
+                    if mov.from.col < king.col {
+                        self.castling_rights &= 0b1110;
+                    } else if mov.from.col > king.col {
+                        self.castling_rights &= 0b1101;
+                    }
+                }
+            }
+        }
+        if let Some(PieceType::Rook) = mov.captured_piece {
+            let king = self.board.find(PieceType::King, mov.piece.color)[0];
+            match mov.piece.color.opposite() {
+                Color::White => {
+                    if mov.to.col < king.col {
+                        self.castling_rights &= 0b1011;
+                    } else if mov.to.col > king.col {
+                        self.castling_rights &= 0b0111;
+                    }
+                }
+                Color::Black => {
+                    if mov.to.col < king.col {
+                        self.castling_rights &= 0b1110;
+                    } else if mov.to.col > king.col {
+                        self.castling_rights &= 0b1101;
+                    }
+                }
+            }
+        }
+        if matches!(mov.move_type, MoveType::Normal { capture: true, .. })
+            || mov.piece.piece_type == PieceType::Pawn
+        {
+            self.halfmove_clock = 0;
+        } else {
+            self.halfmove_clock += 1;
+        }
+        if mov.piece.piece_type == PieceType::Pawn && (&mov.from - &mov.to).1.abs() == 2 {
+            let positions = self.board.find(PieceType::Pawn, mov.piece.color.opposite());
+            let en_passant_pos = Position {
+                col: mov.from.col,
+                row: (mov.from.row + mov.to.row) / 2,
+            };
+
+            let can_en_passant = positions.iter().any(|pos| {
+                let piece = self.board.get_piece(&pos).unwrap();
+                piece_movement(&piece, &pos, &en_passant_pos)
+            });
+
+            if can_en_passant {
+                self.en_passant = Some(en_passant_pos);
+            } else {
+                self.en_passant = None;
+            }
+        } else {
+            self.en_passant = None;
+        }
+        if self.is_white_turn {
+            self.fullmove_number += 1;
+        }
+
+        let current_pos = self.get_fen_reduced();
+        let posistions = *self.prev_positions.get(&current_pos).unwrap_or(&0);
+
+        self.prev_positions.insert(current_pos, posistions + 1);
+
+        if mov.checkmate {
+            self.status = if self.is_white_turn {
+                GameStatus::BlackWins(WinReason::Checkmate)
+            } else {
+                GameStatus::WhiteWins(WinReason::Checkmate)
+            };
+        } else if self.stalemate() {
+            self.status = GameStatus::Draw(DrawReason::Stalemate);
+        } else if self.insufficient_material() {
+            self.status = GameStatus::Draw(DrawReason::InsufficientMaterial);
+        } else if posistions == 2 {
+            self.status = GameStatus::Draw(DrawReason::ThreefoldRepetition);
+        } else if self.halfmove_clock >= 100 {
+            self.status = GameStatus::Draw(DrawReason::FiftyMoveRule);
+        } else {
+            self.status = GameStatus::InProgress;
+        };
+
+        self.history.game_over(self.status);
     }
 
     /// Finds the position of the pieces that matches the given criteria to move
