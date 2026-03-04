@@ -1,7 +1,7 @@
 use rand::Rng;
 
 use crate::{
-    core::{Color, GameStatus, Position, Variant, VariantBuilder},
+    core::{Color, GameStatus, Move, Position, Variant, VariantBuilder},
     errors::{FenError, MoveError, PGNError},
     logic::Game,
     parsing::{
@@ -299,6 +299,10 @@ impl Variant for Chess960 {
     ///
     fn fen(&self) -> String {
         self.game.fen()
+    }
+
+    fn get_legal_moves(&self, pos: Position) -> Vec<Move> {
+        self.game.get_legal_moves(pos)
     }
 
     /// Saves the PGN string of the [Game] to a file

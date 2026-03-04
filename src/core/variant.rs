@@ -45,6 +45,16 @@ pub trait Variant {
     ///
     fn fen(&self) -> String;
 
+    /// Returns the legal moves for a given position.
+    ///
+    /// # Arguments
+    /// * `pos` - The position to get the legal moves for.
+    ///
+    /// # Returns
+    /// A vector of legal moves for the given position.
+    ///
+    fn get_legal_moves(&self, pos: Position) -> Vec<Move>;
+
     /// Saves the game to a file.
     ///
     /// # Arguments

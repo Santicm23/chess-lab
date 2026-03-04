@@ -698,6 +698,9 @@ impl Game {
                 Ok(false) => (),
             }
         }
+        if move_type == &MoveType::EnPassant && piece.piece_type != PieceType::Pawn {
+            return false;
+        }
 
         if let MoveType::Castle { side } = move_type {
             return self.is_castle_legal(piece, start_pos, end_pos, side);
@@ -714,6 +717,15 @@ impl Game {
                 || self.board.get_piece(end_pos).unwrap().color == piece.color
                 || (piece.piece_type == PieceType::Pawn && start_pos.col == end_pos.col)
             {
+                return false;
+            }
+        }
+        if let MoveType::Normal {
+            capture: false,
+            promotion: _,
+        } = move_type
+        {
+            if self.board.is_ocupied(end_pos) {
                 return false;
             }
         }
@@ -751,6 +763,15 @@ impl Game {
                     return false;
                 }
             }
+
+            if let MoveType::EnPassant = move_type {
+                if self.en_passant.map_or_else(|| false, |pos| pos != *end_pos)
+                    || ((piece.color == Color::White && end_pos.row != 5)
+                        || (piece.color == Color::Black && end_pos.row != 2))
+                {
+                    return false;
+                }
+            }
         }
 
         if self.capture_king {
@@ -765,6 +786,26 @@ impl Game {
         return !board.is_attacked(king, piece.color.opposite());
     }
 
+    /// Returns all the legal moves for a piece at a given position
+    ///
+    /// # Arguments
+    /// * `pos`: The position of the piece to get the legal moves for
+    ///
+    /// # Returns
+    /// A vector containing all the legal moves for the piece at the given position
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lab::core::Position;
+    /// use chess_lab::logic::Game;
+    ///
+    /// let game = Game::default();
+    /// let legal_moves = game.get_legal_moves(Position::from_string("e2").unwrap());
+    /// assert_eq!(legal_moves.len(), 2);
+    /// assert_eq!(legal_moves[0].to_string(), "e3");
+    /// assert_eq!(legal_moves[1].to_string(), "e4");
+    /// ```
+    ///
     pub fn get_legal_moves(&self, pos: Position) -> Vec<Move> {
         if self.board.get_piece(&pos).is_none() {
             return vec![];
@@ -787,10 +828,15 @@ impl Game {
             for row in 0..8 {
                 let end_pos = Position { col, row };
                 let move_type = MoveType::Normal {
-                    capture: false,
+                    capture: self
+                        .board
+                        .get_piece(&end_pos)
+                        .map_or_else(|| false, |p| p.color != piece.color),
                     promotion: None,
                 };
-                if self.is_legal(&piece, &pos, &end_pos, &move_type) {
+                if self.is_legal(&piece, &pos, &end_pos, &move_type)
+                    || self.is_legal(&piece, &pos, &end_pos, &MoveType::EnPassant)
+                {
                     moves.push(
                         Move::new(
                             piece.clone(),
@@ -805,6 +851,62 @@ impl Game {
                         )
                         .unwrap(),
                     );
+                } else if piece.piece_type == PieceType::King {
+                    if self.is_legal(
+                        &piece,
+                        &pos,
+                        &end_pos,
+                        &MoveType::Castle {
+                            side: CastleType::KingSide,
+                        },
+                    ) {
+                        moves.push(
+                            Move::new(
+                                piece.clone(),
+                                pos,
+                                end_pos,
+                                MoveType::Castle {
+                                    side: CastleType::KingSide,
+                                },
+                                self.board.get_piece(&end_pos).map(|p| p.piece_type),
+                                Some(Position {
+                                    col: 6,
+                                    row: end_pos.row,
+                                }),
+                                (false, false),
+                                false,
+                                false,
+                            )
+                            .unwrap(),
+                        );
+                    } else if self.is_legal(
+                        &piece,
+                        &pos,
+                        &end_pos,
+                        &MoveType::Castle {
+                            side: CastleType::QueenSide,
+                        },
+                    ) {
+                        moves.push(
+                            Move::new(
+                                piece.clone(),
+                                pos,
+                                end_pos,
+                                MoveType::Castle {
+                                    side: CastleType::QueenSide,
+                                },
+                                self.board.get_piece(&end_pos).map(|p| p.piece_type),
+                                Some(Position {
+                                    col: 2,
+                                    row: end_pos.row,
+                                }),
+                                (false, false),
+                                false,
+                                false,
+                            )
+                            .unwrap(),
+                        );
+                    }
                 }
             }
         }
@@ -1331,50 +1433,43 @@ impl Game {
 
         match side {
             CastleType::KingSide => {
+                if end_pos.col != 6 {
+                    return false;
+                }
                 if piece.color == Color::White && self.castling_rights & 0b1000 == 0 {
-                    // This should never happen, this is covered in parse_move
-                    unreachable!()
+                    return false;
                 } else if piece.color == Color::Black && self.castling_rights & 0b0010 == 0 {
-                    // This should never happen, this is covered in parse_move
-                    unreachable!()
+                    return false;
                 }
-
-                for col in start_pos.col..end_pos.col + 1 {
-                    let new_pos = Position::new(col, start_pos.row).unwrap();
-                    if (&new_pos != start_pos && self.board.is_ocupied(&new_pos))
-                        || self.board.is_attacked(
-                            Position::new(col, start_pos.row).unwrap(),
-                            piece.color.opposite(),
-                        )
-                    {
-                        return false;
-                    }
-                }
-                return true;
             }
             CastleType::QueenSide => {
+                if end_pos.col != 2 {
+                    return false;
+                }
                 if piece.color == Color::White && self.castling_rights & 0b0100 == 0 {
-                    // This should never happen, this is covered in parse_move
-                    unreachable!()
+                    return false;
                 } else if piece.color == Color::Black && self.castling_rights & 0b0001 == 0 {
-                    // This should never happen, this is covered in parse_move
-                    unreachable!()
+                    return false;
                 }
-
-                for col in end_pos.col..start_pos.col + 1 {
-                    let new_pos = Position::new(col, start_pos.row).unwrap();
-                    if (&new_pos != start_pos && self.board.is_ocupied(&new_pos))
-                        || self.board.is_attacked(
-                            Position::new(col, start_pos.row).unwrap(),
-                            piece.color.opposite(),
-                        )
-                    {
-                        return false;
-                    }
-                }
-                return true;
             }
         }
+        let col_range = if end_pos.col < start_pos.col {
+            end_pos.col..=start_pos.col
+        } else {
+            start_pos.col..=end_pos.col
+        };
+        for col in col_range {
+            let new_pos = Position::new(col, start_pos.row).unwrap();
+            if (&new_pos != start_pos && self.board.is_ocupied(&new_pos))
+                || self.board.is_attacked(
+                    Position::new(col, start_pos.row).unwrap(),
+                    piece.color.opposite(),
+                )
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     /// Checks if there are legal moves for the current player
@@ -1707,6 +1802,23 @@ mod tests {
         assert!(game.move_piece("e4").is_err());
         game.move_piece("e5").unwrap();
         assert!(game.move_piece("Nf6").is_err());
+    }
+
+    #[test]
+    fn test_get_legal_moves() {
+        let game = Game::default();
+        let legal_moves = game.get_legal_moves(Position::from_string("e2").unwrap());
+
+        assert_eq!(legal_moves.len(), 2);
+        assert!(legal_moves
+            .iter()
+            .any(|m| m.to == Position::from_string("e3").unwrap()));
+        assert!(legal_moves
+            .iter()
+            .any(|m| m.to == Position::from_string("e4").unwrap()));
+
+        let legal_moves = game.get_legal_moves(Position::from_string("e1").unwrap());
+        assert_eq!(legal_moves.len(), 0);
     }
 
     #[test]
