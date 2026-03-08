@@ -280,10 +280,49 @@ impl Variant for StandardChess {
         self.game.fen()
     }
 
+    /// Returns the piece at a given position
+    ///
+    /// # Arguments
+    /// * `pos` - The position to get the piece from
+    ///
+    /// # Returns
+    /// The piece at the given position, if there is one
+    ///
+    /// # Example
+    /// ```
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::StandardChess;
+    /// use chess_lab::core::Position;
+    ///
+    /// let game = StandardChess::default();
+    /// let piece = game.get_piece_at(Position::from_string("e2").unwrap());
+    /// assert!(piece.is_some());
+    /// assert_eq!(piece.unwrap().to_string(), "P");
+    /// ```
+    ///
     fn get_piece_at(&self, pos: Position) -> Option<Piece> {
         self.game.get_piece_at(pos)
     }
 
+    /// Returns the legal moves of a piece at a given position
+    ///
+    /// # Arguments
+    /// * `pos` - The position to get the legal moves for
+    ///
+    /// # Returns
+    /// A vector of legal moves for the piece at the given position
+    ///
+    /// # Example
+    /// ```
+    /// # use chess_lab::core::Variant;
+    /// # use chess_lab::variants::StandardChess;
+    /// use chess_lab::core::Position;
+    ///
+    /// let game = StandardChess::default();
+    /// let legal_moves = game.get_legal_moves(Position::from_string("e2").unwrap());
+    /// assert!(legal_moves.iter().any(|m| m.to_string() == "e4"));
+    /// ```
+    ///
     fn get_legal_moves(&self, pos: Position) -> Vec<Move> {
         self.game.get_legal_moves(pos)
     }
