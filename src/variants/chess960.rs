@@ -1,7 +1,7 @@
 use rand::Rng;
 
 use crate::{
-    core::{Color, GameStatus, Move, Position, Variant, VariantBuilder},
+    core::{Color, GameStatus, Move, Piece, Position, Variant, VariantBuilder},
     errors::{FenError, MoveError, PGNError},
     logic::Game,
     parsing::{
@@ -299,6 +299,10 @@ impl Variant for Chess960 {
     ///
     fn fen(&self) -> String {
         self.game.fen()
+    }
+
+    fn get_piece_at(&self, pos: Position) -> Option<Piece> {
+        self.game.get_piece_at(pos)
     }
 
     fn get_legal_moves(&self, pos: Position) -> Vec<Move> {

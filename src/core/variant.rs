@@ -1,5 +1,5 @@
 use crate::{
-    core::Move,
+    core::{Move, Piece},
     errors::{FenError, MoveError, PGNError},
     logic::Game,
 };
@@ -44,6 +44,16 @@ pub trait Variant {
     /// The FEN string of the game.
     ///
     fn fen(&self) -> String;
+
+    /// Returns the piece at a given position.
+    ///
+    /// # Arguments
+    /// * `pos` - The position to get the piece from.
+    ///
+    /// # Returns
+    /// The piece at the given position, if there is one.
+    ///
+    fn get_piece_at(&self, pos: Position) -> Option<Piece>;
 
     /// Returns the legal moves for a given position.
     ///
@@ -94,6 +104,7 @@ pub trait Variant {
     fn get_minified_fen(&self) -> String;
 
     /// Gets the last move of the game.
+    ///
     /// # Returns
     /// The last move of the game, if there is one.
     ///

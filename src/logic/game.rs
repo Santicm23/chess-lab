@@ -469,6 +469,10 @@ impl Game {
         self.history.get_move()
     }
 
+    pub fn get_piece_at(&self, pos: Position) -> Option<Piece> {
+        self.board.get_piece(&pos)
+    }
+
     /// Undoes all moves until the starting position
     ///
     /// # Example
