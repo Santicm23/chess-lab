@@ -470,6 +470,7 @@ impl Game {
         self.history.get_move()
     }
 
+    // TODO: add docs
     pub fn get_piece_at(&self, pos: Position) -> Option<Piece> {
         self.board.get_piece(&pos)
     }
@@ -917,6 +918,52 @@ impl Game {
         }
 
         moves
+    }
+
+    // TODO: add docs
+    pub fn get_castle_rook_pos(&self, side: CastleType) -> Option<Position> {
+        if self.is_white_turn && (self.castling_rights & 0b1000 == 0)
+            || (!self.is_white_turn && self.castling_rights & 0b0010 == 0)
+        {
+            return None;
+        } else if !self.is_white_turn && (self.castling_rights & 0b0100 == 0)
+            || (self.is_white_turn && self.castling_rights & 0b0001 == 0)
+        {
+            return None;
+        }
+
+        let color = if self.is_white_turn {
+            Color::White
+        } else {
+            Color::Black
+        };
+
+        let step = match side {
+            CastleType::KingSide => 1,
+            CastleType::QueenSide => -1,
+        };
+        let king_pos = self.board.find(PieceType::King, color)[0];
+
+        let mut col = king_pos.col as i8 + step;
+        while col < 8 && col >= 0 {
+            if let Some(piece) = self.board.get_piece(&Position {
+                col: col as u8,
+                row: king_pos.row,
+            }) {
+                if piece.piece_type == PieceType::Rook && piece.color == color {
+                    return Some(Position {
+                        col: col as u8,
+                        row: king_pos.row,
+                    });
+                }
+            }
+            if step > 0 {
+                col += step;
+            } else {
+                col -= -step;
+            }
+        }
+        return None;
     }
 
     /// Returns whether the king is in check
@@ -2226,6 +2273,30 @@ mod tests {
             pgn.contains(
                 "1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 (6... O-O 7. c3 b5 8. Bc2) 7. Bb3 O-O 8. c3 d5"
             )
+        );
+    }
+
+    #[test]
+    fn test_get_castle_rook_pos() {
+        let mut game = Game::default();
+        assert_eq!(
+            game.get_castle_rook_pos(CastleType::KingSide),
+            Some(Position::from_string("h1").unwrap())
+        );
+        assert_eq!(
+            game.get_castle_rook_pos(CastleType::QueenSide),
+            Some(Position::from_string("a1").unwrap())
+        );
+
+        game.move_piece("e4").unwrap();
+
+        assert_eq!(
+            game.get_castle_rook_pos(CastleType::KingSide),
+            Some(Position::from_string("h8").unwrap())
+        );
+        assert_eq!(
+            game.get_castle_rook_pos(CastleType::QueenSide),
+            Some(Position::from_string("a8").unwrap())
         );
     }
 
