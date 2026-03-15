@@ -126,6 +126,7 @@ impl Game {
         Ok(game)
     }
 
+    // TODO: Document this function
     pub fn get_variant(&self) -> String {
         match self.history.variant.clone() {
             Some(variant) => variant,
