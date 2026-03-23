@@ -126,7 +126,19 @@ impl Game {
         Ok(game)
     }
 
-    // TODO: Document this function
+    /// Returns the variant of the game
+    ///
+    /// # Returns
+    /// A string that holds the variant of the game
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use chess_lab::logic::Game;
+    /// let game = Game::default();
+    /// assert_eq!(game.get_variant(), "Standard");
+    /// ```
+    ///
     pub fn get_variant(&self) -> String {
         match self.history.variant.clone() {
             Some(variant) => variant,
@@ -470,7 +482,24 @@ impl Game {
         self.history.get_move()
     }
 
-    // TODO: add docs
+    /// Returns the piece at a given position
+    ///
+    /// # Arguments
+    /// * `pos`: The position to get the piece from
+    ///
+    /// # Returns
+    /// An `Option<Piece>` containing the piece at the given position, or `None` if the position is empty
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lab::core::{PieceType, Position};
+    /// use chess_lab::logic::Game;
+    ///
+    /// let game = Game::default();
+    /// let piece = game.get_piece_at(Position::from_string("e2").unwrap()).unwrap();
+    /// assert_eq!(piece.piece_type, PieceType::Pawn);
+    /// ```
+    ///
     pub fn get_piece_at(&self, pos: Position) -> Option<Piece> {
         self.board.get_piece(&pos)
     }
@@ -840,15 +869,52 @@ impl Game {
                         .map_or_else(|| false, |p| p.color != piece.color),
                     promotion: None,
                 };
-                if self.is_legal(&piece, &pos, &end_pos, &move_type)
-                    || self.is_legal(&piece, &pos, &end_pos, &MoveType::EnPassant)
-                {
+                let en_passant_move_type = MoveType::EnPassant;
+                let promotion_move_type = MoveType::Normal {
+                    capture: self
+                        .board
+                        .get_piece(&end_pos)
+                        .map_or_else(|| false, |p| p.color != piece.color),
+                    promotion: Some(PieceType::Queen),
+                };
+
+                if self.is_legal(&piece, &pos, &end_pos, &move_type) {
                     moves.push(
                         Move::new(
                             piece.clone(),
                             pos,
                             end_pos,
                             move_type,
+                            self.board.get_piece(&end_pos).map(|p| p.piece_type),
+                            None,
+                            (false, false),
+                            false,
+                            false,
+                        )
+                        .unwrap(),
+                    );
+                } else if self.is_legal(&piece, &pos, &end_pos, &en_passant_move_type) {
+                    moves.push(
+                        Move::new(
+                            piece.clone(),
+                            pos,
+                            end_pos,
+                            en_passant_move_type,
+                            self.board.get_piece(&end_pos).map(|p| p.piece_type),
+                            None,
+                            (false, false),
+                            false,
+                            false,
+                        )
+                        .unwrap(),
+                    );
+                } else if self.is_legal(&piece, &pos, &end_pos, &promotion_move_type) {
+                    moves.push(
+                        Move::new(
+                            piece.clone(),
+                            pos,
+                            end_pos,
+                            promotion_move_type,
                             self.board.get_piece(&end_pos).map(|p| p.piece_type),
                             None,
                             (false, false),
@@ -875,10 +941,7 @@ impl Game {
                                     side: CastleType::KingSide,
                                 },
                                 self.board.get_piece(&end_pos).map(|p| p.piece_type),
-                                Some(Position {
-                                    col: 6,
-                                    row: end_pos.row,
-                                }),
+                                self.get_castle_rook_pos(CastleType::KingSide),
                                 (false, false),
                                 false,
                                 false,
@@ -902,10 +965,7 @@ impl Game {
                                     side: CastleType::QueenSide,
                                 },
                                 self.board.get_piece(&end_pos).map(|p| p.piece_type),
-                                Some(Position {
-                                    col: 2,
-                                    row: end_pos.row,
-                                }),
+                                self.get_castle_rook_pos(CastleType::QueenSide),
                                 (false, false),
                                 false,
                                 false,
@@ -920,16 +980,42 @@ impl Game {
         moves
     }
 
-    // TODO: add docs
+    /// Returns the position of the rook involved in a castle move
+    ///
+    /// # Arguments
+    /// * `side`: The side of the castle move
+    ///
+    /// # Returns
+    /// An `Option<Position>` containing the position of the rook involved in the castle move
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lab::logic::Game;
+    /// use chess_lab::core::CastleType;
+    ///
+    /// let game = Game::default();
+    /// let rook_pos = game.get_castle_rook_pos(CastleType::KingSide).unwrap();
+    /// assert_eq!(rook_pos.to_string(), "h1");
+    /// ```
+    ///
     pub fn get_castle_rook_pos(&self, side: CastleType) -> Option<Position> {
-        if self.is_white_turn && (self.castling_rights & 0b1000 == 0)
-            || (!self.is_white_turn && self.castling_rights & 0b0010 == 0)
-        {
-            return None;
-        } else if !self.is_white_turn && (self.castling_rights & 0b0100 == 0)
-            || (self.is_white_turn && self.castling_rights & 0b0001 == 0)
-        {
-            return None;
+        match side {
+            CastleType::KingSide => {
+                if self.is_white_turn && self.castling_rights & 0b1000 == 0 {
+                    return None;
+                }
+                if !self.is_white_turn && self.castling_rights & 0b0010 == 0 {
+                    return None;
+                }
+            }
+            CastleType::QueenSide => {
+                if self.is_white_turn && self.castling_rights & 0b0100 == 0 {
+                    return None;
+                }
+                if !self.is_white_turn && self.castling_rights & 0b0001 == 0 {
+                    return None;
+                }
+            }
         }
 
         let color = if self.is_white_turn {
@@ -963,7 +1049,8 @@ impl Game {
                 col -= -step;
             }
         }
-        return None;
+        // This should never happen since the castle move should be illegal if there is no rook in the correct position
+        unreachable!()
     }
 
     /// Returns whether the king is in check
@@ -1761,6 +1848,21 @@ mod tests {
     }
 
     #[test]
+    fn test_is_legal_invalid_promotion() {
+        let game = Game::default();
+
+        assert!(!game.is_legal(
+            &Piece::new(Color::White, PieceType::Pawn),
+            &Position::from_string("e2").unwrap(),
+            &Position::from_string("e4").unwrap(),
+            &MoveType::Normal {
+                capture: false,
+                promotion: Some(PieceType::Queen)
+            },
+        ));
+    }
+
+    #[test]
     fn test_is_legal_nonsense_move() {
         let game = Game::default();
         assert!(!game.is_legal(
@@ -1854,11 +1956,26 @@ mod tests {
         assert!(game.move_piece("e4").is_err());
         game.move_piece("e5").unwrap();
         assert!(game.move_piece("Nf6").is_err());
+        assert!(game.move_piece("d4=Q").is_err());
+    }
+
+    #[test]
+    fn test_get_piece_at() {
+        let game = Game::default();
+        let piece = game
+            .get_piece_at(Position::from_string("e2").unwrap())
+            .unwrap();
+        assert_eq!(piece.piece_type, PieceType::Pawn);
+        assert_eq!(piece.color, Color::White);
+
+        assert!(game
+            .get_piece_at(Position::from_string("e4").unwrap())
+            .is_none());
     }
 
     #[test]
     fn test_get_legal_moves() {
-        let game = Game::default();
+        let mut game = Game::default();
         let legal_moves = game.get_legal_moves(Position::from_string("e2").unwrap());
 
         assert_eq!(legal_moves.len(), 2);
@@ -1871,6 +1988,125 @@ mod tests {
 
         let legal_moves = game.get_legal_moves(Position::from_string("e1").unwrap());
         assert_eq!(legal_moves.len(), 0);
+
+        game.move_piece("e4").unwrap();
+
+        let legal_moves = game.get_legal_moves(Position::from_string("e7").unwrap());
+
+        assert_eq!(legal_moves.len(), 2);
+        assert!(legal_moves
+            .iter()
+            .any(|m| m.to == Position::from_string("e6").unwrap()));
+        assert!(legal_moves
+            .iter()
+            .any(|m| m.to == Position::from_string("e5").unwrap()));
+    }
+
+    #[test]
+    fn test_get_legal_moves_no_piece() {
+        let game = Game::default();
+        let legal_moves = game.get_legal_moves(Position::from_string("e4").unwrap());
+        assert_eq!(legal_moves.len(), 0);
+    }
+
+    #[test]
+    fn test_get_legal_moves_oposite_color() {
+        let game = Game::default();
+        let legal_moves = game.get_legal_moves(Position::from_string("e7").unwrap());
+        assert_eq!(legal_moves.len(), 0);
+    }
+
+    #[test]
+    fn test_get_legal_moves_castle() {
+        let mut game = Game::default();
+        game.move_piece("e4").unwrap();
+        game.move_piece("e5").unwrap();
+        game.move_piece("Nf3").unwrap();
+        game.move_piece("Nc6").unwrap();
+        game.move_piece("Bb5").unwrap();
+        game.move_piece("a6").unwrap();
+
+        let legal_moves = game.get_legal_moves(Position::from_string("e1").unwrap());
+        assert_eq!(legal_moves.len(), 3);
+        assert!(legal_moves.iter().any(|mov| matches!(
+            mov.move_type,
+            MoveType::Castle {
+                side: CastleType::KingSide
+            }
+        )));
+        assert!(legal_moves
+            .iter()
+            .any(|mov| matches!(mov.rook_from, Some(Position { col: 7, row: 0 }))));
+
+        let mut game = Game::default();
+        game.move_piece("d4").unwrap();
+        game.move_piece("d5").unwrap();
+        game.move_piece("Nc3").unwrap();
+        game.move_piece("Nc6").unwrap();
+        game.move_piece("Bf4").unwrap();
+        game.move_piece("Bf5").unwrap();
+        game.move_piece("Qd2").unwrap();
+        game.move_piece("Qd7").unwrap();
+
+        let legal_moves = game.get_legal_moves(Position::from_string("e1").unwrap());
+        assert_eq!(legal_moves.len(), 2);
+        assert!(legal_moves.iter().any(|mov| matches!(
+            mov.move_type,
+            MoveType::Castle {
+                side: CastleType::QueenSide
+            }
+        )));
+        assert!(legal_moves
+            .iter()
+            .any(|mov| matches!(mov.rook_from, Some(Position { col: 0, row: 0 }))));
+    }
+
+    #[test]
+    fn test_get_legal_moves_en_passant() {
+        let mut game = Game::default();
+        game.move_piece("e4").unwrap();
+        game.move_piece("d5").unwrap();
+        game.move_piece("e5").unwrap();
+        game.move_piece("f5").unwrap();
+
+        let legal_moves = game.get_legal_moves(Position::from_string("e5").unwrap());
+        assert_eq!(legal_moves.len(), 2);
+        assert!(legal_moves
+            .iter()
+            .any(|m| m.to == Position::from_string("e6").unwrap()));
+        assert!(legal_moves
+            .iter()
+            .any(|m| m.to == Position::from_string("f6").unwrap()));
+    }
+
+    #[test]
+    fn test_get_legal_moves_promotion() {
+        let mut game = Game::default();
+        game.move_piece("e4").unwrap();
+        game.move_piece("d5").unwrap();
+        game.move_piece("exd5").unwrap();
+        game.move_piece("c6").unwrap();
+        game.move_piece("dxc6").unwrap();
+        game.move_piece("a6").unwrap();
+        game.move_piece("cxb7").unwrap();
+        game.move_piece("a5").unwrap();
+
+        let legal_moves = game.get_legal_moves(Position::from_string("b7").unwrap());
+        assert_eq!(legal_moves.len(), 2);
+        assert_eq!(
+            legal_moves.iter().map(|v| v.to).collect::<Vec<Position>>(),
+            vec![
+                Position::from_string("a8").unwrap(),
+                Position::from_string("c8").unwrap()
+            ]
+        );
+        assert!(matches!(
+            legal_moves[0].move_type,
+            MoveType::Normal {
+                capture: true,
+                promotion: Some(PieceType::Queen) // Asume that the promotion is always to queen for simplicity
+            }
+        ));
     }
 
     #[test]
@@ -2298,6 +2534,37 @@ mod tests {
             game.get_castle_rook_pos(CastleType::QueenSide),
             Some(Position::from_string("a8").unwrap())
         );
+    }
+
+    #[test]
+    fn test_get_castle_rook_pos_after_castle() {
+        let mut game = Game::default();
+        game.move_piece("e4").unwrap();
+        game.move_piece("e5").unwrap();
+        game.move_piece("Nf3").unwrap();
+        game.move_piece("Nf6").unwrap();
+        game.move_piece("Bb5").unwrap();
+        game.move_piece("Bb4").unwrap();
+        game.move_piece("O-O").unwrap();
+
+        assert_eq!(
+            game.get_castle_rook_pos(CastleType::KingSide),
+            Some(Position::from_string("h8").unwrap())
+        );
+        assert_eq!(
+            game.get_castle_rook_pos(CastleType::QueenSide),
+            Some(Position::from_string("a8").unwrap())
+        );
+
+        game.move_piece("O-O").unwrap();
+
+        assert_eq!(game.get_castle_rook_pos(CastleType::KingSide), None);
+        assert_eq!(game.get_castle_rook_pos(CastleType::QueenSide), None);
+
+        game.move_piece("a3").unwrap();
+
+        assert_eq!(game.get_castle_rook_pos(CastleType::KingSide), None);
+        assert_eq!(game.get_castle_rook_pos(CastleType::QueenSide), None);
     }
 
     #[test]

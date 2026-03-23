@@ -645,6 +645,22 @@ mod tests {
     }
 
     #[test]
+    fn test_get_piece_at() {
+        let variant = StandardChess::default();
+        let piece = variant.get_piece_at(Position::from_string("e2").unwrap());
+        assert!(piece.is_some());
+        assert_eq!(piece.unwrap().to_string(), "P");
+    }
+
+    #[test]
+    fn test_get_legal_moves() {
+        let variant = StandardChess::default();
+        let legal_moves = variant.get_legal_moves(Position::from_string("e2").unwrap());
+        assert!(legal_moves.iter().any(|m| m.to_string() == "e4"));
+        assert!(legal_moves.iter().any(|m| m.to_string() == "e3"));
+    }
+
+    #[test]
     fn test_undo_redo() {
         let mut variant = StandardChess::default();
         variant.move_piece("e4").unwrap();
