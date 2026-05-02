@@ -50,7 +50,7 @@ assert!(game.pgn().contains("1. e4"));
 Add the following dependency to your `Cargo.toml` file:
 ```toml
 [dependencies]
-chess-lab = "0.2.2"
+chess-lab = "0.2.1"
 ```
 
 ## Project documentation
