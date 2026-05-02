@@ -2,6 +2,25 @@ All notable changes to this project will be documented in this file based on [Ke
 We follow the [Semantic Versioning 2.0.0](http://semver.org/) format.
 
 
+## [v0.2.0](https://github.com/Santicm23/chess-lab/releases/tag/v0.2.0) - 2026-05-01
+
+### Added
+- New `variants` module with `StandardChess` and `Chess960` wrappers, PGN/FEN helpers, and variant-specific tests.
+- New `parsing` module that organizes PGN and FEN parsing (including minified FEN helpers).
+- Game APIs for move history and legality (`get_last_move`, `get_legal_moves`, `get_castle_rook_pos`) plus expanded tests/doc tests.
+- Board movement helpers (`can_move`, `is_attacking`) and stricter error types for board operations.
+
+### Changed
+- Game end-state handling now includes insufficient material, threefold repetition, and fifty-move rule.
+- Board FEN parsing now returns `Result` with explicit `FenError` instead of panicking.
+- Improved documentation and examples across core, variants, and parsing.
+
+### Fixed
+- Legal move generation and castling legality edge cases.
+- PGN parsing edge cases (multi-line games, consecutive subsequences) and PGN tree removal handling.
+- Pawn movement and redo logic bugs.
+- Memory leak (Rc to Weak) and safer error handling by removing unwraps.
+
 ## [v0.1.1](https://github.com/Santicm23/chess-lab/releases/tag/v0.1.1) - 2024-06-27
 
 ### Added

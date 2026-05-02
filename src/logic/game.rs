@@ -1848,6 +1848,60 @@ mod tests {
     }
 
     #[test]
+    fn test_is_castle_legal_no_rights_kingside() {
+        let mut game = Game::default();
+        game.castling_rights = 0;
+        let white_king = Piece::new(Color::White, PieceType::King);
+        let black_king = Piece::new(Color::Black, PieceType::King);
+
+        let white_start = Position::from_string("e1").unwrap();
+        let black_start = Position::from_string("e8").unwrap();
+
+        let white_end = Position::from_string("g1").unwrap();
+        let black_end = Position::from_string("g8").unwrap();
+
+        assert!(!game.is_castle_legal(
+            &white_king,
+            &white_start,
+            &white_end,
+            &CastleType::KingSide
+        ));
+        assert!(!game.is_castle_legal(
+            &black_king,
+            &black_start,
+            &black_end,
+            &CastleType::KingSide
+        ));
+    }
+
+    #[test]
+    fn test_is_castle_legal_no_rights_queenside() {
+        let mut game = Game::default();
+        game.castling_rights = 0;
+        let white_king = Piece::new(Color::White, PieceType::King);
+        let black_king = Piece::new(Color::Black, PieceType::King);
+
+        let white_start = Position::from_string("e1").unwrap();
+        let black_start = Position::from_string("e8").unwrap();
+
+        let white_end = Position::from_string("c1").unwrap();
+        let black_end = Position::from_string("c8").unwrap();
+
+        assert!(!game.is_castle_legal(
+            &white_king,
+            &white_start,
+            &white_end,
+            &CastleType::QueenSide
+        ));
+        assert!(!game.is_castle_legal(
+            &black_king,
+            &black_start,
+            &black_end,
+            &CastleType::QueenSide
+        ));
+    }
+
+    #[test]
     fn test_is_legal_invalid_promotion() {
         let game = Game::default();
 
