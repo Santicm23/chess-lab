@@ -66,12 +66,6 @@ pub fn parse_fen(fen: &str) -> Result<Game, FenError> {
 /// * `Ok(String)`: A string representing the back rank pieces in FEN format
 /// * `Err(Chess960SPIDError)`: An error if the SPID is invalid
 ///
-/// # Example
-/// ```
-/// # use chess_lab::parsing::fen::back_rank_pieces_from_chess960_spid;
-/// let pieces = back_rank_pieces_from_chess960_spid(518).unwrap();
-/// assert_eq!(pieces, "RNBQKBNR");
-/// ```
 ///
 fn back_rank_pieces_from_chess960_spid(spid: u16) -> Result<String, Chess960SPIDError> {
     if spid >= 960 {
