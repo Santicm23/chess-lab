@@ -1,7 +1,7 @@
-name: Rust
+name: Rust tests
 
 on:
-  push:
+  pull_request:
     branches: ["main"]
 
 env:
