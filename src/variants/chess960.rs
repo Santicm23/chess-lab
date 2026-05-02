@@ -2,10 +2,10 @@ use rand::Rng;
 
 use crate::{
     core::{Color, GameStatus, Move, Piece, Position, Variant, VariantBuilder},
-    errors::{FenError, MoveError, PGNError},
+    errors::{Chess960SPIDError, FenError, MoveError, PGNError},
     logic::Game,
     parsing::{
-        fen::get_minified_fen,
+        fen::{get_fen_from_chess960_spid, get_minified_fen},
         pgn::{parse_multiple_pgn, parse_pgn},
     },
     utils::os::{read_file, write_file},
@@ -22,6 +22,15 @@ pub struct Chess960 {
     game: Game,
 }
 
+impl Chess960 {
+    pub fn from_spid(spid: u16) -> Result<Chess960, Chess960SPIDError> {
+        let fen = get_fen_from_chess960_spid(spid)?;
+        let mut game = Game::from_fen(fen.as_str()).unwrap();
+        game.history.variant = Some("Chess960".to_string());
+        Ok(Chess960 { game })
+    }
+}
+
 impl Default for Chess960 {
     /// Generates a random starting position for the pieces
     ///
@@ -35,47 +44,9 @@ impl Default for Chess960 {
     /// ```
     ///
     fn default() -> Chess960 {
-        let mut first_row = String::new();
-        let mut remaining_pieces = vec!['r', 'n', 'b', 'q', 'b', 'n', 'r'];
-        let mut last_piece = ' ';
+        let spid: u16 = rand::thread_rng().gen_range(0..960);
 
-        let mut rng = rand::thread_rng();
-        while last_piece != 'r' {
-            let index = rng.gen_range(0..remaining_pieces.len());
-            let piece = remaining_pieces.remove(index);
-            first_row.push(piece);
-            last_piece = piece;
-        }
-
-        remaining_pieces = remaining_pieces.into_iter().filter(|c| *c != 'r').collect();
-
-        remaining_pieces.push('k');
-
-        while last_piece != 'k' {
-            let index = rng.gen_range(0..remaining_pieces.len());
-            let piece = remaining_pieces.remove(index);
-            first_row.push(piece);
-            last_piece = piece;
-        }
-
-        remaining_pieces.push('r');
-
-        while !remaining_pieces.is_empty() {
-            let index = rng.gen_range(0..remaining_pieces.len());
-            let piece = remaining_pieces.remove(index);
-            first_row.push(piece);
-        }
-
-        let mut game = Game::from_fen(&format!(
-            "{}/pppppppp/8/8/8/8/PPPPPPPP/{} w KQkq - 0 1",
-            first_row,
-            first_row.to_uppercase()
-        ))
-        .unwrap();
-
-        game.history.variant = Some("Chess960".to_string());
-
-        Chess960 { game }
+        Chess960::from_spid(spid).unwrap()
     }
 }
 
