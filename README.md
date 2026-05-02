@@ -53,6 +53,9 @@ Add the following dependency to your `Cargo.toml` file:
 chess-lab = "0.2.2"
 ```
 
+## Project documentation
+https://deepwiki.com/Santicm23/chess-lab
+
 ## Features
 - [x] Playable Chess game
 - [x] FEN/PGN support
