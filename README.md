@@ -10,19 +10,40 @@ Chess Lab is a comprehensive chess library written in rust that supports multipl
 ## Examples
 ### Standard Chess
 ```rust
-/// TODO
+use chess_lab::variants::StandardChess;
+
+let mut game = StandardChess::default();
+game.move_piece("e4").unwrap();
+game.move_piece("e5").unwrap();
+
+assert!(game.pgn().contains("1. e4 e5"));
 ```
-### Position-Based Chess
+### From FEN (Position-Based)
 ```rust
-/// TODO
+use chess_lab::core::VariantBuilder;
+use chess_lab::variants::StandardChess;
+
+let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+let game = StandardChess::from_fen(fen).unwrap();
+
+assert_eq!(game.fen(), fen);
 ```
 ### Chess960
 ```rust
-/// TODO
+use chess_lab::variants::Chess960;
+
+let game = Chess960::default();
+let fen = game.fen();
+
+assert!(fen.contains(" w KQkq - 0 1"));
 ```
 ### Read PGN File
 ```rust
-/// TODO
+use chess_lab::core::VariantBuilder;
+use chess_lab::variants::StandardChess;
+
+let game = StandardChess::load("data/standard/ex1.pgn").unwrap();
+assert!(game.pgn().contains("1. e4"));
 ```
 
 ## Installation
