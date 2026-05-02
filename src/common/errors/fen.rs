@@ -31,6 +31,7 @@ impl FenError {
 #[derive(Debug, Error, PartialEq)]
 #[error("Invalid piece representation: {piece_repr}")]
 pub struct PieceReprError {
+    /// The piece character that caused the error
     pub piece_repr: char,
 }
 

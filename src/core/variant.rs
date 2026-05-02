@@ -160,6 +160,7 @@ pub trait Variant {
     fn get_status(&self) -> GameStatus;
 }
 
+/// Construction helpers for variant types.
 pub trait VariantBuilder: Sized + Default {
     /// The name of the variant.
     ///

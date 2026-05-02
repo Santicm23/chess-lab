@@ -10,6 +10,7 @@ use crate::{
     variants::StandardChess,
 };
 
+/// PGN parser struct that uses the pest library to parse PGN strings
 #[derive(Parser)]
 #[grammar = "./src/parsing/pgn/pgn.pest"]
 struct PGNParser;

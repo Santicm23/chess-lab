@@ -181,7 +181,7 @@ impl VariantBuilder for StandardChess {
 }
 
 impl Variant for StandardChess {
-    /// Moves a [Piece] on the [Board]
+    /// Moves a [Piece] on the [crate::logic::Board]
     ///
     /// # Arguments
     /// * `move_str` - A move string in algebraic notation.
@@ -543,7 +543,7 @@ impl Variant for StandardChess {
         self.game.en_passant
     }
 
-    /// Returns the starting FEN of the [game]
+    /// Returns the starting FEN of the [Game]
     ///
     /// # Returns
     /// A copy of the starting FEN of the [Game]

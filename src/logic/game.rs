@@ -29,15 +29,25 @@ use super::board::Board;
 #[derive(Debug, Clone)]
 pub struct Game {
     capture_king: bool,
+    /// Board state for the current game.
     pub board: Board,
+    /// True when it's white to move.
     pub is_white_turn: bool,
+    /// Halfmove clock for the fifty-move rule.
     pub halfmove_clock: u32,
+    /// Fullmove number (starts at 1).
     pub fullmove_number: u32,
+    /// En passant target square, if any.
     pub en_passant: Option<Position>,
+    /// Castling rights bitmask (KQkq).
     pub castling_rights: u8,
+    /// Starting FEN used to initialize the game.
     pub starting_fen: String,
+    /// PGN tree storing move history and variations.
     pub history: PGNTree<Move>,
+    /// Reduced FEN positions for repetition tracking.
     pub prev_positions: HashMap<String, u32>,
+    /// Current game status.
     pub status: GameStatus,
 }
 

@@ -32,6 +32,7 @@ pub enum PGNError {
 #[derive(Debug, Error)]
 #[error("Invalid or not supported metadata: {metadata}")]
 pub struct PGNMetadataError {
+    /// The metadata key/value that caused the error
     pub metadata: String,
 }
 
