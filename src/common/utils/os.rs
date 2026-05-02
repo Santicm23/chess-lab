@@ -1,0 +1,91 @@
+use std::{
+    fs::{metadata, File, OpenOptions},
+    io::{Read, Write},
+};
+
+/// Write content to a file
+///
+/// # Arguments
+/// * `file_name` - The name of the file to write to
+/// * `content` - The content to write to the file
+/// * `append` - Whether to append the content to the file or overwrite it
+///
+/// # Returns
+/// A `Result<(), std::io::Error>` object
+/// * `Ok(())` if the file was written successfully
+/// * `Err(std::io::Error)` if there was an error writing the file
+///
+pub fn write_file(file_name: &str, content: &str, append: bool) -> Result<(), std::io::Error> {
+    let mut file = match append {
+        true => {
+            let file_not_empty = metadata(file_name).map(|m| m.len() > 0).unwrap_or(false);
+
+            let mut file = OpenOptions::new()
+                .append(true)
+                .create(true)
+                .open(file_name)?;
+
+            if file_not_empty {
+                file.write_all(b"\n\n")?;
+            }
+
+            file
+        }
+        false => {
+            // Overwrite the file (truncate existing content)
+            File::create(file_name)?
+        }
+    };
+
+    // Write the new content
+    file.write_all(content.as_bytes())?;
+    Ok(())
+}
+
+/// Read content from a file
+///
+/// # Arguments
+/// * `file_name` - The name of the file to read from
+///
+/// # Returns
+/// A `Result<String, std::io::Error>` object
+/// * `Ok(String)` with the content of the file
+/// * `Err(std::io::Error)` if there was an error reading the file
+///
+pub fn read_file(file_name: &str) -> Result<String, std::io::Error> {
+    let mut file = File::open(file_name)?;
+    let mut content = String::new();
+    file.read_to_string(&mut content)?;
+    Ok(content)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs;
+
+    #[test]
+    fn test_write_and_read_file() {
+        let file_name = "test_file.txt";
+        let content = "Hello, Chess Lab!";
+        let append_content = "Appending this line.";
+
+        // Write to the file
+        write_file(file_name, content, false).expect("Failed to write to file");
+
+        // Read from the file
+        let read_content = read_file(file_name).expect("Failed to read from file");
+
+        assert_eq!(content, read_content);
+
+        // Append to the file
+        write_file(file_name, append_content, true).expect("Failed to append to file");
+        let read_content_after_append =
+            read_file(file_name).expect("Failed to read from file after append");
+        let expected_content = format!("{}\n\n{}", content, append_content);
+        assert_eq!(expected_content, read_content_after_append);
+
+        // Clean up
+        fs::remove_file(file_name).expect("Failed to delete test file");
+    }
+}

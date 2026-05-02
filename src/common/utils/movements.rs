@@ -1,0 +1,156 @@
+use crate::core::Position;
+
+/// Check if the movement is diagonal
+///
+/// # Arguments
+/// * `start_pos`: The starting [Position]
+/// * `end_pos`: The ending [Position]
+///
+/// # Returns
+/// Whether the movement is diagonal, `bool`
+///
+pub fn diagonal_movement(start_pos: &Position, end_pos: &Position) -> bool {
+    let diff = end_pos - start_pos;
+    diff.0.abs() == diff.1.abs() && diff != (0, 0)
+}
+
+/// Check if the movement is linear
+///
+/// # Arguments
+/// * `start_pos`: The starting [Position]
+/// * `end_pos`: The ending [Position]
+///
+/// # Returns
+/// Whether the movement is linear, `bool`
+///
+pub fn linear_movement(start_pos: &Position, end_pos: &Position) -> bool {
+    let diff = end_pos - start_pos;
+    (diff.0 == 0 || diff.1 == 0) && diff != (0, 0)
+}
+
+/// Check if the movement forms an L
+///
+/// # Arguments
+/// * `start_pos`: The starting [Position]
+/// * `end_pos`: The ending [Position]
+///
+/// # Returns
+/// Whether the movement forms an L, `bool`
+///
+pub fn l_movement(start_pos: &Position, end_pos: &Position) -> bool {
+    let diff = end_pos - start_pos;
+    (diff.0.abs() == 2 && diff.1.abs() == 1) || (diff.0.abs() == 1 && diff.1.abs() == 2)
+}
+
+/// Check if the movement is of a certain length
+///
+/// # Arguments
+/// * `start_pos`: The starting [Position]
+/// * `end_pos`: The ending [Position]
+///
+/// # Returns
+/// Whether the movement is of a certain length, `bool`
+///
+pub fn max_movement(start_pos: &Position, end_pos: &Position, max: i8) -> bool {
+    let diff = end_pos - start_pos;
+    diff.0.abs() <= max && diff.1.abs() <= max && diff != (0, 0)
+}
+
+/// Check if the movement is in a certain direction
+///
+/// # Arguments
+/// * `start_pos`: The starting [Position]
+/// * `end_pos`: The ending [Position]
+///
+/// # Returns
+/// Whether the movement is in a certain direction, `bool`
+///
+pub fn movement_direction(start_pos: &Position, end_pos: &Position, direction: (i8, i8)) -> bool {
+    let diff = end_pos - start_pos;
+
+    if direction.0 == 0 {
+        diff.1 * direction.1 > 0 && diff.0 == 0
+    } else if direction.1 == 0 {
+        diff.0 * direction.0 > 0 && diff.1 == 0
+    } else {
+        diff.0 * direction.0 > 0 && diff.0 * direction.0 == diff.1 * direction.1
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_diagonal_movement() {
+        let start_pos = Position::new(0, 0).unwrap();
+        let end_pos = Position::new(3, 3).unwrap();
+        assert!(diagonal_movement(&start_pos, &end_pos));
+    }
+
+    #[test]
+    fn test_non_diagonal_movement() {
+        let start_pos = Position::new(0, 0).unwrap();
+        let end_pos = Position::new(3, 2).unwrap();
+        assert!(!diagonal_movement(&start_pos, &end_pos));
+    }
+
+    #[test]
+    fn test_linear_movement() {
+        let start_pos = Position::new(0, 0).unwrap();
+        let end_pos = Position::new(0, 3).unwrap();
+        assert!(linear_movement(&start_pos, &end_pos));
+    }
+
+    #[test]
+    fn test_non_linear_movement() {
+        let start_pos = Position::new(0, 0).unwrap();
+        let end_pos = Position::new(2, 3).unwrap();
+        assert!(!linear_movement(&start_pos, &end_pos));
+    }
+
+    #[test]
+    fn test_l_movement() {
+        let start_pos = Position::new(0, 0).unwrap();
+        let end_pos = Position::new(1, 2).unwrap();
+        assert!(l_movement(&start_pos, &end_pos));
+    }
+
+    #[test]
+    fn test_non_l_movement() {
+        let start_pos = Position::new(0, 0).unwrap();
+        let end_pos = Position::new(2, 2).unwrap();
+        assert!(!l_movement(&start_pos, &end_pos));
+    }
+
+    #[test]
+    fn test_max_movement() {
+        let start_pos = Position::new(0, 0).unwrap();
+        let end_pos = Position::new(1, 1).unwrap();
+        assert!(max_movement(&start_pos, &end_pos, 1));
+    }
+
+    #[test]
+    fn test_exceeding_max_movement() {
+        let start_pos = Position::new(0, 0).unwrap();
+        let end_pos = Position::new(2, 2).unwrap();
+        assert!(!max_movement(&start_pos, &end_pos, 1));
+    }
+
+    #[test]
+    fn test_movement_direction() {
+        let start_pos = Position::new(0, 2).unwrap();
+        let end_pos = Position::new(2, 0).unwrap();
+        assert!(movement_direction(&start_pos, &end_pos, (1, -1)));
+        let start_pos = Position::new(0, 0).unwrap();
+        let end_pos = Position::new(1, 0).unwrap();
+        assert!(movement_direction(&start_pos, &end_pos, (1, 0)));
+    }
+
+    #[test]
+    fn test_non_movement_direction() {
+        let start_pos = Position::new(0, 0).unwrap();
+        let end_pos = Position::new(2, 1).unwrap();
+        assert!(!movement_direction(&start_pos, &end_pos, (1, 1)));
+    }
+}

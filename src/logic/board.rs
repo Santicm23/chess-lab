@@ -1,31 +1,43 @@
-use regex::Regex;
+use std::fmt::Display;
 
 use crate::{
-    constants::{
-        movements::{diagonal_movement, linear_movement},
-        Color, PieceType, Position,
+    core::{piece_movement, Color, Piece, PieceType, Position},
+    errors::{
+        FenError, PositionBetweenError, PositionEmptyError, PositionOccupiedError,
+        UnalignedPositionsError,
     },
-    errors::BoardError,
+    parsing::fen::parse_minified_fen,
+    utils::movements::{diagonal_movement, linear_movement},
 };
-
-use super::pieces::{piece_movement, Piece};
 
 /// A struct that represents a chess board
 /// The board is represented by bitboards of each piece (color and type)
 ///
 #[derive(Debug, Clone)]
 pub struct Board {
+    /// Bitboard of white pawns
     wpawns: u64,
+    /// Bitboard of black pawns
     bpawns: u64,
+    /// Bitboard of white knights
     wknights: u64,
+    /// Bitboard of black knights
     bknights: u64,
+    /// Bitboard of white bishops
     wbishops: u64,
+    /// Bitboard of black bishops
     bbishops: u64,
+    /// Bitboard of white rooks
     wrooks: u64,
+    /// Bitboard of black rooks
     brooks: u64,
+    /// Bitboard of white queens
     wqueens: u64,
+    /// Bitboard of black queens
     bqueens: u64,
+    /// Bitboard of white kings
     wkings: u64,
+    /// Bitboard of black kings
     bkings: u64,
 }
 
@@ -60,9 +72,10 @@ impl Board {
     /// * `fen`: A FEN string representing the board
     ///
     /// # Returns
-    /// A new board with the position represented by the FEN string
+    /// * `Ok(Board)`: A new board with the position represented by the FEN string
+    /// * `Err(FenError)`: If the FEN string is invalid
     ///
-    pub fn new(fen: &str) -> Board {
+    pub fn new(fen: &str) -> Result<Board, FenError> {
         Board::from_fen(fen)
     }
 
@@ -94,35 +107,12 @@ impl Board {
     /// * `fen`: A FEN string representing the board
     ///
     /// # Returns
-    /// A new board with the position represented by the FEN string
+    /// A `Result<Board, FenError>` object
+    /// * `Ok(Board)`: A new board with the position represented by the FEN string
+    /// * `Err(FenError)`: If the FEN string is invalid
     ///
-    pub fn from_fen(fen: &str) -> Board {
-        let re = Regex::new(r"^([1-8PpNnBbRrQqKk]{1,8}/){7}[1-8PpNnBbRrQqKk]{1,8}$").unwrap();
-        assert!(re.is_match(fen), "Invalid FEN");
-
-        let mut board = Board::empty();
-        let ranks = fen.split('/').collect::<Vec<&str>>();
-
-        let mut row = 8;
-        for rank in ranks {
-            row -= 1;
-
-            let mut col = 0;
-            for c in rank.chars() {
-                if c.is_digit(10) {
-                    col += c.to_digit(10).unwrap() as u8;
-                    assert!(col <= 8, "Invalid FEN");
-                    continue;
-                }
-
-                let piece = Piece::from_fen(c);
-
-                board.set_piece(piece, &Position::new(col, row)).unwrap();
-
-                col += 1;
-            }
-        }
-        board
+    pub fn from_fen(fen: &str) -> Result<Board, FenError> {
+        parse_minified_fen(fen)
     }
 
     /// Checks if a position is occupied by a piece
@@ -161,43 +151,26 @@ impl Board {
     ///
     pub fn get_piece(&self, pos: &Position) -> Option<Piece> {
         let bit = pos.to_bitboard();
-        if self.wpawns & bit != 0 {
-            return Some(Piece::new(Color::White, PieceType::Pawn));
+
+        let piece_data = [
+            (self.wpawns, Color::White, PieceType::Pawn),
+            (self.bpawns, Color::Black, PieceType::Pawn),
+            (self.wknights, Color::White, PieceType::Knight),
+            (self.bknights, Color::Black, PieceType::Knight),
+            (self.wbishops, Color::White, PieceType::Bishop),
+            (self.bbishops, Color::Black, PieceType::Bishop),
+            (self.wrooks, Color::White, PieceType::Rook),
+            (self.brooks, Color::Black, PieceType::Rook),
+            (self.wqueens, Color::White, PieceType::Queen),
+            (self.bqueens, Color::Black, PieceType::Queen),
+            (self.wkings, Color::White, PieceType::King),
+            (self.bkings, Color::Black, PieceType::King),
+        ];
+
+        match piece_data.iter().find(|(board, _, _)| *board & bit != 0) {
+            Some((_, color, piece_type)) => Some(Piece::new(*color, *piece_type)),
+            None => None,
         }
-        if self.bpawns & bit != 0 {
-            return Some(Piece::new(Color::Black, PieceType::Pawn));
-        }
-        if self.wknights & bit != 0 {
-            return Some(Piece::new(Color::White, PieceType::Knight));
-        }
-        if self.bknights & bit != 0 {
-            return Some(Piece::new(Color::Black, PieceType::Knight));
-        }
-        if self.wbishops & bit != 0 {
-            return Some(Piece::new(Color::White, PieceType::Bishop));
-        }
-        if self.bbishops & bit != 0 {
-            return Some(Piece::new(Color::Black, PieceType::Bishop));
-        }
-        if self.wrooks & bit != 0 {
-            return Some(Piece::new(Color::White, PieceType::Rook));
-        }
-        if self.brooks & bit != 0 {
-            return Some(Piece::new(Color::Black, PieceType::Rook));
-        }
-        if self.wqueens & bit != 0 {
-            return Some(Piece::new(Color::White, PieceType::Queen));
-        }
-        if self.bqueens & bit != 0 {
-            return Some(Piece::new(Color::Black, PieceType::Queen));
-        }
-        if self.wkings & bit != 0 {
-            return Some(Piece::new(Color::White, PieceType::King));
-        }
-        if self.bkings & bit != 0 {
-            return Some(Piece::new(Color::Black, PieceType::King));
-        }
-        None
     }
 
     /// Sets a piece at a position
@@ -207,11 +180,12 @@ impl Board {
     /// * `pos`: The position to set the piece
     ///
     /// # Returns
-    /// Ok if the piece was set successfully, Err if the position is already occupied
+    /// * `Ok(())`: If the piece was set successfully
+    /// * `Err(PositionOccupiedError)`: If the position is already occupied
     ///
-    pub fn set_piece(&mut self, piece: Piece, pos: &Position) -> Result<(), BoardError> {
+    pub fn set_piece(&mut self, piece: Piece, pos: &Position) -> Result<(), PositionOccupiedError> {
         if self.is_ocupied(pos) {
-            return Err(BoardError::Occupied);
+            return Err(PositionOccupiedError::new(pos.clone()));
         }
         let bit = pos.to_bitboard();
         match piece.piece_type {
@@ -249,14 +223,15 @@ impl Board {
     /// * `pos`: The position to delete the piece
     ///
     /// # Returns
-    /// The piece that was deleted or Err if the position is empty
+    /// * `Ok(Piece)`: The piece that was deleted
+    /// * `Err(PositionEmptyError)`: If the position is empty
     ///
-    pub fn delete_piece(&mut self, pos: &Position) -> Result<Piece, BoardError> {
-        let piece = self.get_piece(&pos);
-        if piece.is_none() {
-            return Err(BoardError::Empty);
-        }
-        let piece = piece.unwrap();
+    pub fn delete_piece(&mut self, pos: &Position) -> Result<Piece, PositionEmptyError> {
+        let piece = match self.get_piece(&pos) {
+            Some(piece) => piece,
+            None => return Err(PositionEmptyError::new(pos.clone())),
+        };
+
         let bit = pos.to_bitboard();
         match piece.piece_type {
             PieceType::Pawn => match piece.color {
@@ -353,16 +328,15 @@ impl Board {
     /// * `to`: The position to move the piece to
     ///
     /// # Returns
-    /// Ok if the move was successful, Err if the from position is empty
+    /// * `Ok(())`: If the piece was moved successfully
+    /// * `Err(PositionEmptyError)`: If the start position is empty
     ///
-    pub fn move_piece(&mut self, from: &Position, to: &Position) -> Result<(), BoardError> {
+    pub fn move_piece(&mut self, from: &Position, to: &Position) -> Result<(), PositionEmptyError> {
         let piece = self.delete_piece(from)?;
 
-        if self.is_ocupied(to) {
-            self.delete_piece(to).unwrap();
-        }
+        self.delete_piece(to).ok();
 
-        self.set_piece(piece, to).unwrap();
+        self.set_piece(piece, to).unwrap(); // safe unwrap
         Ok(())
     }
 
@@ -378,33 +352,92 @@ impl Board {
     pub fn is_attacked(&self, pos: Position, color: Color) -> bool {
         let pieces = self.find_all(color);
         for piece in pieces {
-            if self.can_capture(&piece, &pos) {
+            if self.is_attacking(&piece, &pos).unwrap() {
+                // safe unwrap (depends on find_all method)
                 return true;
             }
         }
         false
     }
 
-    pub fn can_capture(&self, start_pos: &Position, end_pos: &Position) -> bool {
-        let piece = self.get_piece(start_pos).unwrap();
-        let captured_piece = self.get_piece(end_pos);
+    /// Checks if a piece can move without considering checks
+    ///
+    /// # Arguments
+    /// * `start_pos`: The position of the piece to move
+    /// * `end_pos`: The position of the piece to capture
+    ///
+    /// # Returns
+    /// * `Ok(bool)`: Whether the piece can move acording to its movement rules
+    /// * `Err(PositionEmptyError)`: If the start position is empty
+    ///
+    pub fn can_move(
+        &self,
+        start_pos: &Position,
+        end_pos: &Position,
+    ) -> Result<bool, PositionEmptyError> {
+        let piece = self
+            .get_piece(start_pos)
+            .ok_or(PositionEmptyError::new(start_pos.clone()))?;
 
-        if captured_piece.is_some() && piece.color == captured_piece.unwrap().color {
-            return false;
-        }
-        if piece_movement(&piece, start_pos, end_pos) {
-            if piece.piece_type == PieceType::Pawn && start_pos.col == end_pos.col {
-                return false;
+        let captured_piece = self.get_piece(end_pos);
+        match captured_piece {
+            Some(captured_piece) => {
+                if captured_piece.color == piece.color {
+                    return Ok(false);
+                }
             }
+            None => (),
+        }
+
+        if piece_movement(&piece, start_pos, end_pos) {
             return match piece.piece_type {
-                PieceType::Pawn => diagonal_movement(start_pos, end_pos),
-                PieceType::Knight | PieceType::King => true,
+                PieceType::Pawn => {
+                    if start_pos.col == end_pos.col {
+                        return Ok(!self.piece_between(start_pos, end_pos).unwrap()
+                            && captured_piece.is_none()); // safe unwrap (depends on piece_movement)
+                    }
+                    Ok(captured_piece.is_some())
+                }
+                PieceType::Knight | PieceType::King => Ok(true),
                 PieceType::Bishop | PieceType::Rook | PieceType::Queen => {
-                    !self.piece_between(start_pos, end_pos)
+                    Ok(!self.piece_between(start_pos, end_pos).unwrap()) // safe unwrap (depends on piece_movement)
                 }
             };
         }
-        false
+        Ok(false)
+    }
+
+    /// Checks if a piece of a postion is attacking a position
+    /// The function does not check if the move is legal
+    /// It only checks if the piece is attacking the position according to its movement rules
+    ///
+    /// # Arguments
+    /// * `start_pos`: The position of the piece to move
+    /// * `end_pos`: The position of the piece to capture
+    ///
+    /// # Returns
+    /// * `Ok(bool)`: Whether the piece is attacking the position
+    /// * `Err(PositionEmptyError)`: If the start position is empty
+    ///
+    pub fn is_attacking(
+        &self,
+        start_pos: &Position,
+        end_pos: &Position,
+    ) -> Result<bool, PositionEmptyError> {
+        let piece = self
+            .get_piece(start_pos)
+            .ok_or(PositionEmptyError::new(start_pos.clone()))?;
+
+        if piece_movement(&piece, start_pos, end_pos) {
+            return match piece.piece_type {
+                PieceType::Pawn => Ok(diagonal_movement(start_pos, end_pos)),
+                PieceType::Knight | PieceType::King => Ok(true),
+                PieceType::Bishop | PieceType::Rook | PieceType::Queen => {
+                    Ok(!self.piece_between(start_pos, end_pos).unwrap()) // safe unwrap (depends on piece_movement)
+                }
+            };
+        }
+        Ok(false)
     }
 
     /// Checks if there is a piece between two positions
@@ -414,62 +447,57 @@ impl Board {
     /// * `to`: The ending position
     ///
     /// # Returns
-    /// Whether there is a piece between the two positions
+    /// * `Ok(bool)`: Whether there is a piece between the two positions
+    /// * `Err(PositionBetweenError)`: If the positions are not aligned
     ///
-    /// # Panics
-    /// If the positions are not in a straight line
-    ///
-    pub fn piece_between(&self, from: &Position, to: &Position) -> bool {
-        assert!(
-            linear_movement(from, to) || diagonal_movement(from, to),
-            "The positions are not in a straight line"
-        );
+    pub fn piece_between(
+        &self,
+        from: &Position,
+        to: &Position,
+    ) -> Result<bool, PositionBetweenError> {
+        if !linear_movement(from, to) && !diagonal_movement(from, to) {
+            return Err(PositionBetweenError::from(UnalignedPositionsError::new(
+                from.clone(),
+                to.clone(),
+            )));
+        }
+
         let direction = from.direction(to);
         let mut pos = from.to_owned();
 
-        loop {
-            if pos.col as i8 + direction.0 < 0
-                || pos.col as i8 + direction.0 > 7
-                || pos.row as i8 + direction.1 < 0
-                || pos.row as i8 + direction.1 > 7
-            {
-                panic!("Position out of bounds :(");
-            }
+        for _ in 0..7 {
             pos = &pos + direction;
             if pos == *to {
                 break;
             }
             if self.is_ocupied(&pos) {
-                return true;
+                return Ok(true);
             }
         }
-        false
+        Ok(false)
     }
 }
 
-impl ToString for Board {
-    /// Converts the board to a string
-    ///
-    /// # Returns
-    /// A string representation of the board in FEN format
-    ///
-    fn to_string(&self) -> String {
+impl Display for Board {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut board = String::new();
         for row in (0..8).rev() {
             let mut empty = 0;
             for col in 0..8 {
-                let pos = Position::new(col, row);
+                let pos = Position::new(col, row).unwrap(); // safe unwrap
                 let piece = self.get_piece(&pos);
-                if piece.is_none() {
-                    empty += 1;
-                    continue;
+                match piece {
+                    None => {
+                        empty += 1;
+                    }
+                    Some(piece) => {
+                        if empty > 0 {
+                            board.push_str(&empty.to_string());
+                            empty = 0;
+                        }
+                        board.push_str(&piece.to_string());
+                    }
                 }
-                if empty > 0 {
-                    board.push_str(&empty.to_string());
-                    empty = 0;
-                }
-                let piece = piece.unwrap();
-                board.push_str(&piece.to_string());
             }
             if empty > 0 {
                 board.push_str(&empty.to_string());
@@ -478,16 +506,14 @@ impl ToString for Board {
                 board.push('/');
             }
         }
-        board
+        write!(f, "{}", board)
     }
 }
 
 #[cfg(test)]
 mod tests {
-
-    use super::Board;
-    use crate::constants::{Color, PieceType, Position};
-    use crate::logic::pieces::Piece;
+    use super::*;
+    use crate::core::{Color, Piece, PieceType, Position};
 
     #[test]
     fn test_default() {
@@ -499,8 +525,8 @@ mod tests {
     }
 
     #[test]
-    fn from_fen() {
-        let board = Board::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+    fn test_from_fen() {
+        let board = Board::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR").unwrap();
         assert_eq!(
             board.to_string(),
             "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
@@ -519,7 +545,7 @@ mod tests {
     #[test]
     fn test_set_piece() {
         let mut board = Board::default();
-        let pos = Position::new(4, 2);
+        let pos = Position::new(4, 2).unwrap();
         let piece = Piece::new(Color::White, PieceType::Pawn);
         board.set_piece(piece, &pos).unwrap();
         assert_eq!(
@@ -529,9 +555,18 @@ mod tests {
     }
 
     #[test]
+    fn test_set_piece_occupied() {
+        let mut board = Board::default();
+        let pos = Position::new(0, 1).unwrap();
+        let piece = Piece::new(Color::White, PieceType::Pawn);
+        let result = board.set_piece(piece, &pos);
+        assert!(result.is_err());
+    }
+
+    #[test]
     fn test_delete_piece() {
         let mut board = Board::default();
-        let pos = Position::new(0, 0);
+        let pos = Position::new(0, 0).unwrap();
         board.delete_piece(&pos).unwrap();
         assert_eq!(
             board.to_string(),
@@ -542,7 +577,7 @@ mod tests {
     #[test]
     fn test_get_piece() {
         let board = Board::default();
-        let pos = Position::new(0, 0);
+        let pos = Position::new(0, 0).unwrap();
         let piece = board.get_piece(&pos).unwrap();
         assert_eq!(piece.to_string(), "R");
     }
@@ -550,10 +585,10 @@ mod tests {
     #[test]
     fn test_is_ocupied() {
         let board = Board::default();
-        let pos = Position::new(0, 0);
+        let pos = Position::new(0, 0).unwrap();
         assert!(board.is_ocupied(&pos));
 
-        let pos = Position::new(0, 2);
+        let pos = Position::new(0, 2).unwrap();
         assert!(!board.is_ocupied(&pos));
     }
 
@@ -574,8 +609,8 @@ mod tests {
     #[test]
     fn test_move_piece() {
         let mut board = Board::default();
-        let from = Position::new(4, 1);
-        let to = Position::new(4, 3);
+        let from = Position::new(4, 1).unwrap();
+        let to = Position::new(4, 3).unwrap();
         board.move_piece(&from, &to).unwrap();
         assert_eq!(
             board.to_string(),
@@ -587,18 +622,18 @@ mod tests {
     fn test_is_attacked() {
         let board = Board::default();
 
-        let pos = Position::from_string("e3");
+        let pos = Position::from_string("e3").unwrap();
         assert!(board.is_attacked(pos, Color::White));
 
-        let pos = Position::from_string("e4");
+        let pos = Position::from_string("e4").unwrap();
         assert!(!board.is_attacked(pos, Color::White));
     }
 
     #[test]
     fn test_piece_between() {
         let board = Board::default();
-        let from = Position::new(0, 0);
-        let to = Position::new(0, 6);
-        assert!(board.piece_between(&from, &to));
+        let from = Position::new(0, 0).unwrap();
+        let to = Position::new(0, 6).unwrap();
+        assert!(board.piece_between(&from, &to).unwrap());
     }
 }

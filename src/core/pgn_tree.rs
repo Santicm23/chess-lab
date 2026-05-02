@@ -1,0 +1,2276 @@
+use std::{
+    cell::RefCell,
+    collections::HashMap,
+    fmt::{Debug, Display},
+    rc::{Rc, Weak},
+};
+
+use crate::{
+    core::{GameStatus, MoveInfo, Position},
+    errors::PGNMetadataError,
+};
+
+/// An enum representing optional PGN metadata
+#[derive(Debug, Clone)]
+pub(crate) enum OptionPGNMetadata {
+    // Game metadata
+    /// The time control of the game
+    TimeControl(String),
+    /// The termination of the game
+    Termination(String),
+
+    // Player metadata
+    /// The white player's ELO
+    WhiteElo(u32),
+    /// The black player's ELO
+    BlackElo(u32),
+    /// The white player's title
+    WhiteTitle(String),
+    /// The black player's title
+    BlackTitle(String),
+    /// The white player's USCF rating
+    WhiteUSCF(String),
+    /// The black player's USCF rating
+    BlackUSCF(String),
+    /// The white player's national association
+    WhiteNA(String),
+    /// The black player's national association
+    BlackNA(String),
+    /// The white player's type
+    WhiteType(String),
+    /// The black player's type
+    BlackType(String),
+
+    // Event metadata
+    /// The event date
+    EventDate(String),
+    /// The event sponsor
+    EventSponsor(String),
+    /// The section of the event
+    Section(String),
+    /// The stage of the event
+    Stage(String),
+    /// The board number
+    Board(String),
+
+    // Opening metadata
+    /// The opening name
+    Opening(String),
+    /// The variation name
+    Variation(String),
+    /// The sub-variation name
+    SubVariation(String),
+    /// The ECO code
+    ECO(String),
+    /// The NIC code
+    NIC(String),
+
+    // Time and date metadata
+    /// The time
+    Time(String),
+    /// The UTC date
+    UTCDate(String),
+    /// The UTC time
+    UTCTime(String),
+
+    // Starting position metadata
+    /// The setup flag
+    SetUp(String),
+    /// The FEN string
+    FEN(String),
+
+    // Other metadata
+    /// The annotator name
+    Annotator(String),
+    /// The mode
+    Mode(String),
+    /// The play count
+    PlyCount(u32),
+}
+
+impl OptionPGNMetadata {
+    /// Create a new [OptionPGNMetadata] from a key and a value.
+    ///
+    /// # Arguments
+    /// * `key` - The key of the metadata.
+    /// * `value` - The value of the metadata.
+    ///
+    /// # Returns
+    /// An [OptionPGNMetadata] if the key is valid, otherwise None.
+    ///
+    pub fn from_string(key: &str, value: &str) -> Option<OptionPGNMetadata> {
+        match key {
+            "TimeControl" => Some(OptionPGNMetadata::TimeControl(value.to_string())),
+            "Termination" => Some(OptionPGNMetadata::Termination(value.to_string())),
+            "WhiteElo" => value.parse().ok().map(OptionPGNMetadata::WhiteElo),
+            "BlackElo" => value.parse().ok().map(OptionPGNMetadata::BlackElo),
+            "WhiteTitle" => Some(OptionPGNMetadata::WhiteTitle(value.to_string())),
+            "BlackTitle" => Some(OptionPGNMetadata::BlackTitle(value.to_string())),
+            "WhiteUSCF" => Some(OptionPGNMetadata::WhiteUSCF(value.to_string())),
+            "BlackUSCF" => Some(OptionPGNMetadata::BlackUSCF(value.to_string())),
+            "WhiteNA" => Some(OptionPGNMetadata::WhiteNA(value.to_string())),
+            "BlackNA" => Some(OptionPGNMetadata::BlackNA(value.to_string())),
+            "WhiteType" => Some(OptionPGNMetadata::WhiteType(value.to_string())),
+            "BlackType" => Some(OptionPGNMetadata::BlackType(value.to_string())),
+            "EventDate" => Some(OptionPGNMetadata::EventDate(value.to_string())),
+            "EventSponsor" => Some(OptionPGNMetadata::EventSponsor(value.to_string())),
+            "Section" => Some(OptionPGNMetadata::Section(value.to_string())),
+            "Stage" => Some(OptionPGNMetadata::Stage(value.to_string())),
+            "Board" => Some(OptionPGNMetadata::Board(value.to_string())),
+            "Opening" => Some(OptionPGNMetadata::Opening(value.to_string())),
+            "Variation" => Some(OptionPGNMetadata::Variation(value.to_string())),
+            "SubVariation" => Some(OptionPGNMetadata::SubVariation(value.to_string())),
+            "ECO" => Some(OptionPGNMetadata::ECO(value.to_string())),
+            "NIC" => Some(OptionPGNMetadata::NIC(value.to_string())),
+            "Time" => Some(OptionPGNMetadata::Time(value.to_string())),
+            "UTCDate" => Some(OptionPGNMetadata::UTCDate(value.to_string())),
+            "UTCTime" => Some(OptionPGNMetadata::UTCTime(value.to_string())),
+            "SetUp" => Some(OptionPGNMetadata::SetUp(value.to_string())),
+            "FEN" => Some(OptionPGNMetadata::FEN(value.to_string())),
+            "Annotator" => Some(OptionPGNMetadata::Annotator(value.to_string())),
+            "Mode" => Some(OptionPGNMetadata::Mode(value.to_string())),
+            "PlyCount" => value.parse().ok().map(OptionPGNMetadata::PlyCount),
+            _ => None,
+        }
+    }
+}
+
+impl Display for OptionPGNMetadata {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            OptionPGNMetadata::TimeControl(time_control) => {
+                write!(f, "[TimeControl \"{}\"]", time_control)
+            }
+            OptionPGNMetadata::Termination(termination) => {
+                write!(f, "[Termination \"{}\"]", termination)
+            }
+            OptionPGNMetadata::WhiteElo(white_elo) => write!(f, "[WhiteElo \"{}\"]", white_elo),
+            OptionPGNMetadata::BlackElo(black_elo) => write!(f, "[BlackElo \"{}\"]", black_elo),
+            OptionPGNMetadata::WhiteTitle(white_title) => {
+                write!(f, "[WhiteTitle \"{}\"]", white_title)
+            }
+            OptionPGNMetadata::BlackTitle(black_title) => {
+                write!(f, "[BlackTitle \"{}\"]", black_title)
+            }
+            OptionPGNMetadata::WhiteUSCF(white_uscf) => write!(f, "[WhiteUSCF \"{}\"]", white_uscf),
+            OptionPGNMetadata::BlackUSCF(black_uscf) => write!(f, "[BlackUSCF \"{}\"]", black_uscf),
+            OptionPGNMetadata::WhiteNA(white_na) => write!(f, "[WhiteNA \"{}\"]", white_na),
+            OptionPGNMetadata::BlackNA(black_na) => write!(f, "[BlackNA \"{}\"]", black_na),
+            OptionPGNMetadata::WhiteType(white_type) => write!(f, "[WhiteType \"{}\"]", white_type),
+            OptionPGNMetadata::BlackType(black_type) => write!(f, "[BlackType \"{}\"]", black_type),
+            OptionPGNMetadata::EventDate(event_date) => write!(f, "[EventDate \"{}\"]", event_date),
+            OptionPGNMetadata::EventSponsor(event_sponsor) => {
+                write!(f, "[EventSponsor \"{}\"]", event_sponsor)
+            }
+            OptionPGNMetadata::Section(section) => write!(f, "[Section \"{}\"]", section),
+            OptionPGNMetadata::Stage(stage) => write!(f, "[Stage \"{}\"]", stage),
+            OptionPGNMetadata::Board(board) => write!(f, "[Board \"{}\"]", board),
+            OptionPGNMetadata::Opening(opening) => write!(f, "[Opening \"{}\"]", opening),
+            OptionPGNMetadata::Variation(variation) => write!(f, "[Variation \"{}\"]", variation),
+            OptionPGNMetadata::SubVariation(sub_variation) => {
+                write!(f, "[SubVariation \"{}\"]", sub_variation)
+            }
+            OptionPGNMetadata::ECO(eco) => write!(f, "[ECO \"{}\"]", eco),
+            OptionPGNMetadata::NIC(nic) => write!(f, "[NIC \"{}\"]", nic),
+            OptionPGNMetadata::Time(time) => write!(f, "[Time \"{}\"]", time),
+            OptionPGNMetadata::UTCDate(utc_date) => write!(f, "[UTCDate \"{}\"]", utc_date),
+            OptionPGNMetadata::UTCTime(utc_time) => write!(f, "[UTCTime \"{}\"]", utc_time),
+            OptionPGNMetadata::SetUp(set_up) => write!(f, "[SetUp \"{}\"]", set_up),
+            OptionPGNMetadata::FEN(fen) => write!(f, "[FEN \"{}\"]", fen),
+            OptionPGNMetadata::Annotator(annotator) => write!(f, "[Annotator \"{}\"]", annotator),
+            OptionPGNMetadata::Mode(mode) => write!(f, "[Mode \"{}\"]", mode),
+            OptionPGNMetadata::PlyCount(ply_count) => write!(f, "[PlyCount \"{}\"]", ply_count),
+        }
+    }
+}
+
+/// A struct representing a PGN line or variation
+/// Its also a tree node that contains a list of child nodes, the parent node,
+/// the move number and the move itself
+///
+#[derive(Debug, Clone)]
+struct PgnLine<T: PartialEq + Clone + Display + Debug> {
+    /// The list of child nodes
+    lines: Vec<Rc<RefCell<PgnLine<T>>>>,
+    /// The parent node
+    parent: Option<Weak<RefCell<PgnLine<T>>>>,
+    /// The halfmove clock
+    halfmove_clock: u32,
+    /// The fullmove number
+    fullmove_number: u32,
+    /// The en passant position
+    en_passant: Option<Position>,
+    /// The castling rights
+    castling_rights: u8,
+    /// The game status
+    game_status: GameStatus,
+    /// The previous positions
+    prev_positions: HashMap<String, u32>,
+    /// The move itself
+    mov: T,
+}
+
+impl<T: PartialEq + Clone + Display + Debug> PartialEq for PgnLine<T> {
+    /// Compares two PgnLine structs
+    /// Two PgnLine structs are equal if their moves are equal
+    ///
+    /// # Arguments
+    /// * `other`: The other PgnLine struct
+    ///
+    /// # Returns
+    /// A `bool` indicating if the two PgnLine structs are equal
+    ///
+    fn eq(&self, other: &Self) -> bool {
+        self.mov == other.mov
+    }
+}
+
+/// A struct representing a PGN tree
+/// It contains the game metadata and a list of lines
+/// The current line is the move node that is currently being checked
+///
+#[derive(Debug, Clone)]
+pub struct PGNTree<T: PartialEq + Clone + Display + Debug> {
+    /// The event name
+    pub event: String,
+    /// The site name
+    pub site: String,
+    /// The date of the game
+    pub date: String,
+    /// The round number
+    pub round: String,
+    /// The white player name
+    pub white: String,
+    /// The black player name
+    pub black: String,
+    /// The result of the game
+    pub result: String,
+    /// The variant of the game
+    pub variant: Option<String>,
+    /// The list of other metadata
+    pub(crate) option_metadata: Vec<OptionPGNMetadata>,
+    /// The list of lines
+    lines: Vec<Rc<RefCell<PgnLine<T>>>>,
+    /// The current line
+    current_line: Option<Rc<RefCell<PgnLine<T>>>>,
+}
+
+impl<T: PartialEq + Clone + Display + Debug> Default for PGNTree<T> {
+    /// Creates a new [PGNTree] with no metadata and an empty list of lines
+    ///
+    /// # Returns
+    /// A an empty [PGNTree]
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::core::{PGNTree, Move};
+    ///
+    /// let tree: PGNTree<Move> = PGNTree::default();
+    /// ```
+    ///
+    fn default() -> PGNTree<T> {
+        PGNTree {
+            event: "".to_string(),
+            site: "".to_string(),
+            date: "".to_string(),
+            round: "".to_string(),
+            white: "".to_string(),
+            black: "".to_string(),
+            result: "".to_string(),
+            variant: None,
+            option_metadata: Vec::new(),
+            lines: Vec::new(),
+            current_line: None,
+        }
+    }
+}
+
+impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
+    /// Creates a new [PGNTree] with the provided metadata and an empty list of lines
+    ///
+    /// # Arguments
+    /// * `event`: The event name
+    /// * `site`: The site name
+    /// * `date`: The date of the game
+    /// * `round`: The round number
+    /// * `white`: The white player name
+    /// * `black`: The black player name
+    /// * `result`: The result of the game
+    /// * `variant`: The variant of the game
+    /// * `white_elo`: The white player ELO
+    /// * `black_elo`: The black player ELO
+    /// * `time_control`: The time control of the game
+    ///
+    /// # Returns
+    /// A new [PGNTree]
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::core::{PGNTree, Move};
+    ///
+    /// let tree: PGNTree<Move> = PGNTree::new(
+    ///    "Event".to_string(),
+    ///    "Site".to_string(),
+    ///    "Date".to_string(),
+    ///    "Round".to_string(),
+    ///    "White".to_string(),
+    ///    "Black".to_string(),
+    ///    "Result".to_string(),
+    ///    None,
+    /// );
+    /// ```
+    ///
+    pub fn new(
+        event: String,
+        site: String,
+        date: String,
+        round: String,
+        white: String,
+        black: String,
+        result: String,
+        variant: Option<String>,
+    ) -> PGNTree<T> {
+        PGNTree {
+            event,
+            site,
+            date,
+            round,
+            white,
+            black,
+            result,
+            variant,
+            option_metadata: Vec::new(),
+            lines: Vec::new(),
+            current_line: None,
+        }
+    }
+
+    /// Adds metadata to the [PGNTree]
+    ///
+    /// # Arguments
+    /// * `key`: The metadata key
+    /// * `value`: The metadata value
+    ///
+    /// # Returns
+    /// A Result<(), PGNMetadataError>
+    /// * `Ok(())`: If the metadata was added successfully
+    /// * `Err(PGNMetadataError)`: If the metadata key is invalid
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::core::{PGNTree, Move};
+    ///
+    /// let mut tree: PGNTree<Move> = PGNTree::default();
+    /// tree.add_metadata("Event", "My Event").unwrap();
+    /// assert_eq!(tree.event, "My Event");
+    /// ```
+    ///
+    pub fn add_metadata(&mut self, key: &str, value: &str) -> Result<(), PGNMetadataError> {
+        match key {
+            "Event" => {
+                self.event = value.to_string();
+            }
+            "Site" => {
+                self.site = value.to_string();
+            }
+            "Date" => {
+                self.date = value.to_string();
+            }
+            "Round" => {
+                self.round = value.to_string();
+            }
+            "White" => {
+                self.white = value.to_string();
+            }
+            "Black" => {
+                self.black = value.to_string();
+            }
+            "Result" => {
+                self.result = value.to_string();
+            }
+            "Variant" => {
+                self.variant = Some(value.to_string());
+            }
+            _ => self.option_metadata.push(
+                OptionPGNMetadata::from_string(key, value)
+                    .ok_or(PGNMetadataError::new(format!("[{} \"{}\"]", key, value)))?,
+            ),
+        }
+        Ok(())
+    }
+
+    /// Adds a move to the current line
+    ///
+    /// # Arguments
+    /// * `mov`: The move to add
+    /// * `halfmove_clock`: The halfmove clock
+    /// * `fullmove_number`: The fullmove number
+    /// * `en_passant`: The en passant position
+    /// * `castling_rights`: The castling rights
+    /// * `game_status`: The game status
+    /// * `prev_positions`: The previous positions
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::core::{PGNTree, Piece, Move, MoveType, PieceType, Color, Position, GameStatus};
+    /// use std::collections::HashMap;
+    ///
+    /// let mut pgn_tree: PGNTree<Move> = PGNTree::default();
+    /// let mov = Move::new(
+    ///     Piece::new(Color::Black, PieceType::Pawn),
+    ///     Position::from_string("e2").unwrap(),
+    ///     Position::from_string("e4").unwrap(),
+    ///     MoveType::Normal {
+    ///         capture: false,
+    ///         promotion: None,
+    ///     },
+    ///     None,
+    ///     None,
+    ///     (false, false),
+    ///     false,
+    ///     false,
+    /// ).unwrap();
+    /// pgn_tree.add_move(mov.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
+    ///
+    /// assert_eq!(mov, pgn_tree.get_move().unwrap());
+    /// ```
+    ///
+    pub fn add_move(
+        &mut self,
+        mov: T,
+        halfmove_clock: u32,
+        fullmove_number: u32,
+        en_passant: Option<Position>,
+        castling_rights: u8,
+        game_status: GameStatus,
+        prev_positions: HashMap<String, u32>,
+    ) {
+        if let Some(current_line) = &self.current_line {
+            let new_line = Rc::new(RefCell::new(PgnLine {
+                lines: Vec::new(),
+                parent: Some(Rc::downgrade(&current_line)),
+                halfmove_clock,
+                fullmove_number,
+                en_passant,
+                castling_rights,
+                game_status,
+                mov,
+                prev_positions,
+            }));
+
+            if current_line.as_ref().borrow_mut().lines.contains(&new_line) {
+                let index = match current_line
+                    .as_ref()
+                    .borrow()
+                    .lines
+                    .iter()
+                    .position(|x| *x == new_line)
+                {
+                    Some(idx) => idx,
+                    None => unreachable!(),
+                };
+
+                self.next_move_variant(index as u32);
+            } else {
+                current_line
+                    .as_ref()
+                    .borrow_mut()
+                    .lines
+                    .push(Rc::clone(&new_line));
+                self.current_line = Some(new_line);
+            }
+        } else {
+            let new_line = Rc::new(RefCell::new(PgnLine {
+                lines: Vec::new(),
+                parent: None,
+                halfmove_clock,
+                fullmove_number,
+                en_passant,
+                castling_rights,
+                game_status,
+                mov,
+                prev_positions,
+            }));
+
+            if self.lines.contains(&new_line) {
+                let index = match self.lines.iter().position(|x| *x == new_line) {
+                    Some(idx) => idx,
+                    None => unreachable!(),
+                };
+
+                self.next_move_variant(index as u32);
+            } else {
+                self.lines.push(Rc::clone(&new_line));
+                self.current_line = Some(new_line);
+            }
+        }
+    }
+
+    /// Removes the current line
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use std::collections::HashMap;
+    ///
+    /// let mut tree = PGNTree::default();
+    ///
+    /// tree.add_move(Move::new(
+    ///     Piece::new(Color::Black, PieceType::Pawn),
+    ///     Position::from_string("e2").unwrap(),
+    ///     Position::from_string("e4").unwrap(),
+    ///     MoveType::Normal {
+    ///         capture: false,
+    ///         promotion: None,
+    ///     },
+    ///     None,
+    ///     None,
+    ///     (false, false),
+    ///     false,
+    ///     false,
+    /// ).unwrap(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
+    ///
+    /// tree.rm_move();
+    /// ```
+    ///
+    pub fn rm_move(&mut self) {
+        let current_line = match self.current_line.take() {
+            Some(line) => line,
+            None => return,
+        };
+
+        let borrowed_line = current_line.borrow();
+
+        if let Some(weak_parent) = &borrowed_line.parent {
+            let parent = weak_parent.upgrade().unwrap();
+
+            let index = match parent
+                .borrow()
+                .lines
+                .iter()
+                .position(|x| Rc::ptr_eq(x, &current_line))
+            {
+                Some(idx) => idx,
+                None => unreachable!(),
+            };
+
+            parent.as_ref().borrow_mut().lines.remove(index);
+
+            self.current_line = Some(parent);
+        } else {
+            // If there is no parent, we are at the root level.
+            let index = match self.lines.iter().position(|x| Rc::ptr_eq(x, &current_line)) {
+                Some(idx) => idx,
+                None => unreachable!(),
+            };
+            self.lines.remove(index);
+
+            match self.lines.get(0) {
+                Some(main_line) => {
+                    self.current_line = Some(Rc::clone(main_line));
+                }
+                None => {
+                    self.current_line = None;
+                }
+            }
+        }
+    }
+
+    /// Returns the current move
+    ///
+    /// # Returns
+    /// The current move
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use std::collections::HashMap;
+    ///
+    /// let mut tree = PGNTree::default();
+    /// let mov = Move::new(
+    ///     Piece::new(Color::Black, PieceType::Pawn),
+    ///     Position::from_string("e2").unwrap(),
+    ///     Position::from_string("e4").unwrap(),
+    ///     MoveType::Normal {
+    ///         capture: false,
+    ///         promotion: None,
+    ///     },
+    ///     None,
+    ///     None,
+    ///     (false, false),
+    ///     false,
+    ///     false,
+    /// ).unwrap();
+    ///
+    /// tree.add_move(mov.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
+    ///
+    /// assert_eq!(tree.get_move(), Some(mov));
+    /// ```
+    ///
+    pub fn get_move(&self) -> Option<T> {
+        Some(self.current_line.as_ref()?.borrow().mov.clone())
+    }
+
+    /// Returns the move info
+    ///
+    /// # Returns
+    /// A tuple containing the halfmove clock, the fullmove number, the en passant position and the castling rights
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus, MoveInfo};
+    /// use std::collections::HashMap;
+    ///
+    /// let mut tree = PGNTree::default();
+    /// let mov = Move::new(
+    ///     Piece::new(Color::Black, PieceType::Pawn),
+    ///     Position::from_string("e2").unwrap(),
+    ///     Position::from_string("e4").unwrap(),
+    ///     MoveType::Normal {
+    ///         capture: false,
+    ///         promotion: None,
+    ///     },
+    ///     None,
+    ///     None,
+    ///     (false, false),
+    ///     false,
+    ///     false,
+    /// ).unwrap();
+    ///
+    /// tree.add_move(mov.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
+    ///
+    /// assert_eq!(tree.get_move_info(), Some(MoveInfo::new(0, 0, None, 0, GameStatus::InProgress, HashMap::new())));
+    /// ```
+    ///
+    pub fn get_move_info(&self) -> Option<MoveInfo> {
+        let current_line = self.current_line.as_ref()?.borrow();
+        Some(MoveInfo::new(
+            current_line.halfmove_clock,
+            current_line.fullmove_number,
+            current_line.en_passant,
+            current_line.castling_rights,
+            current_line.game_status,
+            current_line.prev_positions.clone(),
+        ))
+    }
+
+    /// Returns the next move
+    ///
+    /// # Returns
+    /// The next move
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use std::collections::HashMap;
+    ///
+    /// let mut pgn_tree = PGNTree::default();
+    /// let mov1 = Move::new(
+    ///     Piece::new(Color::Black, PieceType::Pawn),
+    ///     Position::from_string("e2").unwrap(),
+    ///     Position::from_string("e4").unwrap(),
+    ///     MoveType::Normal {
+    ///         capture: false,
+    ///         promotion: None,
+    ///     },
+    ///     None,
+    ///     None,
+    ///     (false, false),
+    ///     false,
+    ///     false,
+    /// ).unwrap();
+    /// let mov2 = Move::new(
+    ///     Piece::new(Color::White, PieceType::Pawn),
+    ///     Position::from_string("e7").unwrap(),
+    ///     Position::from_string("e5").unwrap(),
+    ///     MoveType::Normal {
+    ///         capture: false,
+    ///         promotion: None,
+    ///     },
+    ///     None,
+    ///     None,
+    ///     (false, false),
+    ///     false,
+    ///     false,
+    /// ).unwrap();
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
+    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
+    ///
+    /// assert_eq!(mov2, pgn_tree.get_move().unwrap());
+    /// assert_eq!(mov1, pgn_tree.prev_move().unwrap());
+    /// assert_eq!(mov2, pgn_tree.next_move().unwrap());
+    /// ```
+    ///
+    pub fn next_move(&mut self) -> Option<T> {
+        self.next_move_variant(0)
+    }
+
+    /// Returns the next move variant
+    ///
+    /// # Arguments
+    /// * `variant`: The variant to get
+    ///
+    /// # Returns
+    /// The next move variant
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use std::collections::HashMap;
+    ///
+    /// let mut pgn_tree = PGNTree::default();
+    /// let mov1 = Move::new(
+    ///     Piece::new(Color::White, PieceType::Pawn),
+    ///     Position::from_string("e2").unwrap(),
+    ///     Position::from_string("e4").unwrap(),
+    ///     MoveType::Normal {
+    ///         capture: false,
+    ///         promotion: None,
+    ///     },
+    ///     None,
+    ///     None,
+    ///     (false, false),
+    ///     false,
+    ///     false,
+    /// ).unwrap();
+    /// let mov2 = Move::new(
+    ///     Piece::new(Color::White, PieceType::Pawn),
+    ///     Position::from_string("d2").unwrap(),
+    ///     Position::from_string("d4").unwrap(),
+    ///     MoveType::Normal {
+    ///         capture: false,
+    ///         promotion: None,
+    ///     },
+    ///     None,
+    ///     None,
+    ///     (false, false),
+    ///     false,
+    ///     false,
+    /// ).unwrap();
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
+    /// pgn_tree.prev_move();
+    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
+    ///
+    /// pgn_tree.prev_move();
+    /// assert_eq!(mov1, pgn_tree.next_move().unwrap());
+    ///
+    /// pgn_tree.prev_move();
+    /// assert_eq!(mov2, pgn_tree.next_move_variant(1).unwrap());
+    /// ```
+    ///
+    pub fn next_move_variant(&mut self, variant: u32) -> Option<T> {
+        if let Some(current_line) = &self.current_line {
+            if current_line.as_ref().borrow().lines.len() > variant as usize {
+                let next_line = Rc::clone(&current_line.as_ref().borrow().lines[variant as usize]);
+                self.current_line = Some(Rc::clone(&next_line));
+                return Some(next_line.as_ref().borrow().mov.clone());
+            }
+        } else {
+            if self.lines.len() > variant as usize {
+                let next_line = Rc::clone(&self.lines[variant as usize]);
+                self.current_line = Some(Rc::clone(&next_line));
+                return Some(next_line.as_ref().borrow().mov.clone());
+            }
+        }
+        None
+    }
+
+    /// Returns all the next moves
+    ///
+    /// # Returns
+    /// All the next moves
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use std::collections::HashMap;
+    ///
+    /// let mut pgn_tree = PGNTree::default();
+    /// let mov1 = Move::new(
+    ///     Piece::new(Color::White, PieceType::Pawn),
+    ///     Position::from_string("e4").unwrap(),
+    ///     Position::from_string("e2").unwrap(),
+    ///     MoveType::Normal {
+    ///         capture: false,
+    ///         promotion: None,
+    ///     },
+    ///     None,
+    ///     None,
+    ///     (false, false),
+    ///     false,
+    ///     false,
+    /// ).unwrap();
+    ///
+    /// let mov2 = Move::new(
+    ///     Piece::new(Color::White, PieceType::Pawn),
+    ///     Position::from_string("d2").unwrap(),
+    ///     Position::from_string("d4").unwrap(),
+    ///     MoveType::Normal {
+    ///         capture: false,
+    ///         promotion: None,
+    ///     },
+    ///     None,
+    ///     None,
+    ///     (false, false),
+    ///     false,
+    ///     false,
+    /// ).unwrap();
+    ///
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
+    /// pgn_tree.prev_move();
+    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
+    /// pgn_tree.prev_move();
+    ///
+    /// assert_eq!(vec![mov1.clone(), mov2.clone()], pgn_tree.all_next_moves());
+    /// ```
+    ///
+    pub fn all_next_moves(&self) -> Vec<T> {
+        let mut moves = Vec::new();
+        if let Some(current_line) = &self.current_line {
+            for line in current_line.as_ref().borrow().lines.iter() {
+                moves.push(line.as_ref().borrow().mov.clone());
+            }
+        } else {
+            for line in self.lines.iter() {
+                moves.push(line.as_ref().borrow().mov.clone());
+            }
+        }
+        moves
+    }
+
+    /// Returns the previous move
+    ///
+    /// # Returns
+    /// The previous move
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use std::collections::HashMap;
+    ///
+    /// let mut pgn_tree = PGNTree::default();
+    /// let mov1 = Move::new(
+    ///     Piece::new(Color::Black, PieceType::Pawn),
+    ///     Position::from_string("e2").unwrap(),
+    ///     Position::from_string("e4").unwrap(),
+    ///     MoveType::Normal {
+    ///         capture: false,
+    ///         promotion: None,
+    ///     },
+    ///     None,
+    ///     None,
+    ///     (false, false),
+    ///     false,
+    ///     false,
+    /// ). unwrap();
+    /// let mov2 = Move::new(
+    ///     Piece::new(Color::White, PieceType::Pawn),
+    ///     Position::from_string("e7").unwrap(),
+    ///     Position::from_string("e5").unwrap(),
+    ///     MoveType::Normal {
+    ///         capture: false,
+    ///         promotion: None,
+    ///     },
+    ///     None,
+    ///     None,
+    ///     (false, false),
+    ///     false,
+    ///     false,
+    /// ).unwrap();
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
+    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
+    ///
+    /// assert_eq!(mov2, pgn_tree.get_move().unwrap());
+    /// assert_eq!(mov1, pgn_tree.prev_move().unwrap());
+    /// ```
+    ///
+    pub fn prev_move(&mut self) -> Option<T> {
+        if let Some(current_line) = self.current_line.take() {
+            if let Some(parent_weak) = &current_line.borrow().parent {
+                if let Some(parent_rc) = parent_weak.upgrade() {
+                    let mov = parent_rc.borrow().mov.clone();
+                    self.current_line = Some(parent_rc);
+                    return Some(mov);
+                }
+            }
+        }
+        self.current_line = None;
+        None
+    }
+
+    /// Returns whether there is a next move
+    ///
+    /// # Returns
+    /// Whether there is a next move
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use std::collections::HashMap;
+    ///
+    /// let mut pgn_tree = PGNTree::default();
+    /// let mov1 = Move::new(
+    ///     Piece::new(Color::White, PieceType::Pawn),
+    ///     Position::from_string("e2").unwrap(),
+    ///     Position::from_string("e4").unwrap(),
+    ///     MoveType::Normal {
+    ///         capture: false,
+    ///         promotion: None,
+    ///     },
+    ///     None,
+    ///     None,
+    ///     (false, false),
+    ///     false,
+    ///     false,
+    /// ).unwrap();
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
+    /// pgn_tree.prev_move();
+    ///
+    /// assert!(pgn_tree.has_next_move());
+    /// ```
+    ///
+    pub fn has_next_move(&self) -> bool {
+        match &self.current_line {
+            Some(current_line) => current_line.borrow().lines.len() > 0,
+            None => !self.lines.is_empty(),
+        }
+    }
+
+    /// Returns whether there is a previous move
+    ///
+    /// # Returns
+    /// Whether there is a previous move
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use std::collections::HashMap;
+    ///
+    /// let mut pgn_tree = PGNTree::default();
+    /// let mov1 = Move::new(
+    ///     Piece::new(Color::White, PieceType::Pawn),
+    ///     Position::from_string("e2").unwrap(),
+    ///     Position::from_string("e4").unwrap(),
+    ///     MoveType::Normal {
+    ///         capture: false,
+    ///         promotion: None,
+    ///     },
+    ///     None,
+    ///     None,
+    ///     (false, false),
+    ///     false,
+    ///     false,
+    /// ).unwrap();
+    ///
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
+    /// assert!(pgn_tree.has_prev_move());
+    /// ```
+    ///
+    pub fn has_prev_move(&self) -> bool {
+        self.current_line.is_some()
+    }
+
+    /// Returns the PGN of the game
+    ///
+    /// # Returns
+    /// The PGN of the game
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use std::collections::HashMap;
+    ///
+    /// let mut pgn_tree = PGNTree::default();
+    /// let mov1 = Move::new(
+    ///     Piece::new(Color::White, PieceType::Pawn),
+    ///     Position::from_string("e2").unwrap(),
+    ///     Position::from_string("e4").unwrap(),
+    ///     MoveType::Normal {
+    ///         capture: false,
+    ///         promotion: None,
+    ///     },
+    ///     None,
+    ///     None,
+    ///     (false, false),
+    ///     false,
+    ///     false,
+    /// ).unwrap();
+    /// let mov2 = Move::new(
+    ///     Piece::new(Color::Black, PieceType::Pawn),
+    ///     Position::from_string("e7").unwrap(),
+    ///     Position::from_string("e5").unwrap(),
+    ///     MoveType::Normal {
+    ///         capture: false,
+    ///         promotion: None,
+    ///     },
+    ///     None,
+    ///     None,
+    ///     (false, false),
+    ///     false,
+    ///     false,
+    /// ).unwrap();
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
+    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
+    ///
+    /// assert_eq!(pgn_tree.pgn(), "[Event \"\"]\n[Site \"\"]\n[Date \"\"]\n[Round \"\"]\n[White \"\"]\n[Black \"\"]\n[Result \"\"]\n1. e4 e5");
+    /// ```
+    ///
+    pub fn pgn(&self) -> String {
+        let mut pgn = String::new();
+        pgn.push_str(&self.pgn_header());
+        pgn.push_str(&self.pgn_moves());
+        if !self.result.is_empty() {
+            pgn.push_str(&format!(" {}\n", self.result));
+        }
+        pgn
+    }
+
+    /// Sets the game result
+    ///
+    /// # Arguments
+    /// * `game_status` - The game status
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::core::{PGNTree, Move, GameStatus, WinReason};
+    ///
+    /// let mut pgn_tree: PGNTree<Move> = PGNTree::default();
+    ///
+    /// pgn_tree.game_over(GameStatus::WhiteWins(WinReason::Checkmate));
+    ///
+    /// assert_eq!(pgn_tree.result, "1-0".to_string());
+    /// ```
+    ///
+    pub fn game_over(&mut self, game_status: GameStatus) {
+        match game_status {
+            GameStatus::WhiteWins(_) => {
+                self.result = "1-0".to_string();
+            }
+            GameStatus::BlackWins(_) => {
+                self.result = "0-1".to_string();
+            }
+            GameStatus::Draw(_) => {
+                self.result = "1/2-1/2".to_string();
+            }
+            _ => (),
+        }
+    }
+
+    /// Returns the PGN header
+    ///
+    /// # Returns
+    /// The PGN header
+    ///
+    fn pgn_header(&self) -> String {
+        let mut header = String::new();
+        header.push_str(&format!("[Event \"{}\"]\n", self.event));
+        header.push_str(&format!("[Site \"{}\"]\n", self.site));
+        header.push_str(&format!("[Date \"{}\"]\n", self.date));
+        header.push_str(&format!("[Round \"{}\"]\n", self.round));
+        header.push_str(&format!("[White \"{}\"]\n", self.white));
+        header.push_str(&format!("[Black \"{}\"]\n", self.black));
+        if let Some(variant) = &self.variant {
+            if variant != "Standard" {
+                header.push_str(&format!("[Variant \"{}\"]\n", variant));
+            }
+        }
+        header.push_str(&format!("[Result \"{}\"]\n", self.result));
+        for metadata in self.option_metadata.iter() {
+            header.push_str(&format!("{}\n", metadata));
+        }
+        header
+    }
+
+    /// Returns the PGN moves
+    ///
+    /// # Returns
+    /// The PGN moves
+    ///
+    fn pgn_moves(&self) -> String {
+        let mut pgn = String::new();
+
+        if self.lines.is_empty() {
+            return pgn;
+        }
+
+        let line = self.lines[0].as_ref().borrow();
+        pgn.push_str(&format!("1. {}", line.mov));
+
+        for next in self.lines.iter().skip(1) {
+            pgn.push_str(&format!(
+                " {}",
+                self.pgn_line_moves(Rc::clone(next), 1, true)
+            ));
+        }
+
+        if self.lines.len() > 1 {
+            pgn.push_str(&format!(
+                " 1... {}",
+                self.pgn_line_moves(Rc::clone(&self.lines[0]), 2, false)
+            ));
+        } else {
+            pgn.push_str(&format!(
+                " {}",
+                self.pgn_line_moves(Rc::clone(&self.lines[0]), 2, false)
+            ));
+        };
+
+        if pgn.ends_with(' ') {
+            pgn.pop();
+        }
+
+        pgn
+    }
+
+    /// Returns the PGN moves of a line
+    ///
+    /// # Arguments
+    /// * `line` - The line
+    /// * `move_number` - The move number
+    /// * `secondary` - Whether the line is a subsequent line
+    ///
+    /// # Returns
+    /// The PGN moves of a line
+    ///
+    fn pgn_line_moves(
+        &self,
+        line: Rc<RefCell<PgnLine<T>>>,
+        move_number: u32,
+        secondary: bool,
+    ) -> String {
+        let mut pgn = String::new();
+
+        let mut tmp_move_number = move_number;
+
+        if secondary {
+            if tmp_move_number % 2 == 0 {
+                pgn.push_str(&format!("{}... ", tmp_move_number / 2));
+            } else {
+                pgn.push_str(&format!("{}. ", tmp_move_number / 2 + 1));
+            }
+            pgn.push_str(&format!("{} ", line.as_ref().borrow().mov));
+
+            tmp_move_number += 1;
+        }
+
+        let mut stack = vec![line];
+
+        let mut is_half_sequence = false;
+
+        while let Some(current) = stack.pop() {
+            let line = current.as_ref().borrow();
+
+            if line.lines.is_empty() {
+                pgn.pop();
+                continue;
+            } else {
+                if tmp_move_number % 2 != 0 {
+                    pgn.push_str(&format!("{}. ", tmp_move_number / 2 + 1));
+                };
+
+                let next = Rc::clone(&line.lines[0]);
+                if is_half_sequence {
+                    is_half_sequence = false;
+                    pgn.push_str(&format!(
+                        "{}... {} ",
+                        tmp_move_number / 2,
+                        next.as_ref().borrow().mov
+                    ));
+                } else {
+                    pgn.push_str(&format!("{} ", next.as_ref().borrow().mov));
+                }
+                stack.push(Rc::clone(&next));
+                tmp_move_number += 1;
+
+                if line.lines.len() != 1 {
+                    is_half_sequence = tmp_move_number % 2 == 0;
+                    for next in line.lines.iter().skip(1) {
+                        pgn.push_str(&format!(
+                            "{} ",
+                            self.pgn_line_moves(Rc::clone(next), tmp_move_number - 1, true)
+                        ));
+                    }
+                }
+            }
+        }
+
+        if secondary {
+            format!("({})", pgn)
+        } else {
+            pgn
+        }
+    }
+}
+
+impl<T: PartialEq + Clone + Display + Debug> Iterator for PGNTree<T> {
+    type Item = T;
+
+    /// Returns the next move
+    ///
+    /// # Returns
+    /// The next move
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use std::collections::HashMap;
+    ///
+    /// let mut pgn_tree = PGNTree::default();
+    /// let mov1 = Move::new(
+    ///     Piece::new(Color::Black, PieceType::Pawn),
+    ///     Position::from_string("e2").unwrap(),
+    ///     Position::from_string("e4").unwrap(),
+    ///     MoveType::Normal {
+    ///         capture: false,
+    ///         promotion: None,
+    ///     },
+    ///     None,
+    ///     None,
+    ///     (false, false),
+    ///     false,
+    ///     false,
+    /// ).unwrap();
+    /// let mov2 = Move::new(
+    ///     Piece::new(Color::White, PieceType::Pawn),
+    ///     Position::from_string("e7").unwrap(),
+    ///     Position::from_string("e5").unwrap(),
+    ///     MoveType::Normal {
+    ///         capture: false,
+    ///         promotion: None,
+    ///     },
+    ///     None,
+    ///     None,
+    ///     (false, false),
+    ///     false,
+    ///     false,
+    /// ).unwrap();
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
+    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
+    ///
+    /// assert_eq!(mov2, pgn_tree.get_move().unwrap());
+    /// assert_eq!(mov1, pgn_tree.next_back().unwrap());
+    /// assert_eq!(mov2, pgn_tree.next().unwrap());
+    /// ```
+    ///
+    fn next(&mut self) -> Option<Self::Item> {
+        self.next_move()
+    }
+}
+
+impl<T: PartialEq + Clone + Display + Debug> DoubleEndedIterator for PGNTree<T> {
+    /// Returns the previous move
+    ///
+    /// # Returns
+    /// The previous move
+    ///
+    /// # Examples
+    /// ```
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use std::collections::HashMap;
+    ///
+    /// let mut pgn_tree = PGNTree::default();
+    /// let mov1 = Move::new(
+    ///     Piece::new(Color::Black, PieceType::Pawn),
+    ///     Position::from_string("e2").unwrap(),
+    ///     Position::from_string("e4").unwrap(),
+    ///     MoveType::Normal {
+    ///         capture: false,
+    ///         promotion: None,
+    ///     },
+    ///     None,
+    ///     None,
+    ///     (false, false),
+    ///     false,
+    ///     false,
+    /// ).unwrap();
+    /// let mov2 = Move::new(
+    ///     Piece::new(Color::White, PieceType::Pawn),
+    ///     Position::from_string("e7").unwrap(),
+    ///     Position::from_string("e5").unwrap(),
+    ///     MoveType::Normal {
+    ///         capture: false,
+    ///         promotion: None,
+    ///     },
+    ///     None,
+    ///     None,
+    ///     (false, false),
+    ///     false,
+    ///     false,
+    /// ).unwrap();
+    /// pgn_tree.add_move(mov1.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
+    /// pgn_tree.add_move(mov2.clone(), 0, 0, None, 0, GameStatus::InProgress, HashMap::new());
+    ///
+    /// assert_eq!(mov2, pgn_tree.get_move().unwrap());
+    /// assert_eq!(mov1, pgn_tree.next_back().unwrap());
+    /// ```
+    ///
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.prev_move()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashMap;
+
+    use crate::core::{Color, Move, MoveType, Piece, PieceType, WinReason};
+
+    use super::*;
+
+    #[test]
+    fn test_add_move() {
+        let mut pgn_tree = PGNTree::default();
+        let mov = Move::new(
+            Piece::new(Color::Black, PieceType::Pawn),
+            Position::from_string("e2").unwrap(),
+            Position::from_string("e4").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+
+        pgn_tree.add_move(
+            mov.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+
+        assert_eq!(mov, pgn_tree.get_move().unwrap());
+    }
+
+    #[test]
+    fn test_rm_move() {
+        let mut pgn_tree = PGNTree::default();
+        let mov = Move::new(
+            Piece::new(Color::Black, PieceType::Pawn),
+            Position::from_string("e2").unwrap(),
+            Position::from_string("e4").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        pgn_tree.add_move(
+            mov.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.rm_move();
+
+        assert!(pgn_tree.get_move().is_none());
+    }
+
+    #[test]
+    fn test_prev_move() {
+        let mut pgn_tree = PGNTree::default();
+        let mov1 = Move::new(
+            Piece::new(Color::Black, PieceType::Pawn),
+            Position::from_string("e2").unwrap(),
+            Position::from_string("e4").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        let mov2 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("e7").unwrap(),
+            Position::from_string("e5").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.add_move(
+            mov2.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+
+        assert_eq!(mov2, pgn_tree.get_move().unwrap());
+        assert_eq!(mov1, pgn_tree.prev_move().unwrap());
+        assert!(pgn_tree.prev_move().is_none());
+    }
+
+    #[test]
+    fn test_next_move() {
+        let mut pgn_tree = PGNTree::default();
+        let mov1 = Move::new(
+            Piece::new(Color::Black, PieceType::Pawn),
+            Position::from_string("e2").unwrap(),
+            Position::from_string("e4").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        let mov2 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("e7").unwrap(),
+            Position::from_string("e5").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.add_move(
+            mov2.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+
+        assert_eq!(mov2, pgn_tree.get_move().unwrap());
+        assert_eq!(mov1, pgn_tree.prev_move().unwrap());
+        assert_eq!(mov2, pgn_tree.next_move().unwrap());
+    }
+
+    #[test]
+    fn test_all_next_moves() {
+        let mut pgn_tree = PGNTree::default();
+        let mov1 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("e4").unwrap(),
+            Position::from_string("e2").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+
+        let mov2 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("d2").unwrap(),
+            Position::from_string("d4").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.prev_move();
+        pgn_tree.add_move(
+            mov2.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.prev_move();
+
+        assert_eq!(vec![mov1.clone(), mov2.clone()], pgn_tree.all_next_moves());
+    }
+
+    #[test]
+    fn test_pgn_header() {
+        let tree: PGNTree<Move> = PGNTree::new(
+            "Event".to_string(),
+            "Site".to_string(),
+            "Date".to_string(),
+            "Round".to_string(),
+            "White".to_string(),
+            "Black".to_string(),
+            "Result".to_string(),
+            None,
+        );
+
+        assert_eq!(tree.pgn_header(), "[Event \"Event\"]\n[Site \"Site\"]\n[Date \"Date\"]\n[Round \"Round\"]\n[White \"White\"]\n[Black \"Black\"]\n[Result \"Result\"]\n");
+    }
+
+    #[test]
+    fn test_pgn_optional_metadata() {
+        let mut tree: PGNTree<Move> = PGNTree::default();
+        tree.add_metadata("TimeControl", "3+2").unwrap();
+        tree.add_metadata("Termination", "Draw").unwrap();
+        tree.add_metadata("WhiteTitle", "GM").unwrap();
+        tree.add_metadata("BlackTitle", "IM").unwrap();
+        tree.add_metadata("WhiteUSCF", "no rating").unwrap();
+        tree.add_metadata("BlackUSCF", "no rating").unwrap();
+        tree.add_metadata("WhiteNA", "no rating").unwrap();
+        tree.add_metadata("BlackNA", "no rating").unwrap();
+        tree.add_metadata("WhiteType", "no rating").unwrap();
+        tree.add_metadata("BlackType", "no rating").unwrap();
+        tree.add_metadata("EventSponsor", "none").unwrap();
+        tree.add_metadata("Section", "none").unwrap();
+        tree.add_metadata("Stage", "none").unwrap();
+        tree.add_metadata("Board", "none").unwrap();
+        tree.add_metadata("Variation", "Queen's Gambit").unwrap();
+        tree.add_metadata("SubVariation", "Catalan System").unwrap();
+        tree.add_metadata("NIC", "none").unwrap();
+        tree.add_metadata("Time", "3pm").unwrap();
+        tree.add_metadata("SetUp", "none").unwrap();
+        tree.add_metadata(
+            "FEN",
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+        )
+        .unwrap();
+        tree.add_metadata("Mode", "Standard").unwrap();
+
+        assert!(tree.pgn_header().contains("[TimeControl \"3+2\"]"));
+        assert!(tree.pgn_header().contains("[Termination \"Draw\"]"));
+        assert!(tree.pgn_header().contains("[WhiteTitle \"GM\"]"));
+        assert!(tree.pgn_header().contains("[BlackTitle \"IM\"]"));
+        assert!(tree.pgn_header().contains("[WhiteUSCF \"no rating\"]"));
+        assert!(tree.pgn_header().contains("[BlackUSCF \"no rating\"]"));
+        assert!(tree.pgn_header().contains("[WhiteNA \"no rating\"]"));
+        assert!(tree.pgn_header().contains("[BlackNA \"no rating\"]"));
+        assert!(tree.pgn_header().contains("[WhiteType \"no rating\"]"));
+        assert!(tree.pgn_header().contains("[BlackType \"no rating\"]"));
+        assert!(tree.pgn_header().contains("[EventSponsor \"none\"]"));
+        assert!(tree.pgn_header().contains("[Section \"none\"]"));
+        assert!(tree.pgn_header().contains("[Stage \"none\"]"));
+        assert!(tree.pgn_header().contains("[Board \"none\"]"));
+        assert!(tree.pgn_header().contains("[Variation \"Queen's Gambit\"]"));
+        assert!(tree
+            .pgn_header()
+            .contains("[SubVariation \"Catalan System\"]"));
+        assert!(tree.pgn_header().contains("[NIC \"none\"]"));
+        assert!(tree.pgn_header().contains("[Time \"3pm\"]"));
+        assert!(tree.pgn_header().contains("[SetUp \"none\"]"));
+        assert!(tree
+            .pgn_header()
+            .contains("[FEN \"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\"]"));
+        assert!(tree.pgn_header().contains("[Mode \"Standard\"]"));
+    }
+
+    #[test]
+    fn test_next_variant() {
+        let mut pgn_tree = PGNTree::default();
+        let mov1 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("e2").unwrap(),
+            Position::from_string("e4").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        let mov2 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("d2").unwrap(),
+            Position::from_string("d4").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.prev_move();
+        pgn_tree.add_move(
+            mov2.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+
+        pgn_tree.prev_move();
+        assert_eq!(mov1, pgn_tree.next_move().unwrap());
+
+        pgn_tree.prev_move();
+        assert_eq!(mov2, pgn_tree.next_move_variant(1).unwrap());
+    }
+
+    #[test]
+    fn test_pgn() {
+        let mut pgn_tree = PGNTree::default();
+        let mov1 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("e2").unwrap(),
+            Position::from_string("e4").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        let mov2 = Move::new(
+            Piece::new(Color::Black, PieceType::Pawn),
+            Position::from_string("e7").unwrap(),
+            Position::from_string("e5").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.add_move(
+            mov2.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+
+        assert_eq!(pgn_tree.pgn(), "[Event \"\"]\n[Site \"\"]\n[Date \"\"]\n[Round \"\"]\n[White \"\"]\n[Black \"\"]\n[Result \"\"]\n1. e4 e5");
+    }
+
+    #[test]
+    fn test_empty_pgn() {
+        let pgn_tree = PGNTree::<Move>::default();
+
+        assert_eq!(pgn_tree.pgn(), "[Event \"\"]\n[Site \"\"]\n[Date \"\"]\n[Round \"\"]\n[White \"\"]\n[Black \"\"]\n[Result \"\"]\n");
+    }
+
+    #[test]
+    fn test_play_same_move() {
+        let mut pgn_tree = PGNTree::default();
+        let mov1 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("e2").unwrap(),
+            Position::from_string("e4").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+
+        let mov2 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("e7").unwrap(),
+            Position::from_string("e5").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.prev_move();
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.add_move(
+            mov2.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.prev_move();
+        pgn_tree.add_move(
+            mov2.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+
+        assert_eq!(1, pgn_tree.lines.len());
+        assert_eq!(1, pgn_tree.lines[0].as_ref().borrow().lines.len());
+    }
+
+    #[test]
+    fn test_rm_move_subline() {
+        let mut pgn_tree = PGNTree::default();
+        let mov1 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("e2").unwrap(),
+            Position::from_string("e4").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        let mov2 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("d2").unwrap(),
+            Position::from_string("d4").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.prev_move();
+        pgn_tree.add_move(
+            mov2.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+
+        pgn_tree.rm_move();
+
+        assert_eq!(1, pgn_tree.lines.len());
+        assert_eq!(pgn_tree.current_line.unwrap(), pgn_tree.lines[0]);
+        assert_eq!(0, pgn_tree.lines[0].as_ref().borrow().lines.len());
+    }
+
+    #[test]
+    fn test_rm_move_not_at_root() {
+        let mut pgn_tree = PGNTree::default();
+        let mov1 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("e2").unwrap(),
+            Position::from_string("e4").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        let mov2 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("d2").unwrap(),
+            Position::from_string("d4").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.add_move(
+            mov2.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+
+        pgn_tree.rm_move();
+
+        assert_eq!(1, pgn_tree.lines.len());
+        assert_eq!(0, pgn_tree.lines[0].as_ref().borrow().lines.len());
+    }
+
+    #[test]
+    fn test_rm_move_no_current_line() {
+        let mut pgn_tree = PGNTree::<Move>::default();
+
+        pgn_tree.rm_move();
+
+        assert!(pgn_tree.current_line.is_none());
+        assert!(pgn_tree.lines.is_empty());
+    }
+
+    #[test]
+    fn test_has_prev_move() {
+        let mut pgn_tree = PGNTree::default();
+        let mov1 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("e2").unwrap(),
+            Position::from_string("e4").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+
+        assert!(!pgn_tree.has_prev_move());
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+
+        assert!(pgn_tree.has_prev_move());
+    }
+
+    #[test]
+    fn test_has_next_move() {
+        let mut pgn_tree = PGNTree::default();
+        let mov1 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("e2").unwrap(),
+            Position::from_string("e4").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        let mov2 = Move::new(
+            Piece::new(Color::Black, PieceType::Pawn),
+            Position::from_string("e7").unwrap(),
+            Position::from_string("e5").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.add_move(
+            mov2.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.prev_move();
+
+        assert!(pgn_tree.has_next_move());
+
+        pgn_tree.next_move();
+        assert!(!pgn_tree.has_next_move());
+    }
+
+    #[test]
+    fn test_all_next_moves_non_root() {
+        let mut pgn_tree = PGNTree::default();
+        let mov1 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("e4").unwrap(),
+            Position::from_string("e2").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        let mov2 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("d2").unwrap(),
+            Position::from_string("d4").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.add_move(
+            mov2.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.prev_move();
+
+        assert_eq!(vec![mov2.clone()], pgn_tree.all_next_moves());
+    }
+
+    #[test]
+    fn test_all_next_moves_empty() {
+        let pgn_tree = PGNTree::<Move>::default();
+
+        assert!(pgn_tree.all_next_moves().is_empty());
+    }
+
+    #[test]
+    fn next_move_variant_out_of_bounds() {
+        let mut pgn_tree = PGNTree::default();
+        let mov1 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("e2").unwrap(),
+            Position::from_string("e4").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+
+        assert!(pgn_tree.next_move_variant(1).is_none());
+    }
+
+    #[test]
+    fn test_game_over() {
+        let mut pgn_tree: PGNTree<Move> = PGNTree::default();
+
+        pgn_tree.game_over(GameStatus::InProgress);
+
+        assert_eq!(pgn_tree.result, "".to_string());
+
+        pgn_tree.game_over(GameStatus::WhiteWins(WinReason::Checkmate));
+
+        assert_eq!(pgn_tree.result, "1-0".to_string());
+
+        pgn_tree.game_over(GameStatus::BlackWins(WinReason::Resignation));
+
+        assert_eq!(pgn_tree.result, "0-1".to_string());
+    }
+
+    #[test]
+    fn test_iterator() {
+        let mut pgn_tree = PGNTree::default();
+        let mov1 = Move::new(
+            Piece::new(Color::Black, PieceType::Pawn),
+            Position::from_string("e2").unwrap(),
+            Position::from_string("e4").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        let mov2 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("e7").unwrap(),
+            Position::from_string("e5").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.add_move(
+            mov2.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+
+        pgn_tree.prev_move();
+        pgn_tree.prev_move();
+
+        assert_eq!(mov1, pgn_tree.next().unwrap());
+        assert_eq!(mov2, pgn_tree.next().unwrap());
+    }
+
+    #[test]
+    fn test_double_ended_iter() {
+        let mut pgn_tree = PGNTree::default();
+        let mov1 = Move::new(
+            Piece::new(Color::Black, PieceType::Pawn),
+            Position::from_string("e2").unwrap(),
+            Position::from_string("e4").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        let mov2 = Move::new(
+            Piece::new(Color::White, PieceType::Pawn),
+            Position::from_string("e7").unwrap(),
+            Position::from_string("e5").unwrap(),
+            MoveType::Normal {
+                capture: false,
+                promotion: None,
+            },
+            None,
+            None,
+            (false, false),
+            false,
+            false,
+        )
+        .unwrap();
+        pgn_tree.add_move(
+            mov1.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+        pgn_tree.add_move(
+            mov2.clone(),
+            0,
+            0,
+            None,
+            0,
+            GameStatus::InProgress,
+            HashMap::new(),
+        );
+
+        assert_eq!(mov2, pgn_tree.get_move().unwrap());
+        assert_eq!(mov1, pgn_tree.next_back().unwrap());
+    }
+}

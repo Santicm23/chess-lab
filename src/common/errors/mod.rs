@@ -1,5 +1,12 @@
-mod board;
-mod movements;
+//! Module containing error types and handling mechanisms
+//!
 
-pub use board::*;
+mod fen;
+mod movements;
+mod pgn;
+mod position;
+
+pub use fen::*;
 pub use movements::*;
+pub use pgn::*;
+pub use position::*;
