@@ -23,6 +23,23 @@ pub struct Chess960 {
 }
 
 impl Chess960 {
+    /// Creates a new instance of the [Chess960] [Variant] from a SPID (Starting Position ID)
+    ///
+    /// # Arguments
+    /// * `spid` - The SPID that represents the starting position of the pieces
+    ///
+    /// # Returns
+    /// A `Result<Chess960, Chess960SPIDError>` object
+    /// * `Ok(Chess960)` - A [Chess960] struct with the game
+    /// * `Err(Chess960SPIDError)` - An error that indicates that the SPID is invalid
+    ///
+    /// # Example
+    /// ```
+    /// # use chess_lab::variants::Chess960;
+    /// let spid: u16 = 518;
+    /// let variant = Chess960::from_spid(spid).unwrap();
+    /// ```
+    ///
     pub fn from_spid(spid: u16) -> Result<Chess960, Chess960SPIDError> {
         let fen = get_fen_from_chess960_spid(spid)?;
         let mut game = Game::from_fen(fen.as_str()).unwrap();

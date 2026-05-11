@@ -19,9 +19,9 @@ pub enum PGNError {
     /// The metadata is invalid
     #[error("Invalid or not supported metadata: {0}")]
     InvalidMetadata(#[from] PGNMetadataError),
-    /// The variant does not exists
-    #[error("Invalid or not variant provided: {0}")]
-    InvalidVariant(String),
+    /// The variant is invalid
+    #[error("Invalid variant: {0}, the variant must be {1}")]
+    InvalidVariant(String, &'static str),
 }
 
 /// An error that occurs when parsing PGN metadata

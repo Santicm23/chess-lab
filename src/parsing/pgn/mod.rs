@@ -46,7 +46,7 @@ pub fn parse_multiple_pgn<T: Variant + VariantBuilder>(input: &str) -> Result<Ve
         if game.get_variant() != T::name()
             && !(T::name() == StandardChess::name() && game.get_variant() == "From Position")
         {
-            return Err(PGNError::InvalidVariant(game.get_variant()));
+            return Err(PGNError::InvalidVariant(game.get_variant(), T::name()));
         }
         let variant = T::new(game.clone());
         variants.push(variant);
@@ -76,7 +76,7 @@ pub fn parse_pgn<T: Variant + VariantBuilder>(input: &str) -> Result<T, PGNError
     if game.get_variant() != T::name()
         && !(T::name() == StandardChess::name() && game.get_variant() == "From Position")
     {
-        return Err(PGNError::InvalidVariant(game.get_variant()));
+        return Err(PGNError::InvalidVariant(game.get_variant(), T::name()));
     }
 
     Ok(T::new(game))
