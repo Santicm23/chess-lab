@@ -4,11 +4,8 @@
 
 mod common;
 pub mod core;
-/// Core game logic types and gameplay APIs.
 pub mod logic;
-/// PGN and FEN parsing helpers.
 pub mod parsing;
-/// Variant-specific wrappers (Standard, Chess960).
 pub mod variants;
 
 pub use common::errors;
