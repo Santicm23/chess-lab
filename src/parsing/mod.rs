@@ -1,3 +1,6 @@
+//! PGN and FEN parsing helpers.
+//!
+
 /// FEN parsing helpers.
 pub mod fen;
 /// PGN parsing helpers.

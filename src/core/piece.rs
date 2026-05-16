@@ -225,7 +225,7 @@ fn pawn_movement(color: Color, start_pos: &Position, end_pos: &Position) -> bool
             || movement_direction(start_pos, end_pos, (1, direction))
             || movement_direction(start_pos, end_pos, (-1, direction))
     } else if max_movement(start_pos, end_pos, 2) {
-        movement_direction(start_pos, end_pos, (0, direction)) && start_pos.row == starting_row
+        movement_direction(start_pos, end_pos, (0, direction)) && start_pos.rank == starting_row
     } else {
         false
     }

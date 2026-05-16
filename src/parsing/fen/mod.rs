@@ -207,15 +207,15 @@ pub fn parse_minified_fen(fen: &str) -> Result<Board, FenError> {
     let mut board = Board::empty();
     let ranks = fen.split('/').collect::<Vec<&str>>();
 
-    let mut row = 8;
-    for rank in ranks {
-        row -= 1;
+    let mut rank = 8;
+    for r in ranks {
+        rank -= 1;
 
-        let mut col = 0;
-        for c in rank.chars() {
+        let mut file = 0;
+        for c in r.chars() {
             match c {
                 '1'..='8' => {
-                    col += c.to_digit(10).unwrap() as u8;
+                    file += c.to_digit(10).unwrap() as u8;
                 }
                 _ => {
                     let piece = Piece::from_fen(c).unwrap();
@@ -223,11 +223,12 @@ pub fn parse_minified_fen(fen: &str) -> Result<Board, FenError> {
                     board
                         .set_piece(
                             piece,
-                            &Position::new(col, row).map_err(|_| FenError::new(fen.to_string()))?,
+                            &Position::new(file, rank)
+                                .map_err(|_| FenError::new(fen.to_string()))?,
                         )
                         .unwrap();
 
-                    col += 1;
+                    file += 1;
                 }
             }
         }

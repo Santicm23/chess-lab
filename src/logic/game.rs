@@ -208,12 +208,12 @@ impl Game {
                     MoveType::Castle { side } => {
                         let rook_end = match side {
                             CastleType::KingSide => Position {
-                                col: 5,
-                                row: start_pos.row,
+                                file: 5,
+                                rank: start_pos.rank,
                             },
                             CastleType::QueenSide => Position {
-                                col: 3,
-                                row: start_pos.row,
+                                file: 3,
+                                rank: start_pos.rank,
                             },
                         };
 
@@ -222,14 +222,14 @@ impl Game {
                         for rook in rooks {
                             match side {
                                 CastleType::KingSide => {
-                                    if rook.col > start_pos.col && rook.row == start_pos.row {
+                                    if rook.file > start_pos.file && rook.rank == start_pos.rank {
                                         rook_start = Some(rook);
                                         self.board.move_piece(&rook, &rook_end).unwrap();
                                         break;
                                     }
                                 }
                                 CastleType::QueenSide => {
-                                    if rook.col < start_pos.col && rook.row == start_pos.row {
+                                    if rook.file < start_pos.file && rook.rank == start_pos.rank {
                                         rook_start = Some(rook);
                                         self.board.move_piece(&rook, &rook_end).unwrap();
                                         break;
@@ -240,8 +240,8 @@ impl Game {
                     }
                     MoveType::EnPassant => {
                         let captured_pos = Position {
-                            col: end_pos.col,
-                            row: start_pos.row,
+                            file: end_pos.file,
+                            rank: start_pos.rank,
                         };
                         captured_piece =
                             Some(self.board.delete_piece(&captured_pos).unwrap().piece_type);
@@ -373,8 +373,8 @@ impl Game {
             }
             MoveType::EnPassant => {
                 let captured_pos = Position {
-                    col: mov.to.col,
-                    row: mov.from.row,
+                    file: mov.to.file,
+                    rank: mov.from.rank,
                 };
                 self.board
                     .set_piece(
@@ -387,12 +387,12 @@ impl Game {
                 let rook_from = mov.rook_from.unwrap();
                 let rook_to = match side {
                     CastleType::KingSide => Position {
-                        col: 5,
-                        row: mov.to.row,
+                        file: 5,
+                        rank: mov.to.rank,
                     },
                     CastleType::QueenSide => Position {
-                        col: 3,
-                        row: mov.to.row,
+                        file: 3,
+                        rank: mov.to.rank,
                     },
                 };
                 self.board.move_piece(&rook_to, &rook_from).unwrap();
@@ -638,7 +638,7 @@ impl Game {
             ));
         } else {
             let start_col;
-            let start_row;
+            let start_rank;
             let end_pos;
             let promotion;
             let end_pos_index;
@@ -665,7 +665,7 @@ impl Game {
                     .unwrap();
                 end_pos_index = move_str.len() - 4;
 
-                if end_pos.row != 0 && end_pos.row != 7 {
+                if end_pos.rank != 0 && end_pos.rank != 7 {
                     return Err(MoveError::Invalid(move_str));
                 }
             } else {
@@ -682,20 +682,20 @@ impl Game {
                 if "abcdefgh".contains(move_str.chars().nth(1).unwrap()) {
                     start_col = Some(move_str.chars().nth(1).unwrap() as u8 - 'a' as u8);
                     if "12345678".contains(move_str.chars().nth(2).unwrap()) {
-                        start_row = Some(move_str.chars().nth(2).unwrap() as u8 - '1' as u8);
+                        start_rank = Some(move_str.chars().nth(2).unwrap() as u8 - '1' as u8);
                     } else {
-                        start_row = None;
+                        start_rank = None;
                     }
                 } else if "12345678".contains(move_str.chars().nth(1).unwrap()) {
                     start_col = None;
-                    start_row = Some(move_str.chars().nth(1).unwrap() as u8 - '1' as u8);
+                    start_rank = Some(move_str.chars().nth(1).unwrap() as u8 - '1' as u8);
                 } else {
                     start_col = None;
-                    start_row = None;
+                    start_rank = None;
                 }
             } else {
                 start_col = None;
-                start_row = None;
+                start_rank = None;
             }
 
             if capture
@@ -704,7 +704,7 @@ impl Game {
             {
                 return Ok((
                     PieceType::Pawn,
-                    (start_col, start_row),
+                    (start_col, start_rank),
                     end_pos,
                     MoveType::EnPassant,
                 ));
@@ -712,7 +712,7 @@ impl Game {
 
             return Ok((
                 piece,
-                (start_col, start_row),
+                (start_col, start_rank),
                 end_pos,
                 MoveType::Normal { capture, promotion },
             ));
@@ -760,7 +760,7 @@ impl Game {
         {
             if !self.board.is_ocupied(end_pos)
                 || self.board.get_piece(end_pos).unwrap().color == piece.color
-                || (piece.piece_type == PieceType::Pawn && start_pos.col == end_pos.col)
+                || (piece.piece_type == PieceType::Pawn && start_pos.file == end_pos.file)
             {
                 return false;
             }
@@ -781,7 +781,7 @@ impl Game {
                     capture: false,
                     promotion: _
                 }
-            ) && (self.board.get_piece(end_pos).is_some() || start_pos.col != end_pos.col)
+            ) && (self.board.get_piece(end_pos).is_some() || start_pos.file != end_pos.file)
             {
                 return false;
             }
@@ -791,8 +791,8 @@ impl Game {
                 promotion: Some(_),
             } = move_type
             {
-                if (piece.color == Color::White && end_pos.row != 7)
-                    || (piece.color == Color::Black && end_pos.row != 0)
+                if (piece.color == Color::White && end_pos.rank != 7)
+                    || (piece.color == Color::Black && end_pos.rank != 0)
                 {
                     return false;
                 }
@@ -802,8 +802,8 @@ impl Game {
                 promotion: None,
             } = move_type
             {
-                if (piece.color == Color::White && end_pos.row == 7)
-                    || (piece.color == Color::Black && end_pos.row == 0)
+                if (piece.color == Color::White && end_pos.rank == 7)
+                    || (piece.color == Color::Black && end_pos.rank == 0)
                 {
                     return false;
                 }
@@ -811,8 +811,8 @@ impl Game {
 
             if let MoveType::EnPassant = move_type {
                 if self.en_passant.map_or_else(|| false, |pos| pos != *end_pos)
-                    || ((piece.color == Color::White && end_pos.row != 5)
-                        || (piece.color == Color::Black && end_pos.row != 2))
+                    || ((piece.color == Color::White && end_pos.rank != 5)
+                        || (piece.color == Color::Black && end_pos.rank != 2))
                 {
                     return false;
                 }
@@ -869,9 +869,9 @@ impl Game {
 
         let mut moves = Vec::new();
 
-        for col in 0..8 {
-            for row in 0..8 {
-                let end_pos = Position { col, row };
+        for file in 0..8 {
+            for rank in 0..8 {
+                let end_pos = Position { file, rank };
                 let move_type = MoveType::Normal {
                     capture: self
                         .board
@@ -1040,23 +1040,23 @@ impl Game {
         };
         let king_pos = self.board.find(PieceType::King, color)[0];
 
-        let mut col = king_pos.col as i8 + step;
-        while col < 8 && col >= 0 {
+        let mut file = king_pos.file as i8 + step;
+        while file < 8 && file >= 0 {
             if let Some(piece) = self.board.get_piece(&Position {
-                col: col as u8,
-                row: king_pos.row,
+                file: file as u8,
+                rank: king_pos.rank,
             }) {
                 if piece.piece_type == PieceType::Rook && piece.color == color {
                     return Some(Position {
-                        col: col as u8,
-                        row: king_pos.row,
+                        file: file as u8,
+                        rank: king_pos.rank,
                     });
                 }
             }
             if step > 0 {
-                col += step;
+                file += step;
             } else {
-                col -= -step;
+                file -= -step;
             }
         }
         // This should never happen since the castle move should be illegal if there is no rook in the correct position
@@ -1302,16 +1302,16 @@ impl Game {
             let king = self.board.find(PieceType::King, mov.piece.color)[0];
             match mov.piece.color {
                 Color::White => {
-                    if mov.from.col < king.col {
+                    if mov.from.file < king.file {
                         self.castling_rights &= 0b1011;
-                    } else if mov.from.col > king.col {
+                    } else if mov.from.file > king.file {
                         self.castling_rights &= 0b0111;
                     }
                 }
                 Color::Black => {
-                    if mov.from.col < king.col {
+                    if mov.from.file < king.file {
                         self.castling_rights &= 0b1110;
-                    } else if mov.from.col > king.col {
+                    } else if mov.from.file > king.file {
                         self.castling_rights &= 0b1101;
                     }
                 }
@@ -1321,16 +1321,16 @@ impl Game {
             let king = self.board.find(PieceType::King, mov.piece.color)[0];
             match mov.piece.color.opposite() {
                 Color::White => {
-                    if mov.to.col < king.col {
+                    if mov.to.file < king.file {
                         self.castling_rights &= 0b1011;
-                    } else if mov.to.col > king.col {
+                    } else if mov.to.file > king.file {
                         self.castling_rights &= 0b0111;
                     }
                 }
                 Color::Black => {
-                    if mov.to.col < king.col {
+                    if mov.to.file < king.file {
                         self.castling_rights &= 0b1110;
-                    } else if mov.to.col > king.col {
+                    } else if mov.to.file > king.file {
                         self.castling_rights &= 0b1101;
                     }
                 }
@@ -1346,8 +1346,8 @@ impl Game {
         if mov.piece.piece_type == PieceType::Pawn && (&mov.from - &mov.to).1.abs() == 2 {
             let positions = self.board.find(PieceType::Pawn, mov.piece.color.opposite());
             let en_passant_pos = Position {
-                col: mov.from.col,
-                row: (mov.from.row + mov.to.row) / 2,
+                file: mov.from.file,
+                rank: (mov.from.rank + mov.to.rank) / 2,
             };
 
             let can_en_passant = positions.iter().any(|pos| {
@@ -1426,15 +1426,15 @@ impl Game {
             positions = positions
                 .iter()
                 .filter(|pos| -> bool {
-                    let has_col = match start_pos {
-                        (Some(col), _) => pos.col == col,
+                    let has_file = match start_pos {
+                        (Some(file), _) => pos.file == file,
                         _ => true,
                     };
-                    let has_row = match start_pos {
-                        (_, Some(row)) => pos.row == row,
+                    let has_rank = match start_pos {
+                        (_, Some(rank)) => pos.rank == rank,
                         _ => true,
                     };
-                    has_col && has_row
+                    has_file && has_rank
                 })
                 .cloned()
                 .collect();
@@ -1458,7 +1458,7 @@ impl Game {
         return valid_positions;
     }
 
-    /// Checks if the move representation has to contain the column or row of the piece to move
+    /// Checks if the move representation has to contain the column or rank of the piece to move
     /// asuming that the move is legal
     ///
     /// # Arguments
@@ -1471,7 +1471,7 @@ impl Game {
     /// # Returns
     /// A tuple containing two booleans:
     /// * The first boolean indicates if the column of the piece to move has to be included in the move representation
-    /// * The second boolean indicates if the row of the piece to move has to be included in the move representation
+    /// * The second boolean indicates if the rank of the piece to move has to be included in the move representation
     ///
     fn move_ambiguity(
         &self,
@@ -1519,11 +1519,11 @@ impl Game {
                     .count();
                 (false, valid_positions > 1)
             }
-            (Some(col), Some(row)) => {
+            (Some(file), Some(rank)) => {
                 let positions = self.board.find(piece, color);
-                let col_ambiguity = positions
+                let file_ambiguity = positions
                     .iter()
-                    .filter(|pos| pos.row == row)
+                    .filter(|pos| pos.rank == rank)
                     .filter(|pos| {
                         self.is_legal(
                             &Piece {
@@ -1537,9 +1537,9 @@ impl Game {
                     })
                     .count()
                     > 1;
-                let row_ambiguity = positions
+                let rank_ambiguity = positions
                     .iter()
-                    .filter(|pos| pos.col == col)
+                    .filter(|pos| pos.file == file)
                     .filter(|pos| {
                         self.is_legal(
                             &Piece {
@@ -1553,7 +1553,7 @@ impl Game {
                     })
                     .count()
                     > 1;
-                (col_ambiguity, row_ambiguity)
+                (file_ambiguity, rank_ambiguity)
             }
         }
     }
@@ -1576,13 +1576,13 @@ impl Game {
         end_pos: &Position,
         side: &CastleType,
     ) -> bool {
-        if piece.piece_type != PieceType::King || start_pos.row != end_pos.row {
+        if piece.piece_type != PieceType::King || start_pos.rank != end_pos.rank {
             return false;
         }
 
         match side {
             CastleType::KingSide => {
-                if end_pos.col != 6 {
+                if end_pos.file != 6 {
                     return false;
                 }
                 if piece.color == Color::White && self.castling_rights & 0b1000 == 0 {
@@ -1592,7 +1592,7 @@ impl Game {
                 }
             }
             CastleType::QueenSide => {
-                if end_pos.col != 2 {
+                if end_pos.file != 2 {
                     return false;
                 }
                 if piece.color == Color::White && self.castling_rights & 0b0100 == 0 {
@@ -1602,16 +1602,16 @@ impl Game {
                 }
             }
         }
-        let col_range = if end_pos.col < start_pos.col {
-            end_pos.col..=start_pos.col
+        let file_range = if end_pos.file < start_pos.file {
+            end_pos.file..=start_pos.file
         } else {
-            start_pos.col..=end_pos.col
+            start_pos.file..=end_pos.file
         };
-        for col in col_range {
-            let new_pos = Position::new(col, start_pos.row).unwrap();
+        for file in file_range {
+            let new_pos = Position::new(file, start_pos.rank).unwrap();
             if (&new_pos != start_pos && self.board.is_ocupied(&new_pos))
                 || self.board.is_attacked(
-                    Position::new(col, start_pos.row).unwrap(),
+                    Position::new(file, start_pos.rank).unwrap(),
                     piece.color.opposite(),
                 )
             {
@@ -1635,9 +1635,9 @@ impl Game {
 
         for piece_pos in self.board.find_all(color) {
             let piece = self.board.get_piece(&piece_pos).unwrap();
-            for col in 0..8 {
-                for row in 0..8 {
-                    let end_pos = Position::new(col, row).unwrap();
+            for file in 0..8 {
+                for rank in 0..8 {
+                    let end_pos = Position::new(file, rank).unwrap();
 
                     let mut board = self.board.clone();
                     if !board.can_move(&piece_pos, &end_pos).unwrap() {
@@ -2100,7 +2100,7 @@ mod tests {
         )));
         assert!(legal_moves
             .iter()
-            .any(|mov| matches!(mov.rook_from, Some(Position { col: 7, row: 0 }))));
+            .any(|mov| matches!(mov.rook_from, Some(Position { file: 7, rank: 0 }))));
 
         let mut game = Game::default();
         game.move_piece("d4").unwrap();
@@ -2122,7 +2122,7 @@ mod tests {
         )));
         assert!(legal_moves
             .iter()
-            .any(|mov| matches!(mov.rook_from, Some(Position { col: 0, row: 0 }))));
+            .any(|mov| matches!(mov.rook_from, Some(Position { file: 0, rank: 0 }))));
     }
 
     #[test]

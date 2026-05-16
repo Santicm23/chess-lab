@@ -63,31 +63,31 @@ impl PositionEmptyError {
 /// Error indicating that a [Position] is out of the allowed range
 ///
 #[derive(Debug, PartialEq, Error)]
-#[error("Position ({col}, {row}) is out of range")]
+#[error("Position ({file}, {rank}) is out of range")]
 pub struct PositionOutOfRangeError {
-    /// The column index that is out of range
-    pub col: u8,
-    /// The row index that is out of range
-    pub row: u8,
+    /// The file index that is out of range
+    pub file: u8,
+    /// The rank index that is out of range
+    pub rank: u8,
 }
 
 impl PositionOutOfRangeError {
-    /// Creates a new [PositionOutOfRangeError] with the given column and row
+    /// Creates a new [PositionOutOfRangeError] with the given file and rank
     ///
     /// # Arguments
-    /// * `col` - The column index that is out of range
-    /// * `row` - The row index that is out of range
+    /// * `file` - The file index that is out of range
+    /// * `rank` - The rank index that is out of range
     ///
     /// # Example
     /// ```
     /// # use chess_lab::errors::PositionOutOfRangeError;
-    /// let col = 8;
-    /// let row = 8;
-    /// let error = PositionOutOfRangeError::new(col, row);
+    /// let file = 8;
+    /// let rank = 8;
+    /// let error = PositionOutOfRangeError::new(file, rank);
     /// ```
     ///
-    pub fn new(col: u8, row: u8) -> Self {
-        PositionOutOfRangeError { col, row }
+    pub fn new(file: u8, rank: u8) -> Self {
+        PositionOutOfRangeError { file, rank }
     }
 }
 
@@ -188,12 +188,12 @@ mod tests {
 
     #[test]
     fn test_position_out_of_range_error() {
-        let col = 8;
-        let row = 8;
-        let error = PositionOutOfRangeError::new(col, row);
+        let file = 8;
+        let rank = 8;
+        let error = PositionOutOfRangeError::new(file, rank);
 
-        assert_eq!(error.col, col);
-        assert_eq!(error.row, row);
+        assert_eq!(error.file, file);
+        assert_eq!(error.rank, rank);
         assert_eq!(format!("{}", error), "Position (8, 8) is out of range");
     }
 

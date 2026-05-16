@@ -3,7 +3,7 @@ use std::{fmt::Display, ops};
 use crate::errors::{PositionInvalidError, PositionOutOfRangeError};
 
 /// Represents a position on the board.
-/// The position is represented by a column and a row.
+/// The position is the coordinates in a chess board, composed by file and rank.
 ///
 /// # Examples
 /// ```
@@ -15,24 +15,24 @@ use crate::errors::{PositionInvalidError, PositionOutOfRangeError};
 ///
 /// let pos = Position::from_string("a1").unwrap();
 ///
-/// assert_eq!(pos.col, 0);
-/// assert_eq!(pos.row, 0);
+/// assert_eq!(pos.file, 0);
+/// assert_eq!(pos.rank, 0);
 /// ```
 ///
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Position {
-    /// The column of the position (between 0 and 7)
-    pub col: u8,
-    /// The row of the position (between 0 and 7)
-    pub row: u8,
+    /// The file of the position (between 0 and 7)
+    pub file: u8,
+    /// The rank of the position (between 0 and 7)
+    pub rank: u8,
 }
 
 impl Position {
     /// Creates a new position
     ///
     /// # Arguments
-    /// * `col`: The column of the position (between 0 and 7)
-    /// * `row`: The row of the position (between 0 and 7)
+    /// * `file`: The fileumn of the position (between 0 and 7)
+    /// * `rank`: The rank of the position (between 0 and 7)
     ///
     /// # Returns
     /// * `Ok(Position)`: The new position
@@ -44,15 +44,15 @@ impl Position {
     ///
     /// let pos = Position::new(0, 0).unwrap();
     ///
-    /// assert_eq!(pos.col, 0);
-    /// assert_eq!(pos.row, 0);
+    /// assert_eq!(pos.file, 0);
+    /// assert_eq!(pos.rank, 0);
     /// ```
     ///
-    pub fn new(col: u8, row: u8) -> Result<Position, PositionOutOfRangeError> {
-        if col >= 8 || row >= 8 {
-            return Err(PositionOutOfRangeError::new(col, row));
+    pub fn new(file: u8, rank: u8) -> Result<Position, PositionOutOfRangeError> {
+        if file >= 8 || rank >= 8 {
+            return Err(PositionOutOfRangeError::new(rank, file));
         }
-        Ok(Position { col, row })
+        Ok(Position { file, rank })
     }
 
     /// Creates a new position from a string
@@ -70,8 +70,8 @@ impl Position {
     ///
     /// let pos = Position::from_string("a1").unwrap();
     ///
-    /// assert_eq!(pos.col, 0);
-    /// assert_eq!(pos.row, 0);
+    /// assert_eq!(pos.file, 0);
+    /// assert_eq!(pos.rank, 0);
     /// ```
     ///
     pub fn from_string(s: &str) -> Result<Position, PositionInvalidError> {
@@ -79,9 +79,9 @@ impl Position {
             return Err(PositionInvalidError::new(s.to_string()));
         }
 
-        let col = s.chars().nth(0).unwrap() as u8 - 'a' as u8;
-        let row = s.chars().nth(1).unwrap() as u8 - '1' as u8;
-        Position::new(col, row).map_err(|_| PositionInvalidError::new(s.to_string()))
+        let file = s.chars().nth(0).unwrap() as u8 - 'a' as u8;
+        let rank = s.chars().nth(1).unwrap() as u8 - '1' as u8;
+        Position::new(file, rank).map_err(|_| PositionInvalidError::new(s.to_string()))
     }
 
     /// Converts the position to a string
@@ -99,7 +99,7 @@ impl Position {
     /// ```
     ///
     pub fn to_bitboard(&self) -> u64 {
-        1 << (self.row * 8 + self.col)
+        1 << (self.rank * 8 + self.file)
     }
 
     /// Converts a bitboard to a list of positions
@@ -151,12 +151,12 @@ impl Position {
     /// assert_eq!(direction, (1, 1));
     /// ```
     pub fn direction(&self, other: &Position) -> (i8, i8) {
-        let mut col = other.col as i8 - self.col as i8;
-        let mut row = other.row as i8 - self.row as i8;
+        let mut file = other.file as i8 - self.file as i8;
+        let mut rank = other.rank as i8 - self.rank as i8;
 
-        col = if col == 0 { 0 } else { col / col.abs() };
-        row = if row == 0 { 0 } else { row / row.abs() };
-        (col, row)
+        file = if file == 0 { 0 } else { file / file.abs() };
+        rank = if rank == 0 { 0 } else { rank / rank.abs() };
+        (file, rank)
     }
 }
 
@@ -178,14 +178,14 @@ impl ops::Add<(i8, i8)> for &Position {
     /// let pos = Position::new(0, 0).unwrap();
     /// let new_pos = &pos + (1, 1);
     ///
-    /// assert_eq!(new_pos.col, 1);
-    /// assert_eq!(new_pos.row, 1);
+    /// assert_eq!(new_pos.file, 1);
+    /// assert_eq!(new_pos.rank, 1);
     /// ```
     ///
     fn add(self, other: (i8, i8)) -> Position {
         Position::new(
-            (self.col as i8 + other.0) as u8,
-            (self.row as i8 + other.1) as u8,
+            (self.file as i8 + other.0) as u8,
+            (self.rank as i8 + other.1) as u8,
         )
         .unwrap()
     }
@@ -216,8 +216,8 @@ impl ops::Sub<&Position> for &Position {
     ///
     fn sub(self, other: &Position) -> (i8, i8) {
         (
-            self.col as i8 - other.col as i8,
-            self.row as i8 - other.row as i8,
+            self.file as i8 - other.file as i8,
+            self.rank as i8 - other.rank as i8,
         )
     }
 }
@@ -240,14 +240,14 @@ impl ops::Sub<(i8, i8)> for &Position {
     /// let pos = Position::new(1, 1).unwrap();
     /// let new_pos = &pos - (1, 1);
     ///
-    /// assert_eq!(new_pos.col, 0);
-    /// assert_eq!(new_pos.row, 0);
+    /// assert_eq!(new_pos.file, 0);
+    /// assert_eq!(new_pos.rank, 0);
     /// ```
     ///
     fn sub(self, other: (i8, i8)) -> Position {
         Position {
-            col: (self.col as i8 - other.0) as u8,
-            row: (self.row as i8 - other.1) as u8,
+            file: (self.file as i8 - other.0) as u8,
+            rank: (self.rank as i8 - other.1) as u8,
         }
     }
 }
@@ -257,8 +257,8 @@ impl Display for Position {
         write!(
             f,
             "{}{}",
-            ('a' as u8 + self.col) as char,
-            ('1' as u8 + self.row) as char
+            ('a' as u8 + self.file) as char,
+            ('1' as u8 + self.rank) as char
         )
     }
 }
@@ -274,11 +274,11 @@ mod tests {
         let pos = Position::new(7, 7).unwrap();
         assert_eq!(pos.to_string(), "h8");
         let pos = Position::from_string("a1").unwrap();
-        assert_eq!(pos.col, 0);
-        assert_eq!(pos.row, 0);
+        assert_eq!(pos.file, 0);
+        assert_eq!(pos.rank, 0);
         let pos = Position::from_string("h8").unwrap();
-        assert_eq!(pos.col, 7);
-        assert_eq!(pos.row, 7);
+        assert_eq!(pos.file, 7);
+        assert_eq!(pos.rank, 7);
     }
 
     #[test]

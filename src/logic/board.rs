@@ -392,7 +392,7 @@ impl Board {
         if piece_movement(&piece, start_pos, end_pos) {
             return match piece.piece_type {
                 PieceType::Pawn => {
-                    if start_pos.col == end_pos.col {
+                    if start_pos.file == end_pos.file {
                         return Ok(!self.piece_between(start_pos, end_pos).unwrap()
                             && captured_piece.is_none()); // safe unwrap (depends on piece_movement)
                     }
@@ -481,10 +481,10 @@ impl Board {
 impl Display for Board {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut board = String::new();
-        for row in (0..8).rev() {
+        for rank in (0..8).rev() {
             let mut empty = 0;
-            for col in 0..8 {
-                let pos = Position::new(col, row).unwrap(); // safe unwrap
+            for file in 0..8 {
+                let pos = Position::new(file, rank).unwrap(); // safe unwrap
                 let piece = self.get_piece(&pos);
                 match piece {
                     None => {
@@ -502,7 +502,7 @@ impl Display for Board {
             if empty > 0 {
                 board.push_str(&empty.to_string());
             }
-            if row > 0 {
+            if rank > 0 {
                 board.push('/');
             }
         }
