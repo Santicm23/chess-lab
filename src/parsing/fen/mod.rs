@@ -1,7 +1,7 @@
 use regex::Regex;
 
 use crate::{
-    core::{Piece, Position},
+    core::{Piece, Square},
     errors::{Chess960SPIDError, FenError},
     logic::{Board, Game},
 };
@@ -49,7 +49,7 @@ pub fn parse_fen(fen: &str) -> Result<Game, FenError> {
     game.en_passant = if parts[3] == "-" {
         None
     } else {
-        Some(Position::from_string(parts[3]).unwrap())
+        Some(Square::from_string(parts[3]).unwrap())
     };
     game.halfmove_clock = parts[4].parse::<u32>().unwrap();
     game.fullmove_number = parts[5].parse::<u32>().unwrap();
@@ -94,8 +94,8 @@ fn back_rank_pieces_from_chess960_spid(spid: u16) -> Result<String, Chess960SPID
         .enumerate()
         .filter_map(|(idx, piece)| if piece.is_none() { Some(idx) } else { None })
         .collect();
-    let queen_pos = empty.remove(queen_index);
-    pieces[queen_pos] = Some('Q');
+    let queen_sqr = empty.remove(queen_index);
+    pieces[queen_sqr] = Some('Q');
 
     let knight_table = [
         (0, 1),
@@ -116,10 +116,10 @@ fn back_rank_pieces_from_chess960_spid(spid: u16) -> Result<String, Chess960SPID
         .enumerate()
         .filter_map(|(idx, piece)| if piece.is_none() { Some(idx) } else { None })
         .collect();
-    let knight1_pos = empty[n1];
-    let knight2_pos = empty[n2];
-    pieces[knight1_pos] = Some('N');
-    pieces[knight2_pos] = Some('N');
+    let knight1_sqr = empty[n1];
+    let knight2_sqr = empty[n2];
+    pieces[knight1_sqr] = Some('N');
+    pieces[knight2_sqr] = Some('N');
 
     let mut remaining: Vec<usize> = pieces
         .iter()
@@ -223,8 +223,7 @@ pub fn parse_minified_fen(fen: &str) -> Result<Board, FenError> {
                     board
                         .set_piece(
                             piece,
-                            &Position::new(file, rank)
-                                .map_err(|_| FenError::new(fen.to_string()))?,
+                            &Square::new(file, rank).map_err(|_| FenError::new(fen.to_string()))?,
                         )
                         .unwrap();
 
@@ -302,7 +301,7 @@ mod tests {
             game.fen(),
             "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq e3 0 1"
         );
-        assert_eq!(game.en_passant, Some(Position::from_string("e3").unwrap()));
+        assert_eq!(game.en_passant, Some(Square::from_string("e3").unwrap()));
     }
 
     #[test]

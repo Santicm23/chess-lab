@@ -1,7 +1,7 @@
 use rand::Rng;
 
 use crate::{
-    core::{Color, GameStatus, Move, Piece, Position, Variant, VariantBuilder},
+    core::{Color, GameStatus, Move, Piece, Square, Variant, VariantBuilder},
     errors::{Chess960SPIDError, FenError, MoveError, PGNError},
     logic::Game,
     parsing::{
@@ -11,7 +11,7 @@ use crate::{
     utils::os::{read_file, write_file},
 };
 
-/// Chess960 is a variant of chess that uses the same rules as [standard chess](crate::variants::StandardChess), but the starting position of the pieces is randomized.
+/// Chess960 is a variant of chess that uses the same rules as [standard chess](crate::variants::StandardChess), but the starting Square of the pieces is randomized.
 ///
 /// # Attributes
 /// * `game` - The [Game] struct that contains the current state of the game
@@ -23,10 +23,10 @@ pub struct Chess960 {
 }
 
 impl Chess960 {
-    /// Creates a new instance of the [Chess960] [Variant] from a SPID (Starting Position ID)
+    /// Creates a new instance of the [Chess960] [Variant] from a SPID (Starting Square ID)
     ///
     /// # Arguments
-    /// * `spid` - The SPID that represents the starting position of the pieces
+    /// * `spid` - The SPID that represents the starting Square of the pieces
     ///
     /// # Returns
     /// A `Result<Chess960, Chess960SPIDError>` object
@@ -49,10 +49,10 @@ impl Chess960 {
 }
 
 impl Default for Chess960 {
-    /// Generates a random starting position for the pieces
+    /// Generates a random starting Square for the pieces
     ///
     /// # Returns
-    /// A [Chess960] struct with a random starting position
+    /// A [Chess960] struct with a random starting Square
     ///
     /// # Example
     /// ```
@@ -289,51 +289,51 @@ impl Variant for Chess960 {
         self.game.fen()
     }
 
-    /// Returns the piece at a given position
+    /// Returns the piece at a given Square
     ///
     /// # Arguments
-    /// * `pos` - The position to get the piece from
+    /// * `sqr` - The Square to get the piece from
     ///
     /// # Returns
-    /// The piece at the given position, if there is one
+    /// The piece at the given Square, if there is one
     ///
     /// # Example
     /// ```
     /// # use chess_lab::core::Variant;
     /// # use chess_lab::variants::Chess960;
-    /// use chess_lab::core::Position;
+    /// use chess_lab::core::Square;
     ///
     /// let variant = Chess960::default();
-    /// let piece = variant.get_piece_at(Position::from_string("e2").unwrap());
+    /// let piece = variant.get_piece_at(Square::from_string("e2").unwrap());
     /// assert!(piece.is_some());
     /// assert_eq!(piece.unwrap().to_string(), "P");
     /// ```
     ///
-    fn get_piece_at(&self, pos: Position) -> Option<Piece> {
-        self.game.get_piece_at(pos)
+    fn get_piece_at(&self, sqr: Square) -> Option<Piece> {
+        self.game.get_piece_at(sqr)
     }
 
-    /// Returns the legal moves of a piece at a given position
+    /// Returns the legal moves of a piece at a given Square
     ///
     /// # Arguments
-    /// * `pos` - The position to get the legal moves from
+    /// * `sqr` - The Square to get the legal moves from
     ///
     /// # Returns
-    /// A vector with the legal moves of the piece at the given position
+    /// A vector with the legal moves of the piece at the given Square
     ///
     /// # Example
     /// ```
     /// # use chess_lab::core::Variant;
     /// # use chess_lab::variants::Chess960;
-    /// use chess_lab::core::Position;
+    /// use chess_lab::core::Square;
     ///
     /// let variant = Chess960::default();
-    /// let legal_moves = variant.get_legal_moves(Position::from_string("e2").unwrap());
+    /// let legal_moves = variant.get_legal_moves(Square::from_string("e2").unwrap());
     /// assert!(legal_moves.iter().any(|m| m.to_string() == "e4"));
     /// ```
     ///
-    fn get_legal_moves(&self, pos: Position) -> Vec<Move> {
-        self.game.get_legal_moves(pos)
+    fn get_legal_moves(&self, sqr: Square) -> Vec<Move> {
+        self.game.get_legal_moves(sqr)
     }
 
     /// Saves the PGN string of the [Game] to a file
@@ -549,7 +549,7 @@ impl Variant for Chess960 {
     /// let en_passant = game.get_en_passant();
     /// ```
     ///
-    fn get_en_passant(&self) -> Option<Position> {
+    fn get_en_passant(&self) -> Option<Square> {
         self.game.en_passant
     }
 
@@ -686,7 +686,7 @@ mod tests {
     fn test_get_piece_at() {
         let variant =
             Chess960::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1").unwrap();
-        let piece = variant.get_piece_at(Position::from_string("e2").unwrap());
+        let piece = variant.get_piece_at(Square::from_string("e2").unwrap());
         assert!(piece.is_some());
         assert_eq!(piece.unwrap().to_string(), "P");
     }
@@ -695,7 +695,7 @@ mod tests {
     fn test_get_legal_moves() {
         let variant =
             Chess960::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1").unwrap();
-        let legal_moves = variant.get_legal_moves(Position::from_string("e2").unwrap());
+        let legal_moves = variant.get_legal_moves(Square::from_string("e2").unwrap());
         assert!(legal_moves.iter().any(|m| m.to_string() == "e4"));
     }
 
@@ -812,7 +812,7 @@ mod tests {
         variant.move_piece("f5").unwrap();
         assert_eq!(
             variant.get_en_passant().unwrap(),
-            Position::new(5, 5).unwrap()
+            Square::new(5, 5).unwrap()
         );
     }
 

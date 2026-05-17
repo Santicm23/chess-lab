@@ -39,11 +39,11 @@ impl MoveInfoError {
     /// # Example
     /// ```
     /// # use chess_lab::errors::MoveInfoError;
-    /// use chess_lab::core::{Color, PieceType, Position, Move, MoveType, Piece};
+    /// use chess_lab::core::{Color, PieceType, Square, Move, MoveType, Piece};
     ///
     /// let piece = Piece::new(Color::White, PieceType::Pawn);
-    /// let from = Position::new(4, 1).unwrap();
-    /// let to = Position::new(4, 3).unwrap();
+    /// let from = Square::new(4, 1).unwrap();
+    /// let to = Square::new(4, 3).unwrap();
     /// let move_type = MoveType::Normal {
     ///     capture: false,
     ///     promotion: None,
@@ -73,15 +73,16 @@ impl MoveInfoError {
 
 #[cfg(test)]
 mod tests {
+    use crate::core::{Color, MoveType, Piece, PieceType, Square};
+
     use super::*;
 
     #[test]
     fn test_move_info_error_creation() {
-        let piece =
-            crate::core::Piece::new(crate::core::Color::White, crate::core::PieceType::Pawn);
-        let from = crate::core::Position::new(4, 1).unwrap();
-        let to = crate::core::Position::new(4, 3).unwrap();
-        let move_type = crate::core::MoveType::Normal {
+        let piece = Piece::new(Color::White, PieceType::Pawn);
+        let from = Square::new(4, 1).unwrap();
+        let to = Square::new(4, 3).unwrap();
+        let move_type = MoveType::Normal {
             capture: false,
             promotion: None,
         };

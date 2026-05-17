@@ -1,5 +1,5 @@
 use crate::{
-    core::{Color, GameStatus, Move, Piece, Position, Variant, VariantBuilder},
+    core::{Color, GameStatus, Move, Piece, Square, Variant, VariantBuilder},
     errors::{FenError, MoveError, PGNError},
     logic::Game,
     parsing::{
@@ -280,51 +280,51 @@ impl Variant for StandardChess {
         self.game.fen()
     }
 
-    /// Returns the piece at a given position
+    /// Returns the piece at a given Square
     ///
     /// # Arguments
-    /// * `pos` - The position to get the piece from
+    /// * `sqr` - The Square to get the piece from
     ///
     /// # Returns
-    /// The piece at the given position, if there is one
+    /// The piece at the given Square, if there is one
     ///
     /// # Example
     /// ```
     /// # use chess_lab::core::Variant;
     /// # use chess_lab::variants::StandardChess;
-    /// use chess_lab::core::Position;
+    /// use chess_lab::core::Square;
     ///
     /// let game = StandardChess::default();
-    /// let piece = game.get_piece_at(Position::from_string("e2").unwrap());
+    /// let piece = game.get_piece_at(Square::from_string("e2").unwrap());
     /// assert!(piece.is_some());
     /// assert_eq!(piece.unwrap().to_string(), "P");
     /// ```
     ///
-    fn get_piece_at(&self, pos: Position) -> Option<Piece> {
-        self.game.get_piece_at(pos)
+    fn get_piece_at(&self, sqr: Square) -> Option<Piece> {
+        self.game.get_piece_at(sqr)
     }
 
-    /// Returns the legal moves of a piece at a given position
+    /// Returns the legal moves of a piece at a given Square
     ///
     /// # Arguments
-    /// * `pos` - The position to get the legal moves for
+    /// * `sqr` - The Square to get the legal moves for
     ///
     /// # Returns
-    /// A vector of legal moves for the piece at the given position
+    /// A vector of legal moves for the piece at the given Square
     ///
     /// # Example
     /// ```
     /// # use chess_lab::core::Variant;
     /// # use chess_lab::variants::StandardChess;
-    /// use chess_lab::core::Position;
+    /// use chess_lab::core::Square;
     ///
     /// let game = StandardChess::default();
-    /// let legal_moves = game.get_legal_moves(Position::from_string("e2").unwrap());
+    /// let legal_moves = game.get_legal_moves(Square::from_string("e2").unwrap());
     /// assert!(legal_moves.iter().any(|m| m.to_string() == "e4"));
     /// ```
     ///
-    fn get_legal_moves(&self, pos: Position) -> Vec<Move> {
-        self.game.get_legal_moves(pos)
+    fn get_legal_moves(&self, sqr: Square) -> Vec<Move> {
+        self.game.get_legal_moves(sqr)
     }
 
     /// Saves the [Game] to a file
@@ -539,7 +539,7 @@ impl Variant for StandardChess {
     /// let en_passant = game.get_en_passant();
     /// ```
     ///
-    fn get_en_passant(&self) -> Option<Position> {
+    fn get_en_passant(&self) -> Option<Square> {
         self.game.en_passant
     }
 
@@ -647,7 +647,7 @@ mod tests {
     #[test]
     fn test_get_piece_at() {
         let variant = StandardChess::default();
-        let piece = variant.get_piece_at(Position::from_string("e2").unwrap());
+        let piece = variant.get_piece_at(Square::from_string("e2").unwrap());
         assert!(piece.is_some());
         assert_eq!(piece.unwrap().to_string(), "P");
     }
@@ -655,7 +655,7 @@ mod tests {
     #[test]
     fn test_get_legal_moves() {
         let variant = StandardChess::default();
-        let legal_moves = variant.get_legal_moves(Position::from_string("e2").unwrap());
+        let legal_moves = variant.get_legal_moves(Square::from_string("e2").unwrap());
         assert!(legal_moves.iter().any(|m| m.to_string() == "e4"));
         assert!(legal_moves.iter().any(|m| m.to_string() == "e3"));
     }
@@ -771,7 +771,7 @@ mod tests {
         variant.move_piece("f5").unwrap();
         assert_eq!(
             variant.get_en_passant().unwrap(),
-            Position::new(5, 5).unwrap()
+            Square::new(5, 5).unwrap()
         );
     }
 

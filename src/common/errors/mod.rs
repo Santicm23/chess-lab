@@ -5,10 +5,10 @@ mod chess960;
 mod fen;
 mod movements;
 mod pgn;
-mod position;
+mod square;
 
 pub use chess960::*;
 pub use fen::*;
 pub use movements::*;
 pub use pgn::*;
-pub use position::*;
+pub use square::*;

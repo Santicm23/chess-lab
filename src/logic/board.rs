@@ -1,10 +1,9 @@
 use std::fmt::Display;
 
 use crate::{
-    core::{piece_movement, Color, Piece, PieceType, Position},
+    core::{piece_movement, Color, Piece, PieceType, Square},
     errors::{
-        FenError, PositionBetweenError, PositionEmptyError, PositionOccupiedError,
-        UnalignedPositionsError,
+        FenError, SquareBetweenError, SquareEmptyError, SquareOccupiedError, UnalignedSquaresError,
     },
     parsing::fen::parse_minified_fen,
     utils::movements::{diagonal_movement, linear_movement},
@@ -115,16 +114,16 @@ impl Board {
         parse_minified_fen(fen)
     }
 
-    /// Checks if a position is occupied by a piece
+    /// Checks if a square is occupied by a piece
     ///
     /// # Arguments
-    /// * `pos`: The position to check
+    /// * `sqr`: The square to check
     ///
     /// # Returns
-    /// Whether the position is occupied by a piece
+    /// Whether the square is occupied by a piece
     ///
-    pub fn is_ocupied(&self, pos: &Position) -> bool {
-        let bit = pos.to_bitboard();
+    pub fn is_ocupied(&self, sqr: &Square) -> bool {
+        let bit = sqr.to_bitboard();
         (self.wpawns
             | self.bpawns
             | self.wknights
@@ -141,16 +140,16 @@ impl Board {
             != 0
     }
 
-    /// Gets the piece at a position
+    /// Gets the piece at a square
     ///
     /// # Arguments
-    /// * `pos`: The position to get the piece
+    /// * `sqr`: The square to get the piece
     ///
     /// # Returns
-    /// The piece at the position or None if the position is empty
+    /// The piece at the square or None if the square is empty
     ///
-    pub fn get_piece(&self, pos: &Position) -> Option<Piece> {
-        let bit = pos.to_bitboard();
+    pub fn get_piece(&self, sqr: &Square) -> Option<Piece> {
+        let bit = sqr.to_bitboard();
 
         let piece_data = [
             (self.wpawns, Color::White, PieceType::Pawn),
@@ -173,21 +172,21 @@ impl Board {
         }
     }
 
-    /// Sets a piece at a position
+    /// Sets a piece at a square
     ///
     /// # Arguments
     /// * `piece`: The piece to set
-    /// * `pos`: The position to set the piece
+    /// * `sqr`: The square to set the piece
     ///
     /// # Returns
     /// * `Ok(())`: If the piece was set successfully
-    /// * `Err(PositionOccupiedError)`: If the position is already occupied
+    /// * `Err(SquareOccupiedError)`: If the square is already occupied
     ///
-    pub fn set_piece(&mut self, piece: Piece, pos: &Position) -> Result<(), PositionOccupiedError> {
-        if self.is_ocupied(pos) {
-            return Err(PositionOccupiedError::new(pos.clone()));
+    pub fn set_piece(&mut self, piece: Piece, sqr: &Square) -> Result<(), SquareOccupiedError> {
+        if self.is_ocupied(sqr) {
+            return Err(SquareOccupiedError::new(sqr.clone()));
         }
-        let bit = pos.to_bitboard();
+        let bit = sqr.to_bitboard();
         match piece.piece_type {
             PieceType::Pawn => match piece.color {
                 Color::White => self.wpawns |= bit,
@@ -217,22 +216,22 @@ impl Board {
         Ok(())
     }
 
-    /// Deletes a piece at a position
+    /// Deletes a piece at a square
     ///
     /// # Arguments
-    /// * `pos`: The position to delete the piece
+    /// * `sqr`: The square to delete the piece
     ///
     /// # Returns
     /// * `Ok(Piece)`: The piece that was deleted
-    /// * `Err(PositionEmptyError)`: If the position is empty
+    /// * `Err(SquareEmptyError)`: If the square is empty
     ///
-    pub fn delete_piece(&mut self, pos: &Position) -> Result<Piece, PositionEmptyError> {
-        let piece = match self.get_piece(&pos) {
+    pub fn delete_piece(&mut self, sqr: &Square) -> Result<Piece, SquareEmptyError> {
+        let piece = match self.get_piece(&sqr) {
             Some(piece) => piece,
-            None => return Err(PositionEmptyError::new(pos.clone())),
+            None => return Err(SquareEmptyError::new(sqr.clone())),
         };
 
-        let bit = pos.to_bitboard();
+        let bit = sqr.to_bitboard();
         match piece.piece_type {
             PieceType::Pawn => match piece.color {
                 Color::White => self.wpawns &= !bit,
@@ -269,9 +268,9 @@ impl Board {
     /// * `color`: The color of the piece
     ///
     /// # Returns
-    /// A vector of positions of the pieces
+    /// A vector of squares of the pieces
     ///
-    pub fn find(&self, piece_type: PieceType, color: Color) -> Vec<Position> {
+    pub fn find(&self, piece_type: PieceType, color: Color) -> Vec<Square> {
         let bitboard;
         match piece_type {
             PieceType::Pawn => match color {
@@ -299,7 +298,7 @@ impl Board {
                 Color::Black => bitboard = self.bkings,
             },
         }
-        Position::from_bitboard(bitboard)
+        Square::from_bitboard(bitboard)
     }
 
     /// Finds all pieces of a certain color
@@ -308,9 +307,9 @@ impl Board {
     /// * `color`: The color of the pieces
     ///
     /// # Returns
-    /// A vector of positions of the pieces
+    /// A vector of squares of the pieces
     ///
-    pub fn find_all(&self, color: Color) -> Vec<Position> {
+    pub fn find_all(&self, color: Color) -> Vec<Square> {
         let mut pieces = Vec::new();
         pieces.append(&mut self.find(PieceType::Pawn, color));
         pieces.append(&mut self.find(PieceType::Knight, color));
@@ -321,17 +320,17 @@ impl Board {
         pieces
     }
 
-    /// Moves a piece from one position to another
+    /// Moves a piece from one square to another
     ///
     /// # Arguments
-    /// * `from`: The position to move the piece from
-    /// * `to`: The position to move the piece to
+    /// * `from`: The square to move the piece from
+    /// * `to`: The square to move the piece to
     ///
     /// # Returns
     /// * `Ok(())`: If the piece was moved successfully
-    /// * `Err(PositionEmptyError)`: If the start position is empty
+    /// * `Err(SquareEmptyError)`: If the start square is empty
     ///
-    pub fn move_piece(&mut self, from: &Position, to: &Position) -> Result<(), PositionEmptyError> {
+    pub fn move_piece(&mut self, from: &Square, to: &Square) -> Result<(), SquareEmptyError> {
         let piece = self.delete_piece(from)?;
 
         self.delete_piece(to).ok();
@@ -340,19 +339,19 @@ impl Board {
         Ok(())
     }
 
-    /// Checks if a position is attacked by a certain color
+    /// Checks if a square is attacked by a certain color
     ///
     /// # Arguments
-    /// * `pos`: The position to check
+    /// * `sqr`: The square to check
     /// * `color`: The color of the attacking pieces
     ///
     /// # Returns
-    /// Whether the position is attacked or not
+    /// Whether the square is attacked or not
     ///
-    pub fn is_attacked(&self, pos: Position, color: Color) -> bool {
+    pub fn is_attacked(&self, sqr: Square, color: Color) -> bool {
         let pieces = self.find_all(color);
         for piece in pieces {
-            if self.is_attacking(&piece, &pos).unwrap() {
+            if self.is_attacking(&piece, &sqr).unwrap() {
                 // safe unwrap (depends on find_all method)
                 return true;
             }
@@ -363,23 +362,19 @@ impl Board {
     /// Checks if a piece can move without considering checks
     ///
     /// # Arguments
-    /// * `start_pos`: The position of the piece to move
-    /// * `end_pos`: The position of the piece to capture
+    /// * `start_sqr`: The square of the piece to move
+    /// * `end_sqr`: The square of the piece to capture
     ///
     /// # Returns
     /// * `Ok(bool)`: Whether the piece can move acording to its movement rules
-    /// * `Err(PositionEmptyError)`: If the start position is empty
+    /// * `Err(SquareEmptyError)`: If the start square is empty
     ///
-    pub fn can_move(
-        &self,
-        start_pos: &Position,
-        end_pos: &Position,
-    ) -> Result<bool, PositionEmptyError> {
+    pub fn can_move(&self, start_sqr: &Square, end_sqr: &Square) -> Result<bool, SquareEmptyError> {
         let piece = self
-            .get_piece(start_pos)
-            .ok_or(PositionEmptyError::new(start_pos.clone()))?;
+            .get_piece(start_sqr)
+            .ok_or(SquareEmptyError::new(start_sqr.clone()))?;
 
-        let captured_piece = self.get_piece(end_pos);
+        let captured_piece = self.get_piece(end_sqr);
         match captured_piece {
             Some(captured_piece) => {
                 if captured_piece.color == piece.color {
@@ -389,88 +384,84 @@ impl Board {
             None => (),
         }
 
-        if piece_movement(&piece, start_pos, end_pos) {
+        if piece_movement(&piece, start_sqr, end_sqr) {
             return match piece.piece_type {
                 PieceType::Pawn => {
-                    if start_pos.file == end_pos.file {
-                        return Ok(!self.piece_between(start_pos, end_pos).unwrap()
+                    if start_sqr.file == end_sqr.file {
+                        return Ok(!self.piece_between(start_sqr, end_sqr).unwrap()
                             && captured_piece.is_none()); // safe unwrap (depends on piece_movement)
                     }
                     Ok(captured_piece.is_some())
                 }
                 PieceType::Knight | PieceType::King => Ok(true),
                 PieceType::Bishop | PieceType::Rook | PieceType::Queen => {
-                    Ok(!self.piece_between(start_pos, end_pos).unwrap()) // safe unwrap (depends on piece_movement)
+                    Ok(!self.piece_between(start_sqr, end_sqr).unwrap()) // safe unwrap (depends on piece_movement)
                 }
             };
         }
         Ok(false)
     }
 
-    /// Checks if a piece of a postion is attacking a position
+    /// Checks if a piece in a squre is attacking a square
     /// The function does not check if the move is legal
-    /// It only checks if the piece is attacking the position according to its movement rules
+    /// It only checks if the piece is attacking the square according to its movement rules
     ///
     /// # Arguments
-    /// * `start_pos`: The position of the piece to move
-    /// * `end_pos`: The position of the piece to capture
+    /// * `start_sqr`: The square of the piece to move
+    /// * `end_sqr`: The square of the piece to capture
     ///
     /// # Returns
-    /// * `Ok(bool)`: Whether the piece is attacking the position
-    /// * `Err(PositionEmptyError)`: If the start position is empty
+    /// * `Ok(bool)`: Whether the piece is attacking the square
+    /// * `Err(SquareEmptyError)`: If the start square is empty
     ///
     pub fn is_attacking(
         &self,
-        start_pos: &Position,
-        end_pos: &Position,
-    ) -> Result<bool, PositionEmptyError> {
+        start_sqr: &Square,
+        end_sqr: &Square,
+    ) -> Result<bool, SquareEmptyError> {
         let piece = self
-            .get_piece(start_pos)
-            .ok_or(PositionEmptyError::new(start_pos.clone()))?;
+            .get_piece(start_sqr)
+            .ok_or(SquareEmptyError::new(start_sqr.clone()))?;
 
-        if piece_movement(&piece, start_pos, end_pos) {
+        if piece_movement(&piece, start_sqr, end_sqr) {
             return match piece.piece_type {
-                PieceType::Pawn => Ok(diagonal_movement(start_pos, end_pos)),
+                PieceType::Pawn => Ok(diagonal_movement(start_sqr, end_sqr)),
                 PieceType::Knight | PieceType::King => Ok(true),
                 PieceType::Bishop | PieceType::Rook | PieceType::Queen => {
-                    Ok(!self.piece_between(start_pos, end_pos).unwrap()) // safe unwrap (depends on piece_movement)
+                    Ok(!self.piece_between(start_sqr, end_sqr).unwrap()) // safe unwrap (depends on piece_movement)
                 }
             };
         }
         Ok(false)
     }
 
-    /// Checks if there is a piece between two positions
+    /// Checks if there is a piece between two squares
     ///
     /// # Arguments
-    /// * `from`: The starting position
-    /// * `to`: The ending position
+    /// * `from`: The starting square
+    /// * `to`: The ending square
     ///
     /// # Returns
-    /// * `Ok(bool)`: Whether there is a piece between the two positions
-    /// * `Err(PositionBetweenError)`: If the positions are not aligned
+    /// * `Ok(bool)`: Whether there is a piece between the two squares
+    /// * `Err(SquareBetweenError)`: If the squares are not aligned
     ///
-    pub fn piece_between(
-        &self,
-        from: &Position,
-        to: &Position,
-    ) -> Result<bool, PositionBetweenError> {
+    pub fn piece_between(&self, from: &Square, to: &Square) -> Result<bool, SquareBetweenError> {
         if !linear_movement(from, to) && !diagonal_movement(from, to) {
-            return Err(PositionBetweenError::from(UnalignedPositionsError::new(
+            return Err(SquareBetweenError::from(UnalignedSquaresError::new(
                 from.clone(),
                 to.clone(),
             )));
         }
 
         let direction = from.direction(to);
-        let mut pos = from.to_owned();
+        let mut sqr = from.to_owned();
 
         for _ in 0..7 {
-            pos = &pos + direction;
-            if pos == *to {
+            sqr = &sqr + direction;
+            if sqr == *to {
                 break;
             }
-            if self.is_ocupied(&pos) {
+            if self.is_ocupied(&sqr) {
                 return Ok(true);
             }
         }
@@ -484,8 +475,8 @@ impl Display for Board {
         for rank in (0..8).rev() {
             let mut empty = 0;
             for file in 0..8 {
-                let pos = Position::new(file, rank).unwrap(); // safe unwrap
-                let piece = self.get_piece(&pos);
+                let sqr = Square::new(file, rank).unwrap(); // safe unwrap
+                let piece = self.get_piece(&sqr);
                 match piece {
                     None => {
                         empty += 1;
@@ -513,7 +504,7 @@ impl Display for Board {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::core::{Color, Piece, PieceType, Position};
+    use crate::core::{Color, Piece, PieceType, Square};
 
     #[test]
     fn test_default() {
@@ -545,9 +536,9 @@ mod tests {
     #[test]
     fn test_set_piece() {
         let mut board = Board::default();
-        let pos = Position::new(4, 2).unwrap();
+        let sqr = Square::new(4, 2).unwrap();
         let piece = Piece::new(Color::White, PieceType::Pawn);
-        board.set_piece(piece, &pos).unwrap();
+        board.set_piece(piece, &sqr).unwrap();
         assert_eq!(
             board.to_string(),
             "rnbqkbnr/pppppppp/8/8/8/4P3/PPPPPPPP/RNBQKBNR"
@@ -557,17 +548,17 @@ mod tests {
     #[test]
     fn test_set_piece_occupied() {
         let mut board = Board::default();
-        let pos = Position::new(0, 1).unwrap();
+        let sqr = Square::new(0, 1).unwrap();
         let piece = Piece::new(Color::White, PieceType::Pawn);
-        let result = board.set_piece(piece, &pos);
+        let result = board.set_piece(piece, &sqr);
         assert!(result.is_err());
     }
 
     #[test]
     fn test_delete_piece() {
         let mut board = Board::default();
-        let pos = Position::new(0, 0).unwrap();
-        board.delete_piece(&pos).unwrap();
+        let sqr = Square::new(0, 0).unwrap();
+        board.delete_piece(&sqr).unwrap();
         assert_eq!(
             board.to_string(),
             "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/1NBQKBNR"
@@ -577,19 +568,19 @@ mod tests {
     #[test]
     fn test_get_piece() {
         let board = Board::default();
-        let pos = Position::new(0, 0).unwrap();
-        let piece = board.get_piece(&pos).unwrap();
+        let sqr = Square::new(0, 0).unwrap();
+        let piece = board.get_piece(&sqr).unwrap();
         assert_eq!(piece.to_string(), "R");
     }
 
     #[test]
     fn test_is_ocupied() {
         let board = Board::default();
-        let pos = Position::new(0, 0).unwrap();
-        assert!(board.is_ocupied(&pos));
+        let sqr = Square::new(0, 0).unwrap();
+        assert!(board.is_ocupied(&sqr));
 
-        let pos = Position::new(0, 2).unwrap();
-        assert!(!board.is_ocupied(&pos));
+        let sqr = Square::new(0, 2).unwrap();
+        assert!(!board.is_ocupied(&sqr));
     }
 
     #[test]
@@ -609,8 +600,8 @@ mod tests {
     #[test]
     fn test_move_piece() {
         let mut board = Board::default();
-        let from = Position::new(4, 1).unwrap();
-        let to = Position::new(4, 3).unwrap();
+        let from = Square::new(4, 1).unwrap();
+        let to = Square::new(4, 3).unwrap();
         board.move_piece(&from, &to).unwrap();
         assert_eq!(
             board.to_string(),
@@ -622,18 +613,18 @@ mod tests {
     fn test_is_attacked() {
         let board = Board::default();
 
-        let pos = Position::from_string("e3").unwrap();
-        assert!(board.is_attacked(pos, Color::White));
+        let sqr = Square::from_string("e3").unwrap();
+        assert!(board.is_attacked(sqr, Color::White));
 
-        let pos = Position::from_string("e4").unwrap();
-        assert!(!board.is_attacked(pos, Color::White));
+        let sqr = Square::from_string("e4").unwrap();
+        assert!(!board.is_attacked(sqr, Color::White));
     }
 
     #[test]
     fn test_piece_between() {
         let board = Board::default();
-        let from = Position::new(0, 0).unwrap();
-        let to = Position::new(0, 6).unwrap();
+        let from = Square::new(0, 0).unwrap();
+        let to = Square::new(0, 6).unwrap();
         assert!(board.piece_between(&from, &to).unwrap());
     }
 }

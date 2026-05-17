@@ -1,5 +1,5 @@
 use crate::{
-    core::{Color, GameStatus, Move, Piece, Position, Variant, VariantBuilder, WinReason},
+    core::{Color, GameStatus, Move, Piece, Square, Variant, VariantBuilder, WinReason},
     errors::{FenError, MoveError, PGNError},
     logic::Game,
     parsing::{
@@ -11,7 +11,7 @@ use crate::{
 
 /// Three Check Chess [Variant]
 /// In Three Check Chess, the objective is to check the opponent's king three times.
-/// The first player to deliver three checks wins the game, regardless of the position on the board.
+/// The first player to deliver three checks wins the game, regardless of the Square on the board.
 /// This variant adds an extra layer of strategy, as players must balance between attacking and defending against checks.
 ///
 /// # Attributes
@@ -300,51 +300,51 @@ impl Variant for ThreeCheckChess {
         self.game.fen()
     }
 
-    /// Returns the piece at a given position
+    /// Returns the piece at a given Square
     ///
     /// # Arguments
-    /// * `pos` - The position to get the piece from
+    /// * `sqr` - The Square to get the piece from
     ///
     /// # Returns
-    /// The piece at the given position, if there is one
+    /// The piece at the given Square, if there is one
     ///
     /// # Examples
     /// ```
     /// # use chess_lab::core::Variant;
     /// # use chess_lab::variants::ThreeCheckChess;
-    /// use chess_lab::core::Position;
+    /// use chess_lab::core::Square;
     ///
     /// let game = ThreeCheckChess::default();
-    /// let piece = game.get_piece_at(Position::from_string("e2").unwrap());
+    /// let piece = game.get_piece_at(Square::from_string("e2").unwrap());
     /// assert!(piece.is_some());
     /// assert_eq!(piece.unwrap().to_string(), "P");
     /// ```
     ///
-    fn get_piece_at(&self, pos: Position) -> Option<Piece> {
-        self.game.get_piece_at(pos)
+    fn get_piece_at(&self, sqr: Square) -> Option<Piece> {
+        self.game.get_piece_at(sqr)
     }
 
-    /// Returns the legal moves of a piece at a given position
+    /// Returns the legal moves of a piece at a given Square
     ///
     /// # Arguments
-    /// * `pos` - The position to get the legal moves for
+    /// * `sqr` - The Square to get the legal moves for
     ///
     /// # Returns
-    /// A vector of legal moves for the piece at the given position
+    /// A vector of legal moves for the piece at the given Square
     ///
     /// # Examples
     /// ```
     /// # use chess_lab::core::Variant;
     /// # use chess_lab::variants::ThreeCheckChess;
-    /// use chess_lab::core::Position;
+    /// use chess_lab::core::Square;
     ///
     /// let game = ThreeCheckChess::default();
-    /// let legal_moves = game.get_legal_moves(Position::from_string("e2").unwrap());
+    /// let legal_moves = game.get_legal_moves(Square::from_string("e2").unwrap());
     /// assert!(legal_moves.iter().any(|m| m.to_string() == "e4"));
     /// ```
     ///
-    fn get_legal_moves(&self, pos: Position) -> Vec<Move> {
-        self.game.get_legal_moves(pos)
+    fn get_legal_moves(&self, sqr: Square) -> Vec<Move> {
+        self.game.get_legal_moves(sqr)
     }
 
     /// Saves the game to a file
@@ -565,7 +565,7 @@ impl Variant for ThreeCheckChess {
     /// assert_eq!(en_passant, None);
     /// ```
     ///
-    fn get_en_passant(&self) -> Option<Position> {
+    fn get_en_passant(&self) -> Option<Square> {
         self.game.en_passant
     }
 
@@ -647,20 +647,17 @@ mod tests {
 
     #[test]
     fn test_from_pgn() {
-        let pgn = "[Event \"Three-check\"]\n[Variant \"Three-check\"]\n\n1. e4 e5 2. Nf3 Nc6 3. Bb5 a6";
+        let pgn =
+            "[Event \"Three-check\"]\n[Variant \"Three-check\"]\n\n1. e4 e5 2. Nf3 Nc6 3. Bb5 a6";
         let variant = ThreeCheckChess::from_pgn(pgn).unwrap();
-        assert!(variant
-            .pgn()
-            .contains("1. e4 e5 2. Nf3 Nc6 3. Bb5 a6"));
+        assert!(variant.pgn().contains("1. e4 e5 2. Nf3 Nc6 3. Bb5 a6"));
     }
 
     #[test]
     fn test_load() {
         let path = "data/three_check/ex1.pgn";
         let variant = ThreeCheckChess::load(path).unwrap();
-        assert!(variant
-            .pgn()
-            .contains("1. e4 e5 2. Nf3 Nc6 3. Bb5 a6"));
+        assert!(variant.pgn().contains("1. e4 e5 2. Nf3 Nc6 3. Bb5 a6"));
     }
 
     #[test]
@@ -684,7 +681,7 @@ mod tests {
     #[test]
     fn test_get_piece_at() {
         let variant = ThreeCheckChess::default();
-        let piece = variant.get_piece_at(Position::from_string("e2").unwrap());
+        let piece = variant.get_piece_at(Square::from_string("e2").unwrap());
         assert!(piece.is_some());
         assert_eq!(piece.unwrap().to_string(), "P");
     }
@@ -692,7 +689,7 @@ mod tests {
     #[test]
     fn test_get_legal_moves() {
         let variant = ThreeCheckChess::default();
-        let legal_moves = variant.get_legal_moves(Position::from_string("e2").unwrap());
+        let legal_moves = variant.get_legal_moves(Square::from_string("e2").unwrap());
         assert!(legal_moves.iter().any(|m| m.to_string() == "e4"));
         assert!(legal_moves.iter().any(|m| m.to_string() == "e3"));
     }
@@ -748,7 +745,10 @@ mod tests {
         let mut variant = ThreeCheckChess::default();
 
         variant.draw();
-        assert_eq!(variant.get_status(), GameStatus::Draw(DrawReason::Agreement));
+        assert_eq!(
+            variant.get_status(),
+            GameStatus::Draw(DrawReason::Agreement)
+        );
     }
 
     #[test]
@@ -792,8 +792,9 @@ mod tests {
         let castling_rights = variant.get_castling_rights();
         assert_eq!(castling_rights, "KQkq");
 
-        variant = ThreeCheckChess::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 1")
-            .unwrap();
+        variant =
+            ThreeCheckChess::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 1")
+                .unwrap();
         let castling_rights = variant.get_castling_rights();
         assert_eq!(castling_rights, "-");
     }
@@ -809,7 +810,7 @@ mod tests {
         variant.move_piece("f5").unwrap();
         assert_eq!(
             variant.get_en_passant().unwrap(),
-            Position::new(5, 5).unwrap()
+            Square::new(5, 5).unwrap()
         );
     }
 

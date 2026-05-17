@@ -4,7 +4,7 @@ use crate::{
     logic::Game,
 };
 
-use super::{Color, GameStatus, Position};
+use super::{Color, GameStatus, Square};
 
 /// A trait for a chess variant.
 ///
@@ -45,25 +45,25 @@ pub trait Variant {
     ///
     fn fen(&self) -> String;
 
-    /// Returns the piece at a given position.
+    /// Returns the piece at a given square.
     ///
     /// # Arguments
-    /// * `pos` - The position to get the piece from.
+    /// * `sqr` - The square to get the piece from.
     ///
     /// # Returns
-    /// The piece at the given position, if there is one.
+    /// The piece at the given square, if there is one.
     ///
-    fn get_piece_at(&self, pos: Position) -> Option<Piece>;
+    fn get_piece_at(&self, sqr: Square) -> Option<Piece>;
 
-    /// Returns the legal moves for a given position.
+    /// Returns the legal moves for a given square.
     ///
     /// # Arguments
-    /// * `pos` - The position to get the legal moves for.
+    /// * `sqr` - The square to get the legal moves for.
     ///
     /// # Returns
-    /// A vector of legal moves for the given position.
+    /// A vector of legal moves for the given square.
     ///
-    fn get_legal_moves(&self, pos: Position) -> Vec<Move>;
+    fn get_legal_moves(&self, sqr: Square) -> Vec<Move>;
 
     /// Saves the game to a file.
     ///
@@ -143,7 +143,7 @@ pub trait Variant {
     /// # Returns
     /// The en passant square of the game.
     ///
-    fn get_en_passant(&self) -> Option<Position>;
+    fn get_en_passant(&self) -> Option<Square>;
 
     /// Returns the starting FEN of the game.
     ///

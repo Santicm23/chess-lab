@@ -5,7 +5,7 @@ use regex::Regex;
 use crate::{
     core::{
         piece_movement, CastleType, Color, DrawReason, GameStatus, Move, MoveType, PGNTree, Piece,
-        PieceType, Position, WinReason,
+        PieceType, Square, WinReason,
     },
     errors::{FenError, MoveError},
     parsing::fen::parse_fen,
@@ -38,7 +38,7 @@ pub struct Game {
     /// Fullmove number (starts at 1).
     pub fullmove_number: u32,
     /// En passant target square, if any.
-    pub en_passant: Option<Position>,
+    pub en_passant: Option<Square>,
     /// Castling rights bitmask (KQkq).
     pub castling_rights: u8,
     /// Starting FEN used to initialize the game.
@@ -178,7 +178,7 @@ impl Game {
             return Ok(self.status);
         }
 
-        let (piece_type, start_pos_info, end_pos, move_type) = self.parse_move(move_str)?;
+        let (piece_type, start_sqr_info, end_sqr, move_type) = self.parse_move(move_str)?;
         let color = if self.is_white_turn {
             Color::White
         } else {
@@ -186,34 +186,34 @@ impl Game {
         };
 
         let ambiguity =
-            self.move_ambiguity(piece_type, color, start_pos_info, &end_pos, &move_type);
+            self.move_ambiguity(piece_type, color, start_sqr_info, &end_sqr, &move_type);
 
-        let positions = self.find_pieces(piece_type, color, start_pos_info, &end_pos, &move_type);
+        let sqrs = self.find_pieces(piece_type, color, start_sqr_info, &end_sqr, &move_type);
 
-        let start_pos = match positions.len() {
+        let start_sqr = match sqrs.len() {
             0 => return Err(MoveError::Illegal(move_str.to_string())),
-            1 => positions[0],
+            1 => sqrs[0],
             _ => {
                 return Err(MoveError::Ambiguous(move_str.to_string()));
             }
         };
 
-        let mut rook_start: Option<Position> = None;
+        let mut rook_start: Option<Square> = None;
         let mut captured_piece: Option<PieceType> =
-            self.board.get_piece(&end_pos).map(|p| p.piece_type);
+            self.board.get_piece(&end_sqr).map(|p| p.piece_type);
 
-        match self.board.move_piece(&start_pos, &end_pos) {
+        match self.board.move_piece(&start_sqr, &end_sqr) {
             Ok(_) => {
                 match &move_type {
                     MoveType::Castle { side } => {
                         let rook_end = match side {
-                            CastleType::KingSide => Position {
+                            CastleType::KingSide => Square {
                                 file: 5,
-                                rank: start_pos.rank,
+                                rank: start_sqr.rank,
                             },
-                            CastleType::QueenSide => Position {
+                            CastleType::QueenSide => Square {
                                 file: 3,
-                                rank: start_pos.rank,
+                                rank: start_sqr.rank,
                             },
                         };
 
@@ -222,14 +222,14 @@ impl Game {
                         for rook in rooks {
                             match side {
                                 CastleType::KingSide => {
-                                    if rook.file > start_pos.file && rook.rank == start_pos.rank {
+                                    if rook.file > start_sqr.file && rook.rank == start_sqr.rank {
                                         rook_start = Some(rook);
                                         self.board.move_piece(&rook, &rook_end).unwrap();
                                         break;
                                     }
                                 }
                                 CastleType::QueenSide => {
-                                    if rook.file < start_pos.file && rook.rank == start_pos.rank {
+                                    if rook.file < start_sqr.file && rook.rank == start_sqr.rank {
                                         rook_start = Some(rook);
                                         self.board.move_piece(&rook, &rook_end).unwrap();
                                         break;
@@ -239,20 +239,20 @@ impl Game {
                         }
                     }
                     MoveType::EnPassant => {
-                        let captured_pos = Position {
-                            file: end_pos.file,
-                            rank: start_pos.rank,
+                        let captured_sqr = Square {
+                            file: end_sqr.file,
+                            rank: start_sqr.rank,
                         };
                         captured_piece =
-                            Some(self.board.delete_piece(&captured_pos).unwrap().piece_type);
+                            Some(self.board.delete_piece(&captured_sqr).unwrap().piece_type);
                     }
                     MoveType::Normal {
                         capture: _,
                         promotion: Some(piece_type),
                     } => {
-                        self.board.delete_piece(&end_pos).unwrap();
+                        self.board.delete_piece(&end_sqr).unwrap();
                         self.board
-                            .set_piece(Piece::new(color, piece_type.to_owned()), &end_pos)
+                            .set_piece(Piece::new(color, piece_type.to_owned()), &end_sqr)
                             .unwrap();
                     }
                     _ => {}
@@ -261,8 +261,8 @@ impl Game {
                 self.update_rules(
                     Move::new(
                         Piece::new(color, piece_type),
-                        start_pos,
-                        end_pos,
+                        start_sqr,
+                        end_sqr,
                         move_type,
                         captured_piece,
                         rook_start,
@@ -319,7 +319,7 @@ impl Game {
             &self
                 .en_passant
                 .as_ref()
-                .map_or(String::from("-"), |pos| pos.to_string()),
+                .map_or(String::from("-"), |sqr| sqr.to_string()),
         );
         fen.push(' ');
         fen.push_str(&self.halfmove_clock.to_string());
@@ -372,25 +372,25 @@ impl Game {
                 }
             }
             MoveType::EnPassant => {
-                let captured_pos = Position {
+                let captured_sqr = Square {
                     file: mov.to.file,
                     rank: mov.from.rank,
                 };
                 self.board
                     .set_piece(
                         Piece::new(mov.piece.color.opposite(), mov.captured_piece.unwrap()),
-                        &captured_pos,
+                        &captured_sqr,
                     )
                     .unwrap();
             }
             MoveType::Castle { side } => {
                 let rook_from = mov.rook_from.unwrap();
                 let rook_to = match side {
-                    CastleType::KingSide => Position {
+                    CastleType::KingSide => Square {
                         file: 5,
                         rank: mov.to.rank,
                     },
-                    CastleType::QueenSide => Position {
+                    CastleType::QueenSide => Square {
                         file: 3,
                         rank: mov.to.rank,
                     },
@@ -492,26 +492,26 @@ impl Game {
         self.history.get_move()
     }
 
-    /// Returns the piece at a given position
+    /// Returns the piece at a given square
     ///
     /// # Arguments
-    /// * `pos`: The position to get the piece from
+    /// * `sqr`: The square to get the piece from
     ///
     /// # Returns
-    /// An `Option<Piece>` containing the piece at the given position, or `None` if the position is empty
+    /// An `Option<Piece>` containing the piece at the given square, or `None` if the square is empty
     ///
     /// # Example
     /// ```
-    /// use chess_lab::core::{PieceType, Position};
+    /// use chess_lab::core::{PieceType, Square};
     /// use chess_lab::logic::Game;
     ///
     /// let game = Game::default();
-    /// let piece = game.get_piece_at(Position::from_string("e2").unwrap()).unwrap();
+    /// let piece = game.get_piece_at(Square::from_string("e2").unwrap()).unwrap();
     /// assert_eq!(piece.piece_type, PieceType::Pawn);
     /// ```
     ///
-    pub fn get_piece_at(&self, pos: Position) -> Option<Piece> {
-        self.board.get_piece(&pos)
+    pub fn get_piece_at(&self, sqr: Square) -> Option<Piece> {
+        self.board.get_piece(&sqr)
     }
 
     /// Undoes all moves until the starting position
@@ -575,19 +575,32 @@ impl Game {
         self.history.pgn()
     }
 
-    /// Parse a move string and return the start and end positions
+    /// Parse a move string and return the start and end sqrs
     ///
     /// # Arguments
     /// * `move_str`: A string slice that holds the move to be parsed
     ///
     /// # Returns
-    /// * `Ok((PieceType, (Option<u8>, Option<u8>), Position, MoveType))`: A tuple containing the piece type, the start position, the end position and the move type
+    /// * `Ok((PieceType, (Option<u8>, Option<u8>), Square, MoveType))`: A tuple containing the piece type, the start square, the end square and the move type
     /// * `Err(MoveError)`: An error if the move is invalid
+    ///
+    /// # Example
+    /// ```
+    /// use chess_lab::logic::Game;
+    ///
+    /// let game = Game::default();
+    ///
+    /// let parsed_move = game.parse_move("e4").unwrap();
+    /// assert_eq!(parsed_move.0, chess_lab::core::PieceType::Pawn);
+    /// assert_eq!(parsed_move.1, (None, None));
+    /// assert_eq!(parsed_move.2.to_string(), "e4");
+    /// assert_eq!(parsed_move.3, chess_lab::core::MoveType::Normal { capture: false, promotion: None });
+    /// ```
     ///
     pub fn parse_move(
         &self,
         move_str: &str,
-    ) -> Result<(PieceType, (Option<u8>, Option<u8>), Position, MoveType), MoveError> {
+    ) -> Result<(PieceType, (Option<u8>, Option<u8>), Square, MoveType), MoveError> {
         let mut move_str = move_str.to_string();
         let re =
             Regex::new(r"^([PNBRQK]?[a-h]?[1-8]?x?[a-h][1-8](=[NBRQ])?|O(-O){1,2})[+#]?").unwrap();
@@ -601,7 +614,7 @@ impl Game {
 
         if move_str.starts_with('O') {
             let castle_side;
-            let end_pos;
+            let end_sqr;
             if move_str == "O-O" {
                 if (self.castling_rights & 0b1000 == 0 || !self.is_white_turn)
                     && (self.castling_rights & 0b0010 == 0 || self.is_white_turn)
@@ -609,10 +622,10 @@ impl Game {
                     return Err(MoveError::Invalid(move_str));
                 }
                 castle_side = CastleType::KingSide;
-                end_pos = if self.is_white_turn {
-                    Position::from_string("g1").unwrap()
+                end_sqr = if self.is_white_turn {
+                    Square::from_string("g1").unwrap()
                 } else {
-                    Position::from_string("g8").unwrap()
+                    Square::from_string("g8").unwrap()
                 };
             } else if move_str == "O-O-O" {
                 if (self.castling_rights & 0b0100 == 0 || !self.is_white_turn)
@@ -622,10 +635,10 @@ impl Game {
                 }
                 castle_side = CastleType::QueenSide;
 
-                end_pos = if self.is_white_turn {
-                    Position::from_string("c1").unwrap()
+                end_sqr = if self.is_white_turn {
+                    Square::from_string("c1").unwrap()
                 } else {
-                    Position::from_string("c8").unwrap()
+                    Square::from_string("c8").unwrap()
                 };
             } else {
                 unreachable!()
@@ -633,15 +646,15 @@ impl Game {
             return Ok((
                 PieceType::King,
                 (None, None),
-                end_pos,
+                end_sqr,
                 MoveType::Castle { side: castle_side },
             ));
         } else {
             let start_col;
             let start_rank;
-            let end_pos;
+            let end_sqr;
             let promotion;
-            let end_pos_index;
+            let end_sqr_index;
             let piece = match move_str.chars().next().unwrap() {
                 'N' => PieceType::Knight,
                 'B' => PieceType::Bishop,
@@ -661,24 +674,24 @@ impl Game {
                 }
 
                 promotion = Some(PieceType::from_char(move_str.chars().last().unwrap()).unwrap());
-                end_pos = Position::from_string(&move_str[move_str.len() - 4..move_str.len() - 2])
-                    .unwrap();
-                end_pos_index = move_str.len() - 4;
+                end_sqr =
+                    Square::from_string(&move_str[move_str.len() - 4..move_str.len() - 2]).unwrap();
+                end_sqr_index = move_str.len() - 4;
 
-                if end_pos.rank != 0 && end_pos.rank != 7 {
+                if end_sqr.rank != 0 && end_sqr.rank != 7 {
                     return Err(MoveError::Invalid(move_str));
                 }
             } else {
-                end_pos = Position::from_string(&move_str[move_str.len() - 2..]).unwrap();
-                end_pos_index = move_str.len() - 2;
+                end_sqr = Square::from_string(&move_str[move_str.len() - 2..]).unwrap();
+                end_sqr_index = move_str.len() - 2;
                 promotion = None;
             }
 
             let capture = move_str.contains("x")
-                || self.board.is_ocupied(&end_pos)
-                || self.en_passant.map_or_else(|| false, |pos| pos == end_pos);
+                || self.board.is_ocupied(&end_sqr)
+                || self.en_passant.map_or_else(|| false, |sqr| sqr == end_sqr);
 
-            if end_pos_index > 1 {
+            if end_sqr_index > 1 {
                 if "abcdefgh".contains(move_str.chars().nth(1).unwrap()) {
                     start_col = Some(move_str.chars().nth(1).unwrap() as u8 - 'a' as u8);
                     if "12345678".contains(move_str.chars().nth(2).unwrap()) {
@@ -700,12 +713,12 @@ impl Game {
 
             if capture
                 && piece == PieceType::Pawn
-                && self.en_passant.map_or_else(|| false, |pos| pos == end_pos)
+                && self.en_passant.map_or_else(|| false, |sqr| sqr == end_sqr)
             {
                 return Ok((
                     PieceType::Pawn,
                     (start_col, start_rank),
-                    end_pos,
+                    end_sqr,
                     MoveType::EnPassant,
                 ));
             }
@@ -713,7 +726,7 @@ impl Game {
             return Ok((
                 piece,
                 (start_col, start_rank),
-                end_pos,
+                end_sqr,
                 MoveType::Normal { capture, promotion },
             ));
         }
@@ -723,8 +736,8 @@ impl Game {
     ///
     /// # Arguments
     /// * `piece`: The piece being moved
-    /// * `start_pos`: The starting position of the piece
-    /// * `end_pos`: The ending position of the piece
+    /// * `start_square`: The starting square
+    /// * `end_square`: The ending square
     /// * `move_type`: The type of move being made
     ///
     /// # Returns
@@ -733,12 +746,12 @@ impl Game {
     pub fn is_legal(
         &self,
         piece: &Piece,
-        start_pos: &Position,
-        end_pos: &Position,
+        start_sqr: &Square,
+        end_sqr: &Square,
         move_type: &MoveType,
     ) -> bool {
         if piece.piece_type != PieceType::Knight && piece.piece_type != PieceType::King {
-            match self.board.piece_between(start_pos, end_pos) {
+            match self.board.piece_between(start_sqr, end_sqr) {
                 Ok(true) | Err(_) => return false,
                 Ok(false) => (),
             }
@@ -748,9 +761,9 @@ impl Game {
         }
 
         if let MoveType::Castle { side } = move_type {
-            return self.is_castle_legal(piece, start_pos, end_pos, side);
+            return self.is_castle_legal(piece, start_sqr, end_sqr, side);
         }
-        if !piece_movement(piece, start_pos, end_pos) {
+        if !piece_movement(piece, start_sqr, end_sqr) {
             return false;
         }
         if let MoveType::Normal {
@@ -758,9 +771,9 @@ impl Game {
             promotion: _,
         } = move_type
         {
-            if !self.board.is_ocupied(end_pos)
-                || self.board.get_piece(end_pos).unwrap().color == piece.color
-                || (piece.piece_type == PieceType::Pawn && start_pos.file == end_pos.file)
+            if !self.board.is_ocupied(end_sqr)
+                || self.board.get_piece(end_sqr).unwrap().color == piece.color
+                || (piece.piece_type == PieceType::Pawn && start_sqr.file == end_sqr.file)
             {
                 return false;
             }
@@ -770,7 +783,7 @@ impl Game {
             promotion: _,
         } = move_type
         {
-            if self.board.is_ocupied(end_pos) {
+            if self.board.is_ocupied(end_sqr) {
                 return false;
             }
         }
@@ -781,7 +794,7 @@ impl Game {
                     capture: false,
                     promotion: _
                 }
-            ) && (self.board.get_piece(end_pos).is_some() || start_pos.file != end_pos.file)
+            ) && (self.board.get_piece(end_sqr).is_some() || start_sqr.file != end_sqr.file)
             {
                 return false;
             }
@@ -791,8 +804,8 @@ impl Game {
                 promotion: Some(_),
             } = move_type
             {
-                if (piece.color == Color::White && end_pos.rank != 7)
-                    || (piece.color == Color::Black && end_pos.rank != 0)
+                if (piece.color == Color::White && end_sqr.rank != 7)
+                    || (piece.color == Color::Black && end_sqr.rank != 0)
                 {
                     return false;
                 }
@@ -802,17 +815,17 @@ impl Game {
                 promotion: None,
             } = move_type
             {
-                if (piece.color == Color::White && end_pos.rank == 7)
-                    || (piece.color == Color::Black && end_pos.rank == 0)
+                if (piece.color == Color::White && end_sqr.rank == 7)
+                    || (piece.color == Color::Black && end_sqr.rank == 0)
                 {
                     return false;
                 }
             }
 
             if let MoveType::EnPassant = move_type {
-                if self.en_passant.map_or_else(|| false, |pos| pos != *end_pos)
-                    || ((piece.color == Color::White && end_pos.rank != 5)
-                        || (piece.color == Color::Black && end_pos.rank != 2))
+                if self.en_passant.map_or_else(|| false, |sqr| sqr != *end_sqr)
+                    || ((piece.color == Color::White && end_sqr.rank != 5)
+                        || (piece.color == Color::Black && end_sqr.rank != 2))
                 {
                     return false;
                 }
@@ -824,39 +837,39 @@ impl Game {
         }
 
         let mut board = self.board.clone();
-        board.move_piece(start_pos, end_pos).unwrap();
+        board.move_piece(start_sqr, end_sqr).unwrap();
 
         let king = board.find(PieceType::King, piece.color)[0];
 
         return !board.is_attacked(king, piece.color.opposite());
     }
 
-    /// Returns all the legal moves for a piece at a given position
+    /// Returns all the legal moves for a piece at a given square
     ///
     /// # Arguments
-    /// * `pos`: The position of the piece to get the legal moves for
+    /// * `sqr`: The square of the piece to get the legal moves for
     ///
     /// # Returns
-    /// A vector containing all the legal moves for the piece at the given position
+    /// A vector containing all the legal moves for the piece at the given square
     ///
     /// # Example
     /// ```
-    /// use chess_lab::core::Position;
+    /// use chess_lab::core::Square;
     /// use chess_lab::logic::Game;
     ///
     /// let game = Game::default();
-    /// let legal_moves = game.get_legal_moves(Position::from_string("e2").unwrap());
+    /// let legal_moves = game.get_legal_moves(Square::from_string("e2").unwrap());
     /// assert_eq!(legal_moves.len(), 2);
     /// assert_eq!(legal_moves[0].to_string(), "e3");
     /// assert_eq!(legal_moves[1].to_string(), "e4");
     /// ```
     ///
-    pub fn get_legal_moves(&self, pos: Position) -> Vec<Move> {
-        if self.board.get_piece(&pos).is_none() {
+    pub fn get_legal_moves(&self, sqr: Square) -> Vec<Move> {
+        if self.board.get_piece(&sqr).is_none() {
             return vec![];
         }
 
-        let piece = self.board.get_piece(&pos).unwrap();
+        let piece = self.board.get_piece(&sqr).unwrap();
         if piece.color
             != if self.is_white_turn {
                 Color::White
@@ -871,11 +884,11 @@ impl Game {
 
         for file in 0..8 {
             for rank in 0..8 {
-                let end_pos = Position { file, rank };
+                let end_sqr = Square { file, rank };
                 let move_type = MoveType::Normal {
                     capture: self
                         .board
-                        .get_piece(&end_pos)
+                        .get_piece(&end_sqr)
                         .map_or_else(|| false, |p| p.color != piece.color),
                     promotion: None,
                 };
@@ -883,19 +896,19 @@ impl Game {
                 let promotion_move_type = MoveType::Normal {
                     capture: self
                         .board
-                        .get_piece(&end_pos)
+                        .get_piece(&end_sqr)
                         .map_or_else(|| false, |p| p.color != piece.color),
                     promotion: Some(PieceType::Queen),
                 };
 
-                if self.is_legal(&piece, &pos, &end_pos, &move_type) {
+                if self.is_legal(&piece, &sqr, &end_sqr, &move_type) {
                     moves.push(
                         Move::new(
                             piece.clone(),
-                            pos,
-                            end_pos,
+                            sqr,
+                            end_sqr,
                             move_type,
-                            self.board.get_piece(&end_pos).map(|p| p.piece_type),
+                            self.board.get_piece(&end_sqr).map(|p| p.piece_type),
                             None,
                             (false, false),
                             false,
@@ -903,14 +916,14 @@ impl Game {
                         )
                         .unwrap(),
                     );
-                } else if self.is_legal(&piece, &pos, &end_pos, &en_passant_move_type) {
+                } else if self.is_legal(&piece, &sqr, &end_sqr, &en_passant_move_type) {
                     moves.push(
                         Move::new(
                             piece.clone(),
-                            pos,
-                            end_pos,
+                            sqr,
+                            end_sqr,
                             en_passant_move_type,
-                            self.board.get_piece(&end_pos).map(|p| p.piece_type),
+                            self.board.get_piece(&end_sqr).map(|p| p.piece_type),
                             None,
                             (false, false),
                             false,
@@ -918,14 +931,14 @@ impl Game {
                         )
                         .unwrap(),
                     );
-                } else if self.is_legal(&piece, &pos, &end_pos, &promotion_move_type) {
+                } else if self.is_legal(&piece, &sqr, &end_sqr, &promotion_move_type) {
                     moves.push(
                         Move::new(
                             piece.clone(),
-                            pos,
-                            end_pos,
+                            sqr,
+                            end_sqr,
                             promotion_move_type,
-                            self.board.get_piece(&end_pos).map(|p| p.piece_type),
+                            self.board.get_piece(&end_sqr).map(|p| p.piece_type),
                             None,
                             (false, false),
                             false,
@@ -936,8 +949,8 @@ impl Game {
                 } else if piece.piece_type == PieceType::King {
                     if self.is_legal(
                         &piece,
-                        &pos,
-                        &end_pos,
+                        &sqr,
+                        &end_sqr,
                         &MoveType::Castle {
                             side: CastleType::KingSide,
                         },
@@ -945,13 +958,13 @@ impl Game {
                         moves.push(
                             Move::new(
                                 piece.clone(),
-                                pos,
-                                end_pos,
+                                sqr,
+                                end_sqr,
                                 MoveType::Castle {
                                     side: CastleType::KingSide,
                                 },
-                                self.board.get_piece(&end_pos).map(|p| p.piece_type),
-                                self.get_castle_rook_pos(CastleType::KingSide),
+                                self.board.get_piece(&end_sqr).map(|p| p.piece_type),
+                                self.get_castle_rook_sqr(CastleType::KingSide),
                                 (false, false),
                                 false,
                                 false,
@@ -960,8 +973,8 @@ impl Game {
                         );
                     } else if self.is_legal(
                         &piece,
-                        &pos,
-                        &end_pos,
+                        &sqr,
+                        &end_sqr,
                         &MoveType::Castle {
                             side: CastleType::QueenSide,
                         },
@@ -969,13 +982,13 @@ impl Game {
                         moves.push(
                             Move::new(
                                 piece.clone(),
-                                pos,
-                                end_pos,
+                                sqr,
+                                end_sqr,
                                 MoveType::Castle {
                                     side: CastleType::QueenSide,
                                 },
-                                self.board.get_piece(&end_pos).map(|p| p.piece_type),
-                                self.get_castle_rook_pos(CastleType::QueenSide),
+                                self.board.get_piece(&end_sqr).map(|p| p.piece_type),
+                                self.get_castle_rook_sqr(CastleType::QueenSide),
                                 (false, false),
                                 false,
                                 false,
@@ -990,13 +1003,13 @@ impl Game {
         moves
     }
 
-    /// Returns the position of the rook involved in a castle move
+    /// Returns the square of the rook involved in a castle move
     ///
     /// # Arguments
     /// * `side`: The side of the castle move
     ///
     /// # Returns
-    /// An `Option<Position>` containing the position of the rook involved in the castle move
+    /// An `Option<Square>` containing the square of the rook involved in the castle move
     ///
     /// # Example
     /// ```
@@ -1004,11 +1017,11 @@ impl Game {
     /// use chess_lab::core::CastleType;
     ///
     /// let game = Game::default();
-    /// let rook_pos = game.get_castle_rook_pos(CastleType::KingSide).unwrap();
-    /// assert_eq!(rook_pos.to_string(), "h1");
+    /// let rook_sqr = game.get_castle_rook_sqr(CastleType::KingSide).unwrap();
+    /// assert_eq!(rook_sqr.to_string(), "h1");
     /// ```
     ///
-    pub fn get_castle_rook_pos(&self, side: CastleType) -> Option<Position> {
+    pub fn get_castle_rook_sqr(&self, side: CastleType) -> Option<Square> {
         match side {
             CastleType::KingSide => {
                 if self.is_white_turn && self.castling_rights & 0b1000 == 0 {
@@ -1038,18 +1051,18 @@ impl Game {
             CastleType::KingSide => 1,
             CastleType::QueenSide => -1,
         };
-        let king_pos = self.board.find(PieceType::King, color)[0];
+        let king_sqr = self.board.find(PieceType::King, color)[0];
 
-        let mut file = king_pos.file as i8 + step;
+        let mut file = king_sqr.file as i8 + step;
         while file < 8 && file >= 0 {
-            if let Some(piece) = self.board.get_piece(&Position {
+            if let Some(piece) = self.board.get_piece(&Square {
                 file: file as u8,
-                rank: king_pos.rank,
+                rank: king_sqr.rank,
             }) {
                 if piece.piece_type == PieceType::Rook && piece.color == color {
-                    return Some(Position {
+                    return Some(Square {
                         file: file as u8,
-                        rank: king_pos.rank,
+                        rank: king_sqr.rank,
                     });
                 }
             }
@@ -1059,7 +1072,7 @@ impl Game {
                 file -= -step;
             }
         }
-        // This should never happen since the castle move should be illegal if there is no rook in the correct position
+        // This should never happen since the castle move should be illegal if there is no rook in the correct square
         unreachable!()
     }
 
@@ -1186,8 +1199,8 @@ impl Game {
         }
 
         let pieces = [white_pieces, black_pieces].concat();
-        for pos in pieces {
-            let piece = self.board.get_piece(&pos).unwrap();
+        for sqr in pieces {
+            let piece = self.board.get_piece(&sqr).unwrap();
             match piece.piece_type {
                 PieceType::Pawn | PieceType::Rook | PieceType::Queen => return false,
                 _ => {}
@@ -1272,7 +1285,7 @@ impl Game {
     /// Parses a move string
     ///
     /// # Arguments
-    /// * `mov`: A move that holds the piece type, start and end position, the move type, the captured piece and the rook start position
+    /// * `mov`: A move that holds the piece type, start and end square, the move type, the captured piece and the rook start square
     ///
     fn update_rules(&mut self, mut mov: Move) {
         self.is_white_turn = !self.is_white_turn;
@@ -1344,19 +1357,19 @@ impl Game {
             self.halfmove_clock += 1;
         }
         if mov.piece.piece_type == PieceType::Pawn && (&mov.from - &mov.to).1.abs() == 2 {
-            let positions = self.board.find(PieceType::Pawn, mov.piece.color.opposite());
-            let en_passant_pos = Position {
+            let sqrs = self.board.find(PieceType::Pawn, mov.piece.color.opposite());
+            let en_passant_sqr = Square {
                 file: mov.from.file,
                 rank: (mov.from.rank + mov.to.rank) / 2,
             };
 
-            let can_en_passant = positions.iter().any(|pos| {
-                let piece = self.board.get_piece(&pos).unwrap();
-                piece_movement(&piece, &pos, &en_passant_pos)
+            let can_en_passant = sqrs.iter().any(|sqr| {
+                let piece = self.board.get_piece(&sqr).unwrap();
+                piece_movement(&piece, &sqr, &en_passant_sqr)
             });
 
             if can_en_passant {
-                self.en_passant = Some(en_passant_pos);
+                self.en_passant = Some(en_passant_sqr);
             } else {
                 self.en_passant = None;
             }
@@ -1393,27 +1406,27 @@ impl Game {
         self.history.game_over(self.status);
     }
 
-    /// Finds the position of the pieces that matches the given criteria to move
+    /// Finds the squares of the pieces that matches the given criteria to move
     ///
     /// # Arguments
     /// * `piece`: The type of piece to find
     /// * `color`: The color of the piece to find
-    /// * `start_pos`: The criteria for the starting position of the piece to find
-    /// * `end_pos`: The ending position of the piece to find
+    /// * `start_sqr`: The criteria for the starting square of the piece to find
+    /// * `end_sqr`: The ending square of the piece to find
     /// * `move_type`: The type of move to find
     ///
     /// # Returns
-    /// The position of the pieces on the board
+    /// The square of the pieces on the board
     ///
     fn find_pieces(
         &self,
         piece: PieceType,
         color: Color,
-        start_pos: (Option<u8>, Option<u8>),
-        end_pos: &Position,
+        start_sqr: (Option<u8>, Option<u8>),
+        end_sqr: &Square,
         move_type: &MoveType,
-    ) -> Vec<Position> {
-        let mut positions = match move_type {
+    ) -> Vec<Square> {
+        let mut sqrs = match move_type {
             MoveType::Normal {
                 capture: _,
                 promotion: _,
@@ -1422,16 +1435,16 @@ impl Game {
             MoveType::Castle { side: _ } => self.board.find(PieceType::King, color),
         };
 
-        if start_pos != (None, None) {
-            positions = positions
+        if start_sqr != (None, None) {
+            sqrs = sqrs
                 .iter()
-                .filter(|pos| -> bool {
-                    let has_file = match start_pos {
-                        (Some(file), _) => pos.file == file,
+                .filter(|sqr| -> bool {
+                    let has_file = match start_sqr {
+                        (Some(file), _) => sqr.file == file,
                         _ => true,
                     };
-                    let has_rank = match start_pos {
-                        (_, Some(rank)) => pos.rank == rank,
+                    let has_rank = match start_sqr {
+                        (_, Some(rank)) => sqr.rank == rank,
                         _ => true,
                     };
                     has_file && has_rank
@@ -1440,22 +1453,22 @@ impl Game {
                 .collect();
         }
 
-        let mut valid_positions = Vec::new();
-        for pos in positions {
+        let mut valid_sqrs = Vec::new();
+        for sqr in sqrs {
             if self.is_legal(
                 &Piece {
                     color,
                     piece_type: piece,
                 },
-                &pos,
-                &end_pos,
+                &sqr,
+                &end_sqr,
                 &move_type,
             ) {
-                valid_positions.push(pos);
+                valid_sqrs.push(sqr);
             }
         }
 
-        return valid_positions;
+        return valid_sqrs;
     }
 
     /// Checks if the move representation has to contain the column or rank of the piece to move
@@ -1464,8 +1477,8 @@ impl Game {
     /// # Arguments
     /// * `piece`: The type of piece to move
     /// * `color`: The color of the piece to move
-    /// * `start_pos`: The starting position of the piece to move
-    /// * `end_pos`: The ending position of the piece to move
+    /// * `start_sqr`: The starting square of the piece to move
+    /// * `end_sqr`: The ending square of the piece to move
     /// * `move_type`: The type of move to make
     ///
     /// # Returns
@@ -1477,77 +1490,77 @@ impl Game {
         &self,
         piece: PieceType,
         color: Color,
-        start_pos: (Option<u8>, Option<u8>),
-        end_pos: &Position,
+        start_sqr: (Option<u8>, Option<u8>),
+        end_sqr: &Square,
         move_type: &MoveType,
     ) -> (bool, bool) {
-        match start_pos {
+        match start_sqr {
             (None, None) => (false, false),
             (Some(_), None) => {
-                let positions = self.board.find(piece, color);
-                let valid_positions = positions
+                let sqrs = self.board.find(piece, color);
+                let valid_sqrs = sqrs
                     .iter()
-                    .filter(|pos| {
+                    .filter(|sqr| {
                         self.is_legal(
                             &Piece {
                                 color,
                                 piece_type: piece,
                             },
-                            &pos,
-                            &end_pos,
+                            &sqr,
+                            &end_sqr,
                             &move_type,
                         )
                     })
                     .count();
-                (valid_positions > 1, false)
+                (valid_sqrs > 1, false)
             }
             (None, Some(_)) => {
-                let positions = self.board.find(piece, color);
-                let valid_positions = positions
+                let sqrs = self.board.find(piece, color);
+                let valid_sqrs = sqrs
                     .iter()
-                    .filter(|pos| {
+                    .filter(|sqr| {
                         self.is_legal(
                             &Piece {
                                 color,
                                 piece_type: piece,
                             },
-                            &pos,
-                            &end_pos,
+                            &sqr,
+                            &end_sqr,
                             &move_type,
                         )
                     })
                     .count();
-                (false, valid_positions > 1)
+                (false, valid_sqrs > 1)
             }
             (Some(file), Some(rank)) => {
-                let positions = self.board.find(piece, color);
-                let file_ambiguity = positions
+                let sqrs = self.board.find(piece, color);
+                let file_ambiguity = sqrs
                     .iter()
-                    .filter(|pos| pos.rank == rank)
-                    .filter(|pos| {
+                    .filter(|sqr| sqr.rank == rank)
+                    .filter(|sqr| {
                         self.is_legal(
                             &Piece {
                                 color,
                                 piece_type: piece,
                             },
-                            &pos,
-                            &end_pos,
+                            &sqr,
+                            &end_sqr,
                             &move_type,
                         )
                     })
                     .count()
                     > 1;
-                let rank_ambiguity = positions
+                let rank_ambiguity = sqrs
                     .iter()
-                    .filter(|pos| pos.file == file)
-                    .filter(|pos| {
+                    .filter(|sqr| sqr.file == file)
+                    .filter(|sqr| {
                         self.is_legal(
                             &Piece {
                                 color,
                                 piece_type: piece,
                             },
-                            &pos,
-                            &end_pos,
+                            &sqr,
+                            &end_sqr,
                             &move_type,
                         )
                     })
@@ -1562,8 +1575,8 @@ impl Game {
     ///
     /// # Arguments
     /// * `piece`: The king piece to castle
-    /// * `start_pos`: The starting position of the king piece
-    /// * `end_pos`: The ending position of the king piece
+    /// * `start_sqr`: The starting square of the king piece
+    /// * `end_sqr`: The ending square of the king piece
     /// * `side`: The side to castle
     ///
     /// # Returns
@@ -1572,17 +1585,17 @@ impl Game {
     fn is_castle_legal(
         &self,
         piece: &Piece,
-        start_pos: &Position,
-        end_pos: &Position,
+        start_sqr: &Square,
+        end_sqr: &Square,
         side: &CastleType,
     ) -> bool {
-        if piece.piece_type != PieceType::King || start_pos.rank != end_pos.rank {
+        if piece.piece_type != PieceType::King || start_sqr.rank != end_sqr.rank {
             return false;
         }
 
         match side {
             CastleType::KingSide => {
-                if end_pos.file != 6 {
+                if end_sqr.file != 6 {
                     return false;
                 }
                 if piece.color == Color::White && self.castling_rights & 0b1000 == 0 {
@@ -1592,7 +1605,7 @@ impl Game {
                 }
             }
             CastleType::QueenSide => {
-                if end_pos.file != 2 {
+                if end_sqr.file != 2 {
                     return false;
                 }
                 if piece.color == Color::White && self.castling_rights & 0b0100 == 0 {
@@ -1602,16 +1615,16 @@ impl Game {
                 }
             }
         }
-        let file_range = if end_pos.file < start_pos.file {
-            end_pos.file..=start_pos.file
+        let file_range = if end_sqr.file < start_sqr.file {
+            end_sqr.file..=start_sqr.file
         } else {
-            start_pos.file..=end_pos.file
+            start_sqr.file..=end_sqr.file
         };
         for file in file_range {
-            let new_pos = Position::new(file, start_pos.rank).unwrap();
-            if (&new_pos != start_pos && self.board.is_ocupied(&new_pos))
+            let new_sqr = Square::new(file, start_sqr.rank).unwrap();
+            if (&new_sqr != start_sqr && self.board.is_ocupied(&new_sqr))
                 || self.board.is_attacked(
-                    Position::new(file, start_pos.rank).unwrap(),
+                    Square::new(file, start_sqr.rank).unwrap(),
                     piece.color.opposite(),
                 )
             {
@@ -1633,18 +1646,18 @@ impl Game {
             Color::Black
         };
 
-        for piece_pos in self.board.find_all(color) {
-            let piece = self.board.get_piece(&piece_pos).unwrap();
+        for piece_sqr in self.board.find_all(color) {
+            let piece = self.board.get_piece(&piece_sqr).unwrap();
             for file in 0..8 {
                 for rank in 0..8 {
-                    let end_pos = Position::new(file, rank).unwrap();
+                    let end_sqr = Square::new(file, rank).unwrap();
 
                     let mut board = self.board.clone();
-                    if !board.can_move(&piece_pos, &end_pos).unwrap() {
+                    if !board.can_move(&piece_sqr, &end_sqr).unwrap() {
                         continue;
                     }
 
-                    board.move_piece(&piece_pos, &end_pos).unwrap();
+                    board.move_piece(&piece_sqr, &end_sqr).unwrap();
 
                     let king = board.find(PieceType::King, piece.color)[0];
                     if !board.is_attacked(king, piece.color.opposite()) {
@@ -1680,7 +1693,7 @@ impl fmt::Display for Game {
 #[cfg(test)]
 mod tests {
 
-    use crate::core::{Color, MoveType, PieceType, Position};
+    use crate::core::{Color, MoveType, PieceType, Square};
 
     use super::*;
 
@@ -1864,11 +1877,11 @@ mod tests {
         let white_king = Piece::new(Color::White, PieceType::King);
         let black_king = Piece::new(Color::Black, PieceType::King);
 
-        let white_start = Position::from_string("e1").unwrap();
-        let black_start = Position::from_string("e8").unwrap();
+        let white_start = Square::from_string("e1").unwrap();
+        let black_start = Square::from_string("e8").unwrap();
 
-        let white_end = Position::from_string("g1").unwrap();
-        let black_end = Position::from_string("g8").unwrap();
+        let white_end = Square::from_string("g1").unwrap();
+        let black_end = Square::from_string("g8").unwrap();
 
         assert!(!game.is_castle_legal(
             &white_king,
@@ -1891,11 +1904,11 @@ mod tests {
         let white_king = Piece::new(Color::White, PieceType::King);
         let black_king = Piece::new(Color::Black, PieceType::King);
 
-        let white_start = Position::from_string("e1").unwrap();
-        let black_start = Position::from_string("e8").unwrap();
+        let white_start = Square::from_string("e1").unwrap();
+        let black_start = Square::from_string("e8").unwrap();
 
-        let white_end = Position::from_string("c1").unwrap();
-        let black_end = Position::from_string("c8").unwrap();
+        let white_end = Square::from_string("c1").unwrap();
+        let black_end = Square::from_string("c8").unwrap();
 
         assert!(!game.is_castle_legal(
             &white_king,
@@ -1917,8 +1930,8 @@ mod tests {
 
         assert!(!game.is_legal(
             &Piece::new(Color::White, PieceType::Pawn),
-            &Position::from_string("e2").unwrap(),
-            &Position::from_string("e4").unwrap(),
+            &Square::from_string("e2").unwrap(),
+            &Square::from_string("e4").unwrap(),
             &MoveType::Normal {
                 capture: false,
                 promotion: Some(PieceType::Queen)
@@ -1931,8 +1944,8 @@ mod tests {
         let game = Game::default();
         assert!(!game.is_legal(
             &Piece::new(Color::White, PieceType::Knight),
-            &Position::from_string("e1").unwrap(),
-            &Position::from_string("e1").unwrap(),
+            &Square::from_string("e1").unwrap(),
+            &Square::from_string("e1").unwrap(),
             &MoveType::Castle {
                 side: CastleType::KingSide,
             },
@@ -2027,56 +2040,56 @@ mod tests {
     fn test_get_piece_at() {
         let game = Game::default();
         let piece = game
-            .get_piece_at(Position::from_string("e2").unwrap())
+            .get_piece_at(Square::from_string("e2").unwrap())
             .unwrap();
         assert_eq!(piece.piece_type, PieceType::Pawn);
         assert_eq!(piece.color, Color::White);
 
         assert!(game
-            .get_piece_at(Position::from_string("e4").unwrap())
+            .get_piece_at(Square::from_string("e4").unwrap())
             .is_none());
     }
 
     #[test]
     fn test_get_legal_moves() {
         let mut game = Game::default();
-        let legal_moves = game.get_legal_moves(Position::from_string("e2").unwrap());
+        let legal_moves = game.get_legal_moves(Square::from_string("e2").unwrap());
 
         assert_eq!(legal_moves.len(), 2);
         assert!(legal_moves
             .iter()
-            .any(|m| m.to == Position::from_string("e3").unwrap()));
+            .any(|m| m.to == Square::from_string("e3").unwrap()));
         assert!(legal_moves
             .iter()
-            .any(|m| m.to == Position::from_string("e4").unwrap()));
+            .any(|m| m.to == Square::from_string("e4").unwrap()));
 
-        let legal_moves = game.get_legal_moves(Position::from_string("e1").unwrap());
+        let legal_moves = game.get_legal_moves(Square::from_string("e1").unwrap());
         assert_eq!(legal_moves.len(), 0);
 
         game.move_piece("e4").unwrap();
 
-        let legal_moves = game.get_legal_moves(Position::from_string("e7").unwrap());
+        let legal_moves = game.get_legal_moves(Square::from_string("e7").unwrap());
 
         assert_eq!(legal_moves.len(), 2);
         assert!(legal_moves
             .iter()
-            .any(|m| m.to == Position::from_string("e6").unwrap()));
+            .any(|m| m.to == Square::from_string("e6").unwrap()));
         assert!(legal_moves
             .iter()
-            .any(|m| m.to == Position::from_string("e5").unwrap()));
+            .any(|m| m.to == Square::from_string("e5").unwrap()));
     }
 
     #[test]
     fn test_get_legal_moves_no_piece() {
         let game = Game::default();
-        let legal_moves = game.get_legal_moves(Position::from_string("e4").unwrap());
+        let legal_moves = game.get_legal_moves(Square::from_string("e4").unwrap());
         assert_eq!(legal_moves.len(), 0);
     }
 
     #[test]
     fn test_get_legal_moves_oposite_color() {
         let game = Game::default();
-        let legal_moves = game.get_legal_moves(Position::from_string("e7").unwrap());
+        let legal_moves = game.get_legal_moves(Square::from_string("e7").unwrap());
         assert_eq!(legal_moves.len(), 0);
     }
 
@@ -2090,7 +2103,7 @@ mod tests {
         game.move_piece("Bb5").unwrap();
         game.move_piece("a6").unwrap();
 
-        let legal_moves = game.get_legal_moves(Position::from_string("e1").unwrap());
+        let legal_moves = game.get_legal_moves(Square::from_string("e1").unwrap());
         assert_eq!(legal_moves.len(), 3);
         assert!(legal_moves.iter().any(|mov| matches!(
             mov.move_type,
@@ -2100,7 +2113,7 @@ mod tests {
         )));
         assert!(legal_moves
             .iter()
-            .any(|mov| matches!(mov.rook_from, Some(Position { file: 7, rank: 0 }))));
+            .any(|mov| matches!(mov.rook_from, Some(Square { file: 7, rank: 0 }))));
 
         let mut game = Game::default();
         game.move_piece("d4").unwrap();
@@ -2112,7 +2125,7 @@ mod tests {
         game.move_piece("Qd2").unwrap();
         game.move_piece("Qd7").unwrap();
 
-        let legal_moves = game.get_legal_moves(Position::from_string("e1").unwrap());
+        let legal_moves = game.get_legal_moves(Square::from_string("e1").unwrap());
         assert_eq!(legal_moves.len(), 2);
         assert!(legal_moves.iter().any(|mov| matches!(
             mov.move_type,
@@ -2122,7 +2135,7 @@ mod tests {
         )));
         assert!(legal_moves
             .iter()
-            .any(|mov| matches!(mov.rook_from, Some(Position { file: 0, rank: 0 }))));
+            .any(|mov| matches!(mov.rook_from, Some(Square { file: 0, rank: 0 }))));
     }
 
     #[test]
@@ -2133,14 +2146,14 @@ mod tests {
         game.move_piece("e5").unwrap();
         game.move_piece("f5").unwrap();
 
-        let legal_moves = game.get_legal_moves(Position::from_string("e5").unwrap());
+        let legal_moves = game.get_legal_moves(Square::from_string("e5").unwrap());
         assert_eq!(legal_moves.len(), 2);
         assert!(legal_moves
             .iter()
-            .any(|m| m.to == Position::from_string("e6").unwrap()));
+            .any(|m| m.to == Square::from_string("e6").unwrap()));
         assert!(legal_moves
             .iter()
-            .any(|m| m.to == Position::from_string("f6").unwrap()));
+            .any(|m| m.to == Square::from_string("f6").unwrap()));
     }
 
     #[test]
@@ -2155,13 +2168,13 @@ mod tests {
         game.move_piece("cxb7").unwrap();
         game.move_piece("a5").unwrap();
 
-        let legal_moves = game.get_legal_moves(Position::from_string("b7").unwrap());
+        let legal_moves = game.get_legal_moves(Square::from_string("b7").unwrap());
         assert_eq!(legal_moves.len(), 2);
         assert_eq!(
-            legal_moves.iter().map(|v| v.to).collect::<Vec<Position>>(),
+            legal_moves.iter().map(|v| v.to).collect::<Vec<Square>>(),
             vec![
-                Position::from_string("a8").unwrap(),
-                Position::from_string("c8").unwrap()
+                Square::from_string("a8").unwrap(),
+                Square::from_string("c8").unwrap()
             ]
         );
         assert!(matches!(
@@ -2577,31 +2590,31 @@ mod tests {
     }
 
     #[test]
-    fn test_get_castle_rook_pos() {
+    fn test_get_castle_rook_sqr() {
         let mut game = Game::default();
         assert_eq!(
-            game.get_castle_rook_pos(CastleType::KingSide),
-            Some(Position::from_string("h1").unwrap())
+            game.get_castle_rook_sqr(CastleType::KingSide),
+            Some(Square::from_string("h1").unwrap())
         );
         assert_eq!(
-            game.get_castle_rook_pos(CastleType::QueenSide),
-            Some(Position::from_string("a1").unwrap())
+            game.get_castle_rook_sqr(CastleType::QueenSide),
+            Some(Square::from_string("a1").unwrap())
         );
 
         game.move_piece("e4").unwrap();
 
         assert_eq!(
-            game.get_castle_rook_pos(CastleType::KingSide),
-            Some(Position::from_string("h8").unwrap())
+            game.get_castle_rook_sqr(CastleType::KingSide),
+            Some(Square::from_string("h8").unwrap())
         );
         assert_eq!(
-            game.get_castle_rook_pos(CastleType::QueenSide),
-            Some(Position::from_string("a8").unwrap())
+            game.get_castle_rook_sqr(CastleType::QueenSide),
+            Some(Square::from_string("a8").unwrap())
         );
     }
 
     #[test]
-    fn test_get_castle_rook_pos_after_castle() {
+    fn test_get_castle_rook_sqr_after_castle() {
         let mut game = Game::default();
         game.move_piece("e4").unwrap();
         game.move_piece("e5").unwrap();
@@ -2612,23 +2625,23 @@ mod tests {
         game.move_piece("O-O").unwrap();
 
         assert_eq!(
-            game.get_castle_rook_pos(CastleType::KingSide),
-            Some(Position::from_string("h8").unwrap())
+            game.get_castle_rook_sqr(CastleType::KingSide),
+            Some(Square::from_string("h8").unwrap())
         );
         assert_eq!(
-            game.get_castle_rook_pos(CastleType::QueenSide),
-            Some(Position::from_string("a8").unwrap())
+            game.get_castle_rook_sqr(CastleType::QueenSide),
+            Some(Square::from_string("a8").unwrap())
         );
 
         game.move_piece("O-O").unwrap();
 
-        assert_eq!(game.get_castle_rook_pos(CastleType::KingSide), None);
-        assert_eq!(game.get_castle_rook_pos(CastleType::QueenSide), None);
+        assert_eq!(game.get_castle_rook_sqr(CastleType::KingSide), None);
+        assert_eq!(game.get_castle_rook_sqr(CastleType::QueenSide), None);
 
         game.move_piece("a3").unwrap();
 
-        assert_eq!(game.get_castle_rook_pos(CastleType::KingSide), None);
-        assert_eq!(game.get_castle_rook_pos(CastleType::QueenSide), None);
+        assert_eq!(game.get_castle_rook_sqr(CastleType::KingSide), None);
+        assert_eq!(game.get_castle_rook_sqr(CastleType::QueenSide), None);
     }
 
     #[test]
@@ -2772,7 +2785,7 @@ mod tests {
                 PieceType::Knight,
                 Color::White,
                 (Some(1), None),
-                &Position::from_string("d2").unwrap(),
+                &Square::from_string("d2").unwrap(),
                 &MoveType::Normal {
                     capture: false,
                     promotion: None

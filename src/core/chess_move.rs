@@ -2,7 +2,7 @@ use std::{collections::HashMap, fmt};
 
 use crate::errors::MoveInfoError;
 
-use super::{GameStatus, Piece, PieceType, Position};
+use super::{GameStatus, Piece, PieceType, Square};
 
 /// Represents the type of a [Move]
 ///
@@ -40,16 +40,16 @@ pub enum CastleType {
 pub struct Move {
     /// The [Piece] that is moving
     pub piece: Piece,
-    /// The [Position] the piece is moving from
-    pub from: Position,
-    /// The [Position] the piece is moving to
-    pub to: Position,
+    /// The [Square] the piece is moving from
+    pub from: Square,
+    /// The [Square] the piece is moving to
+    pub to: Square,
     /// The [type](Move) of the move
     pub move_type: MoveType,
     /// The type of the piece that is captured, if any
     pub captured_piece: Option<PieceType>,
-    /// The position of the rook, if the move is a castle
-    pub rook_from: Option<Position>,
+    /// The Square of the rook, if the move is a castle
+    pub rook_from: Option<Square>,
     /// A tuple of booleans representing the ambiguity of the move
     pub ambiguity: (bool, bool),
     /// Whether the move puts the opponent in check
@@ -62,12 +62,12 @@ impl Move {
     /// Creates a new [Move]
     ///
     /// # Arguments
-    /// * `piece`: The [Piece] that is moving
-    /// * `from`: The [Position] the piece is moving from
-    /// * `to`: The [Position] the piece is moving to
+    /// * `piece`: The [Piece](piece) that is moving
+    /// * `from`: The [Square](square) the [Piece](piece) is moving from
+    /// * `to`: The [Square](square) the [Piece](piece) is moving to
     /// * `move_type`: The [type](MoveType) of the move
-    /// * `captured_piece`: The [Piece] that is captured, if any
-    /// * `rook_from`: The [Position] of the rook, if the move is a castle
+    /// * `captured_piece`: The [Piece](piece) that is captured, if any
+    /// * `rook_from`: The [Square] of the rook, if the move is a castle
     /// * `ambiguity`: A tuple of booleans representing the ambiguity of the move
     /// * `check`: Whether the move puts the opponent in check
     /// * `checkmate`: Whether the move puts the opponent in checkmate
@@ -79,11 +79,11 @@ impl Move {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::core::{Color, PieceType, Piece, Position, Move, MoveType};
+    /// use chess_lab::core::{Color, PieceType, Piece, Square, Move, MoveType};
     ///
     /// let piece = Piece::new(Color::White, PieceType::Pawn);
-    /// let from = Position::new(4, 1).unwrap();
-    /// let to = Position::new(4, 3).unwrap();
+    /// let from = Square::new(4, 1).unwrap();
+    /// let to = Square::new(4, 3).unwrap();
     /// let move_type = MoveType::Normal {
     ///     capture: false,
     ///     promotion: None,
@@ -108,11 +108,11 @@ impl Move {
     ///
     pub fn new(
         piece: Piece,
-        from: Position,
-        to: Position,
+        from: Square,
+        to: Square,
         move_type: MoveType,
         captured_piece: Option<PieceType>,
-        rook_from: Option<Position>,
+        rook_from: Option<Square>,
         ambiguity: (bool, bool),
         check: bool,
         checkmate: bool,
@@ -151,7 +151,7 @@ impl Move {
                 }
                 if rook_from.is_none() {
                     return Err(MoveInfoError::new(
-                        String::from("The move is a castle, but no rook position is provided"),
+                        String::from("The move is a castle, but no rook Square is provided"),
                         mov,
                     ));
                 }
@@ -224,7 +224,7 @@ pub struct MoveInfo {
     /// The number of fullmoves
     pub fullmove_number: u32,
     /// The en passant target square
-    pub en_passant: Option<Position>,
+    pub en_passant: Option<Square>,
     /// The castling rights
     pub castling_rights: u8,
     /// The status of the [Game](crate::logic::Game)
@@ -242,6 +242,7 @@ impl MoveInfo {
     /// * `en_passant`: The en passant target square
     /// * `castling_rights`: The castling rights
     /// * `game_status`: The current [GameStatus]
+    /// * `prev_positions`: A map of previous board positions and their occurrence counts
     ///
     /// # Example
     /// ```
@@ -261,7 +262,7 @@ impl MoveInfo {
     pub fn new(
         halfmove_clock: u32,
         fullmove_number: u32,
-        en_passant: Option<Position>,
+        en_passant: Option<Square>,
         castling_rights: u8,
         game_status: GameStatus,
         prev_positions: HashMap<String, u32>,
@@ -285,8 +286,8 @@ mod tests {
     #[test]
     fn test_move_display_normal() {
         let piece = Piece::new(Color::White, PieceType::Knight);
-        let from = Position::new(1, 0).unwrap(); // b1
-        let to = Position::new(2, 2).unwrap(); // c3
+        let from = Square::new(1, 0).unwrap(); // b1
+        let to = Square::new(2, 2).unwrap(); // c3
         let move_type = MoveType::Normal {
             capture: false,
             promotion: None,
@@ -309,8 +310,8 @@ mod tests {
     #[test]
     fn test_move_display_capture() {
         let piece = Piece::new(Color::Black, PieceType::Bishop);
-        let from = Position::new(2, 7).unwrap(); // c8
-        let to = Position::new(5, 4).unwrap(); // f5
+        let from = Square::new(2, 7).unwrap(); // c8
+        let to = Square::new(5, 4).unwrap(); // f5
         let move_type = MoveType::Normal {
             capture: true,
             promotion: None,
@@ -333,8 +334,8 @@ mod tests {
     #[test]
     fn test_move_display_kingside_castle() {
         let piece = Piece::new(Color::White, PieceType::King);
-        let from = Position::new(4, 0).unwrap(); // e1
-        let to = Position::new(6, 0).unwrap(); // g1
+        let from = Square::new(4, 0).unwrap(); // e1
+        let to = Square::new(6, 0).unwrap(); // g1
         let move_type = MoveType::Castle {
             side: CastleType::KingSide,
         };
@@ -344,7 +345,7 @@ mod tests {
             to,
             move_type,
             None,
-            Some(Position::new(7, 0).unwrap()), // h1
+            Some(Square::new(7, 0).unwrap()), // h1
             (false, false),
             false,
             false,
@@ -356,8 +357,8 @@ mod tests {
     #[test]
     fn test_move_display_queenside_castle() {
         let piece = Piece::new(Color::Black, PieceType::King);
-        let from = Position::new(4, 7).unwrap(); // e8
-        let to = Position::new(2, 7).unwrap(); // c8
+        let from = Square::new(4, 7).unwrap(); // e8
+        let to = Square::new(2, 7).unwrap(); // c8
         let move_type = MoveType::Castle {
             side: CastleType::QueenSide,
         };
@@ -367,7 +368,7 @@ mod tests {
             to,
             move_type,
             None,
-            Some(Position::new(0, 7).unwrap()), // a8
+            Some(Square::new(0, 7).unwrap()), // a8
             (false, false),
             false,
             false,
@@ -379,8 +380,8 @@ mod tests {
     #[test]
     fn test_promoting_non_pawn_error() {
         let piece = Piece::new(Color::White, PieceType::Knight);
-        let from = Position::new(6, 7).unwrap(); // g8
-        let to = Position::new(7, 7).unwrap(); // h8
+        let from = Square::new(6, 7).unwrap(); // g8
+        let to = Square::new(7, 7).unwrap(); // h8
         let move_type = MoveType::Normal {
             capture: false,
             promotion: Some(PieceType::Queen),
@@ -402,8 +403,8 @@ mod tests {
     #[test]
     fn test_castling_non_king_error() {
         let piece = Piece::new(Color::Black, PieceType::Queen);
-        let from = Position::new(4, 7).unwrap(); // e8
-        let to = Position::new(6, 7).unwrap(); // g8
+        let from = Square::new(4, 7).unwrap(); // e8
+        let to = Square::new(6, 7).unwrap(); // g8
         let move_type = MoveType::Castle {
             side: CastleType::KingSide,
         };
@@ -413,7 +414,7 @@ mod tests {
             to,
             move_type,
             None,
-            Some(Position::new(7, 7).unwrap()), // h8
+            Some(Square::new(7, 7).unwrap()), // h8
             (false, false),
             false,
             false,
@@ -424,8 +425,8 @@ mod tests {
     #[test]
     fn test_castle_with_no_rook_error() {
         let piece = Piece::new(Color::White, PieceType::King);
-        let from = Position::new(4, 0).unwrap(); // e1
-        let to = Position::new(2, 0).unwrap(); // c1
+        let from = Square::new(4, 0).unwrap(); // e1
+        let to = Square::new(2, 0).unwrap(); // c1
         let move_type = MoveType::Castle {
             side: CastleType::QueenSide,
         };
@@ -435,7 +436,7 @@ mod tests {
             to,
             move_type,
             None,
-            None, // No rook position provided
+            None, // No rook square provided
             (false, false),
             false,
             false,
@@ -446,8 +447,8 @@ mod tests {
     #[test]
     fn test_en_passant_non_pawn_error() {
         let piece = Piece::new(Color::Black, PieceType::Bishop);
-        let from = Position::new(3, 4).unwrap(); // d5
-        let to = Position::new(4, 3).unwrap(); // e4
+        let from = Square::new(3, 4).unwrap(); // d5
+        let to = Square::new(4, 3).unwrap(); // e4
         let move_type = MoveType::EnPassant;
 
         let mv_result = Move::new(

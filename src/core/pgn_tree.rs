@@ -6,7 +6,7 @@ use std::{
 };
 
 use crate::{
-    core::{GameStatus, MoveInfo, Position},
+    core::{GameStatus, MoveInfo, Square},
     errors::PGNMetadataError,
 };
 
@@ -198,8 +198,8 @@ struct PgnLine<T: PartialEq + Clone + Display + Debug> {
     halfmove_clock: u32,
     /// The fullmove number
     fullmove_number: u32,
-    /// The en passant position
-    en_passant: Option<Position>,
+    /// The en passant square
+    en_passant: Option<Square>,
     /// The castling rights
     castling_rights: u8,
     /// The game status
@@ -405,21 +405,21 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
     /// * `mov`: The move to add
     /// * `halfmove_clock`: The halfmove clock
     /// * `fullmove_number`: The fullmove number
-    /// * `en_passant`: The en passant position
+    /// * `en_passant`: The en passant square
     /// * `castling_rights`: The castling rights
     /// * `game_status`: The game status
     /// * `prev_positions`: The previous positions
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{PGNTree, Piece, Move, MoveType, PieceType, Color, Position, GameStatus};
+    /// use chess_lab::core::{PGNTree, Piece, Move, MoveType, PieceType, Color, Square, GameStatus};
     /// use std::collections::HashMap;
     ///
     /// let mut pgn_tree: PGNTree<Move> = PGNTree::default();
     /// let mov = Move::new(
     ///     Piece::new(Color::Black, PieceType::Pawn),
-    ///     Position::from_string("e2").unwrap(),
-    ///     Position::from_string("e4").unwrap(),
+    ///     Square::from_string("e2").unwrap(),
+    ///     Square::from_string("e4").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -440,7 +440,7 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
         mov: T,
         halfmove_clock: u32,
         fullmove_number: u32,
-        en_passant: Option<Position>,
+        en_passant: Option<Square>,
         castling_rights: u8,
         game_status: GameStatus,
         prev_positions: HashMap<String, u32>,
@@ -510,15 +510,15 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Square, GameStatus};
     /// use std::collections::HashMap;
     ///
     /// let mut tree = PGNTree::default();
     ///
     /// tree.add_move(Move::new(
     ///     Piece::new(Color::Black, PieceType::Pawn),
-    ///     Position::from_string("e2").unwrap(),
-    ///     Position::from_string("e4").unwrap(),
+    ///     Square::from_string("e2").unwrap(),
+    ///     Square::from_string("e4").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -583,14 +583,14 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Square, GameStatus};
     /// use std::collections::HashMap;
     ///
     /// let mut tree = PGNTree::default();
     /// let mov = Move::new(
     ///     Piece::new(Color::Black, PieceType::Pawn),
-    ///     Position::from_string("e2").unwrap(),
-    ///     Position::from_string("e4").unwrap(),
+    ///     Square::from_string("e2").unwrap(),
+    ///     Square::from_string("e4").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -614,18 +614,18 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
     /// Returns the move info
     ///
     /// # Returns
-    /// A tuple containing the halfmove clock, the fullmove number, the en passant position and the castling rights
+    /// A tuple containing the halfmove clock, the fullmove number, the en passant square and the castling rights
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus, MoveInfo};
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Square, GameStatus, MoveInfo};
     /// use std::collections::HashMap;
     ///
     /// let mut tree = PGNTree::default();
     /// let mov = Move::new(
     ///     Piece::new(Color::Black, PieceType::Pawn),
-    ///     Position::from_string("e2").unwrap(),
-    ///     Position::from_string("e4").unwrap(),
+    ///     Square::from_string("e2").unwrap(),
+    ///     Square::from_string("e4").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -661,14 +661,14 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Square, GameStatus};
     /// use std::collections::HashMap;
     ///
     /// let mut pgn_tree = PGNTree::default();
     /// let mov1 = Move::new(
     ///     Piece::new(Color::Black, PieceType::Pawn),
-    ///     Position::from_string("e2").unwrap(),
-    ///     Position::from_string("e4").unwrap(),
+    ///     Square::from_string("e2").unwrap(),
+    ///     Square::from_string("e4").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -681,8 +681,8 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
     /// ).unwrap();
     /// let mov2 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
-    ///     Position::from_string("e7").unwrap(),
-    ///     Position::from_string("e5").unwrap(),
+    ///     Square::from_string("e7").unwrap(),
+    ///     Square::from_string("e5").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -715,14 +715,14 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Square, GameStatus};
     /// use std::collections::HashMap;
     ///
     /// let mut pgn_tree = PGNTree::default();
     /// let mov1 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
-    ///     Position::from_string("e2").unwrap(),
-    ///     Position::from_string("e4").unwrap(),
+    ///     Square::from_string("e2").unwrap(),
+    ///     Square::from_string("e4").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -735,8 +735,8 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
     /// ).unwrap();
     /// let mov2 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
-    ///     Position::from_string("d2").unwrap(),
-    ///     Position::from_string("d4").unwrap(),
+    ///     Square::from_string("d2").unwrap(),
+    ///     Square::from_string("d4").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -782,14 +782,14 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
     ///
     /// # Example
     /// ```
-    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Square, GameStatus};
     /// use std::collections::HashMap;
     ///
     /// let mut pgn_tree = PGNTree::default();
     /// let mov1 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
-    ///     Position::from_string("e4").unwrap(),
-    ///     Position::from_string("e2").unwrap(),
+    ///     Square::from_string("e4").unwrap(),
+    ///     Square::from_string("e2").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -803,8 +803,8 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
     ///
     /// let mov2 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
-    ///     Position::from_string("d2").unwrap(),
-    ///     Position::from_string("d4").unwrap(),
+    ///     Square::from_string("d2").unwrap(),
+    ///     Square::from_string("d4").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -845,14 +845,14 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Square, GameStatus};
     /// use std::collections::HashMap;
     ///
     /// let mut pgn_tree = PGNTree::default();
     /// let mov1 = Move::new(
     ///     Piece::new(Color::Black, PieceType::Pawn),
-    ///     Position::from_string("e2").unwrap(),
-    ///     Position::from_string("e4").unwrap(),
+    ///     Square::from_string("e2").unwrap(),
+    ///     Square::from_string("e4").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -865,8 +865,8 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
     /// ). unwrap();
     /// let mov2 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
-    ///     Position::from_string("e7").unwrap(),
-    ///     Position::from_string("e5").unwrap(),
+    ///     Square::from_string("e7").unwrap(),
+    ///     Square::from_string("e5").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -905,14 +905,14 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Square, GameStatus};
     /// use std::collections::HashMap;
     ///
     /// let mut pgn_tree = PGNTree::default();
     /// let mov1 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
-    ///     Position::from_string("e2").unwrap(),
-    ///     Position::from_string("e4").unwrap(),
+    ///     Square::from_string("e2").unwrap(),
+    ///     Square::from_string("e4").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -943,14 +943,14 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Square, GameStatus};
     /// use std::collections::HashMap;
     ///
     /// let mut pgn_tree = PGNTree::default();
     /// let mov1 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
-    ///     Position::from_string("e2").unwrap(),
-    ///     Position::from_string("e4").unwrap(),
+    ///     Square::from_string("e2").unwrap(),
+    ///     Square::from_string("e4").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -977,14 +977,14 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Square, GameStatus};
     /// use std::collections::HashMap;
     ///
     /// let mut pgn_tree = PGNTree::default();
     /// let mov1 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
-    ///     Position::from_string("e2").unwrap(),
-    ///     Position::from_string("e4").unwrap(),
+    ///     Square::from_string("e2").unwrap(),
+    ///     Square::from_string("e4").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -997,8 +997,8 @@ impl<T: PartialEq + Clone + Display + Debug> PGNTree<T> {
     /// ).unwrap();
     /// let mov2 = Move::new(
     ///     Piece::new(Color::Black, PieceType::Pawn),
-    ///     Position::from_string("e7").unwrap(),
-    ///     Position::from_string("e5").unwrap(),
+    ///     Square::from_string("e7").unwrap(),
+    ///     Square::from_string("e5").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -1212,14 +1212,14 @@ impl<T: PartialEq + Clone + Display + Debug> Iterator for PGNTree<T> {
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Square, GameStatus};
     /// use std::collections::HashMap;
     ///
     /// let mut pgn_tree = PGNTree::default();
     /// let mov1 = Move::new(
     ///     Piece::new(Color::Black, PieceType::Pawn),
-    ///     Position::from_string("e2").unwrap(),
-    ///     Position::from_string("e4").unwrap(),
+    ///     Square::from_string("e2").unwrap(),
+    ///     Square::from_string("e4").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -1232,8 +1232,8 @@ impl<T: PartialEq + Clone + Display + Debug> Iterator for PGNTree<T> {
     /// ).unwrap();
     /// let mov2 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
-    ///     Position::from_string("e7").unwrap(),
-    ///     Position::from_string("e5").unwrap(),
+    ///     Square::from_string("e7").unwrap(),
+    ///     Square::from_string("e5").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -1265,14 +1265,14 @@ impl<T: PartialEq + Clone + Display + Debug> DoubleEndedIterator for PGNTree<T> 
     ///
     /// # Examples
     /// ```
-    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Position, GameStatus};
+    /// use chess_lab::core::{PGNTree, Piece, Move, PieceType, MoveType, Color, Square, GameStatus};
     /// use std::collections::HashMap;
     ///
     /// let mut pgn_tree = PGNTree::default();
     /// let mov1 = Move::new(
     ///     Piece::new(Color::Black, PieceType::Pawn),
-    ///     Position::from_string("e2").unwrap(),
-    ///     Position::from_string("e4").unwrap(),
+    ///     Square::from_string("e2").unwrap(),
+    ///     Square::from_string("e4").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -1285,8 +1285,8 @@ impl<T: PartialEq + Clone + Display + Debug> DoubleEndedIterator for PGNTree<T> 
     /// ).unwrap();
     /// let mov2 = Move::new(
     ///     Piece::new(Color::White, PieceType::Pawn),
-    ///     Position::from_string("e7").unwrap(),
-    ///     Position::from_string("e5").unwrap(),
+    ///     Square::from_string("e7").unwrap(),
+    ///     Square::from_string("e5").unwrap(),
     ///     MoveType::Normal {
     ///         capture: false,
     ///         promotion: None,
@@ -1322,8 +1322,8 @@ mod tests {
         let mut pgn_tree = PGNTree::default();
         let mov = Move::new(
             Piece::new(Color::Black, PieceType::Pawn),
-            Position::from_string("e2").unwrap(),
-            Position::from_string("e4").unwrap(),
+            Square::from_string("e2").unwrap(),
+            Square::from_string("e4").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1354,8 +1354,8 @@ mod tests {
         let mut pgn_tree = PGNTree::default();
         let mov = Move::new(
             Piece::new(Color::Black, PieceType::Pawn),
-            Position::from_string("e2").unwrap(),
-            Position::from_string("e4").unwrap(),
+            Square::from_string("e2").unwrap(),
+            Square::from_string("e4").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1386,8 +1386,8 @@ mod tests {
         let mut pgn_tree = PGNTree::default();
         let mov1 = Move::new(
             Piece::new(Color::Black, PieceType::Pawn),
-            Position::from_string("e2").unwrap(),
-            Position::from_string("e4").unwrap(),
+            Square::from_string("e2").unwrap(),
+            Square::from_string("e4").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1401,8 +1401,8 @@ mod tests {
         .unwrap();
         let mov2 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
-            Position::from_string("e7").unwrap(),
-            Position::from_string("e5").unwrap(),
+            Square::from_string("e7").unwrap(),
+            Square::from_string("e5").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1443,8 +1443,8 @@ mod tests {
         let mut pgn_tree = PGNTree::default();
         let mov1 = Move::new(
             Piece::new(Color::Black, PieceType::Pawn),
-            Position::from_string("e2").unwrap(),
-            Position::from_string("e4").unwrap(),
+            Square::from_string("e2").unwrap(),
+            Square::from_string("e4").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1458,8 +1458,8 @@ mod tests {
         .unwrap();
         let mov2 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
-            Position::from_string("e7").unwrap(),
-            Position::from_string("e5").unwrap(),
+            Square::from_string("e7").unwrap(),
+            Square::from_string("e5").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1500,8 +1500,8 @@ mod tests {
         let mut pgn_tree = PGNTree::default();
         let mov1 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
-            Position::from_string("e4").unwrap(),
-            Position::from_string("e2").unwrap(),
+            Square::from_string("e4").unwrap(),
+            Square::from_string("e2").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1516,8 +1516,8 @@ mod tests {
 
         let mov2 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
-            Position::from_string("d2").unwrap(),
-            Position::from_string("d4").unwrap(),
+            Square::from_string("d2").unwrap(),
+            Square::from_string("d4").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1631,8 +1631,8 @@ mod tests {
         let mut pgn_tree = PGNTree::default();
         let mov1 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
-            Position::from_string("e2").unwrap(),
-            Position::from_string("e4").unwrap(),
+            Square::from_string("e2").unwrap(),
+            Square::from_string("e4").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1646,8 +1646,8 @@ mod tests {
         .unwrap();
         let mov2 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
-            Position::from_string("d2").unwrap(),
-            Position::from_string("d4").unwrap(),
+            Square::from_string("d2").unwrap(),
+            Square::from_string("d4").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1691,8 +1691,8 @@ mod tests {
         let mut pgn_tree = PGNTree::default();
         let mov1 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
-            Position::from_string("e2").unwrap(),
-            Position::from_string("e4").unwrap(),
+            Square::from_string("e2").unwrap(),
+            Square::from_string("e4").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1706,8 +1706,8 @@ mod tests {
         .unwrap();
         let mov2 = Move::new(
             Piece::new(Color::Black, PieceType::Pawn),
-            Position::from_string("e7").unwrap(),
-            Position::from_string("e5").unwrap(),
+            Square::from_string("e7").unwrap(),
+            Square::from_string("e5").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1753,8 +1753,8 @@ mod tests {
         let mut pgn_tree = PGNTree::default();
         let mov1 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
-            Position::from_string("e2").unwrap(),
-            Position::from_string("e4").unwrap(),
+            Square::from_string("e2").unwrap(),
+            Square::from_string("e4").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1769,8 +1769,8 @@ mod tests {
 
         let mov2 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
-            Position::from_string("e7").unwrap(),
-            Position::from_string("e5").unwrap(),
+            Square::from_string("e7").unwrap(),
+            Square::from_string("e5").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1831,8 +1831,8 @@ mod tests {
         let mut pgn_tree = PGNTree::default();
         let mov1 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
-            Position::from_string("e2").unwrap(),
-            Position::from_string("e4").unwrap(),
+            Square::from_string("e2").unwrap(),
+            Square::from_string("e4").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1846,8 +1846,8 @@ mod tests {
         .unwrap();
         let mov2 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
-            Position::from_string("d2").unwrap(),
-            Position::from_string("d4").unwrap(),
+            Square::from_string("d2").unwrap(),
+            Square::from_string("d4").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1891,8 +1891,8 @@ mod tests {
         let mut pgn_tree = PGNTree::default();
         let mov1 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
-            Position::from_string("e2").unwrap(),
-            Position::from_string("e4").unwrap(),
+            Square::from_string("e2").unwrap(),
+            Square::from_string("e4").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1906,8 +1906,8 @@ mod tests {
         .unwrap();
         let mov2 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
-            Position::from_string("d2").unwrap(),
-            Position::from_string("d4").unwrap(),
+            Square::from_string("d2").unwrap(),
+            Square::from_string("d4").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1959,8 +1959,8 @@ mod tests {
         let mut pgn_tree = PGNTree::default();
         let mov1 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
-            Position::from_string("e2").unwrap(),
-            Position::from_string("e4").unwrap(),
+            Square::from_string("e2").unwrap(),
+            Square::from_string("e4").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -1992,8 +1992,8 @@ mod tests {
         let mut pgn_tree = PGNTree::default();
         let mov1 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
-            Position::from_string("e2").unwrap(),
-            Position::from_string("e4").unwrap(),
+            Square::from_string("e2").unwrap(),
+            Square::from_string("e4").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -2007,8 +2007,8 @@ mod tests {
         .unwrap();
         let mov2 = Move::new(
             Piece::new(Color::Black, PieceType::Pawn),
-            Position::from_string("e7").unwrap(),
-            Position::from_string("e5").unwrap(),
+            Square::from_string("e7").unwrap(),
+            Square::from_string("e5").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -2052,8 +2052,8 @@ mod tests {
         let mut pgn_tree = PGNTree::default();
         let mov1 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
-            Position::from_string("e4").unwrap(),
-            Position::from_string("e2").unwrap(),
+            Square::from_string("e4").unwrap(),
+            Square::from_string("e2").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -2067,8 +2067,8 @@ mod tests {
         .unwrap();
         let mov2 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
-            Position::from_string("d2").unwrap(),
-            Position::from_string("d4").unwrap(),
+            Square::from_string("d2").unwrap(),
+            Square::from_string("d4").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -2115,8 +2115,8 @@ mod tests {
         let mut pgn_tree = PGNTree::default();
         let mov1 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
-            Position::from_string("e2").unwrap(),
-            Position::from_string("e4").unwrap(),
+            Square::from_string("e2").unwrap(),
+            Square::from_string("e4").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -2164,8 +2164,8 @@ mod tests {
         let mut pgn_tree = PGNTree::default();
         let mov1 = Move::new(
             Piece::new(Color::Black, PieceType::Pawn),
-            Position::from_string("e2").unwrap(),
-            Position::from_string("e4").unwrap(),
+            Square::from_string("e2").unwrap(),
+            Square::from_string("e4").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -2179,8 +2179,8 @@ mod tests {
         .unwrap();
         let mov2 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
-            Position::from_string("e7").unwrap(),
-            Position::from_string("e5").unwrap(),
+            Square::from_string("e7").unwrap(),
+            Square::from_string("e5").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -2223,8 +2223,8 @@ mod tests {
         let mut pgn_tree = PGNTree::default();
         let mov1 = Move::new(
             Piece::new(Color::Black, PieceType::Pawn),
-            Position::from_string("e2").unwrap(),
-            Position::from_string("e4").unwrap(),
+            Square::from_string("e2").unwrap(),
+            Square::from_string("e4").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
@@ -2238,8 +2238,8 @@ mod tests {
         .unwrap();
         let mov2 = Move::new(
             Piece::new(Color::White, PieceType::Pawn),
-            Position::from_string("e7").unwrap(),
-            Position::from_string("e5").unwrap(),
+            Square::from_string("e7").unwrap(),
+            Square::from_string("e5").unwrap(),
             MoveType::Normal {
                 capture: false,
                 promotion: None,
