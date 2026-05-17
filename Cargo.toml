@@ -20,4 +20,4 @@ pest = "2.1"
 pest_derive = "2.1"
 thiserror = "2.0.3"
 rand = "0.8.5"
-fen-macro = { path = "fen-macro" }
+fen-macro = { path = "./crates/fen-macro" }
